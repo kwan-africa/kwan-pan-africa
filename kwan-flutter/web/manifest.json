@@ -1,0 +1,11 @@
+{
+    "name": "Kwan",
+    "short_name": "Kwan",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#0F172A",
+    "theme_color": "#D97706",
+    "description": "Kwan — The Path Through Africa's Real Economy",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false
+}

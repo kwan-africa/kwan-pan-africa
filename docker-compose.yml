@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: kwan_db
+    environment:
+      POSTGRES_DB: kwan
+      POSTGRES_USER: kwan_user
+      POSTGRES_PASSWORD: kwan_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - kwan_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kwan_user -d kwan"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./kwan-backend
+      dockerfile: Dockerfile
+    container_name: kwan_backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/kwan
+      SPRING_DATASOURCE_USERNAME: kwan_user
+      SPRING_DATASOURCE_PASSWORD: kwan_pass
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      PAYSTACK_SECRET_KEY: ${PAYSTACK_SECRET_KEY}
+      PAYSTACK_PUBLIC_KEY: ${PAYSTACK_PUBLIC_KEY}
+      GOOGLE_PLACES_API_KEY: ${GOOGLE_PLACES_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  kwan_data:

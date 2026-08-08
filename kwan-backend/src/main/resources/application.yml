@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: kwan-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/kwan}
+    username: ${SPRING_DATASOURCE_USERNAME:kwan_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:kwan_pass}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    defer-datasource-initialization: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  sql:
+    init:
+      mode: always
+
+server:
+  port: 8080
+
+gemini:
+  api:
+    key: ${GEMINI_API_KEY:}
+    base-url: https://generativelanguage.googleapis.com/v1beta
+    embedding-model: text-embedding-004
+    generation-model: gemini-1.5-flash
+  rag:
+    top-k: 8
+    similarity-threshold: 0.7
+
+paystack:
+  secret-key: ${PAYSTACK_SECRET_KEY:}
+  public-key: ${PAYSTACK_PUBLIC_KEY:}
+  base-url: https://api.paystack.co
+  platform-fee-percent: 5.0
+  callback-url: ${PAYSTACK_CALLBACK_URL:http://localhost:8080/api/payments/verify}
+
+google:
+  places:
+    api-key: ${GOOGLE_PLACES_API_KEY:}
+
+cors:
+  allowed-origins:
+    - "*"
