@@ -9,7 +9,7 @@
 * **Track Selection:** TRACK 01 — FinTech & Inclusive Finance (Secondary: Track 06 — African Languages & Cultural AI)
 * **Contact Email:** team@kwan.ai
 * **Phone Number (WhatsApp):** +233 24 111 2233
-* **LinkedIn or Portfolio:** [https://github.com/kwan-ai/kwan-pan-africa](https://github.com/kwan-ai/kwan-pan-africa)
+* **LinkedIn or Portfolio:** [https://github.com/kwan-africa/kwan-pan-africa](https://github.com/kwan-africa/kwan-pan-africa)
 
 ---
 

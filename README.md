@@ -160,6 +160,8 @@ kwan-ai/
 
 > *Kwan routes international travel dollars into the wallets of informal West African operators — no bank account, no middleman, no friction.*
 
+**GitHub:** [github.com/kwan-africa/kwan-pan-africa](https://github.com/kwan-africa/kwan-pan-africa)
+
 - **Ghana & Nigeria** launch markets (West Africa rollout roadmap)
 - **MoMo-first** — designed for the 57% of West Africans without bank accounts
 - **AI-native** — not a directory, a personalized intelligence layer
