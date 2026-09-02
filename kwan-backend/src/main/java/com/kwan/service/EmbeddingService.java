@@ -26,19 +26,25 @@ public class EmbeddingService {
     @Value("${gemini.api.embedding-model}")
     private String model;
 
-    private final OkHttpClient http = new OkHttpClient();
+    private final OkHttpClient http;
     private final ObjectMapper mapper = new ObjectMapper();
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
+    public EmbeddingService(OkHttpClient http) {
+        this.http = http;
+    }
+
     public float[] embed(String text) throws IOException {
-        String url = baseUrl + "/models/" + model + ":embedContent?key=" + apiKey;
+        String url = baseUrl + "/models/" + model + ":embedContent";
         String body = mapper.writeValueAsString(Map.of(
                 "model", "models/" + model,
-                "content", Map.of("parts", List.of(Map.of("text", text)))
+                "content", Map.of("parts", List.of(Map.of("text", text))),
+                "outputDimensionality", 768
         ));
 
         Request request = new Request.Builder()
                 .url(url)
+                .header("x-goog-api-key", apiKey)
                 .post(RequestBody.create(body, JSON))
                 .build();
 

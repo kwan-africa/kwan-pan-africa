@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,7 +24,7 @@ public class PaymentController {
     }
 
     @PostMapping("/initialize")
-    public ResponseEntity<?> initialize(@RequestBody PaymentRequest req) {
+    public ResponseEntity<?> initialize(@Valid @RequestBody PaymentRequest req) {
         try {
             log.info("Initializing payment for listing: {}", req.getListingId());
             Map<String, Object> result = paymentService.initializePayment(
@@ -52,6 +53,24 @@ public class PaymentController {
             log.error("Failed to verify payment: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError()
                     .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/webhook")
+    public ResponseEntity<?> handleWebhook(
+            @RequestBody String rawPayload,
+            @RequestHeader(value = "x-paystack-signature", required = false) String signature) {
+        try {
+            log.info("Paystack webhook received");
+            Map<String, Object> result = paymentService.processWebhook(rawPayload, signature);
+            return ResponseEntity.ok(result);
+        } catch (SecurityException se) {
+            log.warn("Webhook rejected: {}", se.getMessage());
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", se.getMessage()));
+        } catch (Exception e) {
+            log.error("Webhook processing error: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         }
     }
 }

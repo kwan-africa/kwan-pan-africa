@@ -6,12 +6,24 @@ import com.kwan.service.ItineraryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import jakarta.validation.Valid;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 
+/**
+ * REST endpoint for AI-powered itinerary generation.
+ *
+ * <p>Validation is handled by {@code @Valid} + {@code GlobalExceptionHandler}.
+ * Checked {@code IOException} from the service layer is wrapped as
+ * {@code UncheckedIOException} so that {@code GlobalExceptionHandler} can
+ * intercept it without each controller method needing its own try/catch.
+ */
 @RestController
 @RequestMapping("/api/itinerary")
+@Validated
 public class ItineraryController {
 
     private static final Logger log = LoggerFactory.getLogger(ItineraryController.class);
@@ -23,15 +35,15 @@ public class ItineraryController {
     }
 
     @PostMapping("/generate")
-    public ResponseEntity<?> generate(@RequestBody ItineraryRequest request) {
+    public ResponseEntity<ItineraryResponse> generate(@Valid @RequestBody ItineraryRequest request) {
+        log.info("Itinerary generation request for {}, {}", request.getDestination(), request.getCountry());
         try {
-            log.info("Received itinerary generation request for {}", request.getDestination());
             ItineraryResponse result = itineraryService.generateItinerary(request);
             return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            log.error("Failed to generate itinerary: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError()
-                    .body(Map.of("error", e.getMessage()));
+        } catch (IOException e) {
+            // Rethrow as unchecked so GlobalExceptionHandler can catch it cleanly.
+            // The handler will log the full stack trace and return a structured 500.
+            throw new UncheckedIOException("Failed to call AI service", e);
         }
     }
 }

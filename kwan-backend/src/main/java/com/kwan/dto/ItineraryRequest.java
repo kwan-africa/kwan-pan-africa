@@ -1,17 +1,31 @@
 package com.kwan.dto;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ItineraryRequest {
+    @NotBlank(message = "destination is required")
     private String destination;
+
+    @NotBlank(message = "country code is required")
     private String country = "GH";
+
+    @NotNull(message = "startDate is required")
     private LocalDate startDate;
+
+    @NotNull(message = "endDate is required")
     private LocalDate endDate;
+
+    @Min(value = 0, message = "budgetUsd must be positive")
     private double budgetUsd = 500;
     private List<String> interests = new ArrayList<>();
     private String pace = "MODERATE";
+
+    @Min(value = 1, message = "groupSize must be at least 1")
     private int groupSize = 1;
     private String preferredLanguage = "en";
     private boolean includeInformalTransport = true;

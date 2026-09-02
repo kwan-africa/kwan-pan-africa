@@ -38,7 +38,7 @@ public class PaymentService {
     @Value("${paystack.platform-fee-percent:5.0}")
     private double platformFeePercent;
 
-    private final OkHttpClient http = new OkHttpClient();
+    private final OkHttpClient http;
     private final ObjectMapper mapper = new ObjectMapper();
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
@@ -50,9 +50,49 @@ public class PaymentService {
         "XOF", 620.0
     );
 
-    public PaymentService(BookingRepository bookingRepository, ListingRepository listingRepository) {
+    public PaymentService(BookingRepository bookingRepository, ListingRepository listingRepository, OkHttpClient http) {
         this.bookingRepository = bookingRepository;
         this.listingRepository = listingRepository;
+        this.http = http;
+    }
+
+    public boolean verifyWebhookSignature(String payload, String signature) {
+        if (signature == null || signature.isBlank() || secretKey == null || secretKey.isBlank()) {
+            return false;
+        }
+        try {
+            javax.crypto.Mac mac = javax.crypto.Mac.getInstance("HmacSHA512");
+            javax.crypto.spec.SecretKeySpec secretKeySpec = new javax.crypto.spec.SecretKeySpec(
+                    secretKey.getBytes(java.nio.charset.StandardCharsets.UTF_8), "HmacSHA512");
+            mac.init(secretKeySpec);
+            byte[] hash = mac.doFinal(payload.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString().equalsIgnoreCase(signature);
+        } catch (Exception e) {
+            log.error("Error computing webhook HMAC-SHA512: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    public Map<String, Object> processWebhook(String payload, String signature) throws IOException {
+        if (!verifyWebhookSignature(payload, signature)) {
+            throw new SecurityException("Invalid Paystack webhook signature");
+        }
+        JsonNode root = mapper.readTree(payload);
+        String event = root.path("event").asText();
+        log.info("Received verified Paystack webhook event: {}", event);
+
+        if ("charge.success".equals(event)) {
+            String reference = root.path("data").path("reference").asText();
+            log.info("Processing successful charge for ref: {}", reference);
+            return verifyAndSettle(reference);
+        }
+        return Map.of("status", "ignored", "event", event);
     }
 
     public Map<String, Object> initializePayment(

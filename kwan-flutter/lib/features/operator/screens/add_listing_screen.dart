@@ -58,9 +58,10 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: const Text('Add New Listing'),
+        title: const Text('Add Listing'),
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: const Icon(Icons.close_rounded, size: 20),
+          color: AppTheme.textSecondary,
           onPressed: () => context.pop(),
         ),
       ),
@@ -73,28 +74,50 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
             children: [
               // ── AI Embedding Notice ─────────────────────────────────────
               Container(
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(AppTheme.spaceMd),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.08),
+                  color: AppTheme.surface,
                   borderRadius: AppTheme.radiusMd,
-                  border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
+                  border: Border.all(color: AppTheme.border),
                 ),
-                child: const Row(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('✨', style: TextStyle(fontSize: 20)),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Kwan AI will automatically index your listing. The better your description, the more often tourists will find you.',
-                        style: TextStyle(
-                          fontFamily: 'Outfit', fontSize: 13,
-                          color: AppTheme.primary, height: 1.5,
-                        ),
+                    Container(
+                      width: 32, height: 32,
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.1),
+                        borderRadius: AppTheme.radiusSm,
+                      ),
+                      child: const Icon(Icons.auto_awesome_outlined,
+                          color: AppTheme.primary, size: 16),
+                    ),
+                    const SizedBox(width: AppTheme.spaceMd),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Kwan AI will index this listing',
+                              style: TextStyle(
+                                fontFamily: 'Outfit', fontWeight: FontWeight.w700,
+                                color: AppTheme.textPrimary, fontSize: 13,
+                              )),
+                          SizedBox(height: 3),
+                          Text(
+                            'Travellers building AI itineraries for your city will automatically discover your business.',
+                            style: TextStyle(
+                              fontFamily: 'Outfit', fontSize: 12,
+                              color: AppTheme.textSecondary, height: 1.5,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ).animate().fadeIn(duration: 400.ms),
+
+
 
               const SizedBox(height: 28),
 

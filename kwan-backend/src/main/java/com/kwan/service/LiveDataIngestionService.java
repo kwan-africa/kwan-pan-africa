@@ -28,7 +28,7 @@ public class LiveDataIngestionService {
     @Value("${google.places.api-key:}")
     private String googlePlacesApiKey;
 
-    private final OkHttpClient httpClient = new OkHttpClient();
+    private final OkHttpClient httpClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final Map<String, double[]> CITY_COORDS = Map.of(
@@ -50,10 +50,11 @@ public class LiveDataIngestionService {
         "campground",         Listing.ListingCategory.ACCOMMODATION
     );
 
-    public LiveDataIngestionService(OperatorRepository operatorRepository, ListingRepository listingRepository, EmbeddingService embeddingService) {
+    public LiveDataIngestionService(OperatorRepository operatorRepository, ListingRepository listingRepository, EmbeddingService embeddingService, OkHttpClient httpClient) {
         this.operatorRepository = operatorRepository;
         this.listingRepository = listingRepository;
         this.embeddingService = embeddingService;
+        this.httpClient = httpClient;
     }
 
     public int ingestCity(String city, String country) throws IOException {

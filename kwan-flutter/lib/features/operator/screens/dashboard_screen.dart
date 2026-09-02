@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/services/api_service.dart';
 
-// ── Provider ──────────────────────────────────────────────────────────────────
+// ── Provider ──────────────────────────────────────────────────────────────────────────────
 
 // In a real app, operatorId comes from auth. For demo, we use a fixed ID.
 const _demoOperatorId = 'demo-operator-id';
@@ -15,7 +15,7 @@ final dashboardProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref)
   return api.getOperatorDashboard(_demoOperatorId);
 });
 
-// ── Screen ─────────────────────────────────────────────────────────────────────
+// ── Screen ────────────────────────────────────────────────────────────────────────────────
 
 class OperatorDashboardScreen extends ConsumerWidget {
   const OperatorDashboardScreen({super.key});
@@ -33,45 +33,42 @@ class OperatorDashboardScreen extends ConsumerWidget {
             pinned: true,
             backgroundColor: AppTheme.background,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+              color: AppTheme.textSecondary,
               onPressed: () => context.pop(),
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.add_circle_outline, color: AppTheme.primary),
+                icon: const Icon(Icons.add_circle_outline, size: 22, color: AppTheme.textSecondary),
                 tooltip: 'Add Listing',
                 onPressed: () => context.pushNamed('add-listing', extra: _demoOperatorId),
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
-                decoration: const BoxDecoration(gradient: AppTheme.heroGradient),
+                color: AppTheme.background,
                 padding: const EdgeInsets.fromLTRB(24, 80, 24, 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    const Text('Operator Hub',
-                        style: TextStyle(
-                          fontFamily: 'Outfit', fontSize: 13,
-                          color: AppTheme.primary, letterSpacing: 1,
-                          fontWeight: FontWeight.w600,
-                        )),
+                    AppTheme.sectionBadge('Operator Hub'),
+                    const SizedBox(height: 10),
                     dashAsync.when(
                       data: (data) => Text(
                         data['operatorName'] ?? 'My Business',
                         style: const TextStyle(
-                          fontFamily: 'Outfit', fontSize: 28,
+                          fontFamily: 'Outfit', fontSize: 30,
                           fontWeight: FontWeight.w700, color: AppTheme.textPrimary,
+                          letterSpacing: -1.0,
                         ),
                       ),
-                      loading: () => const Text('Loading...',
-                          style: TextStyle(fontFamily: 'Outfit', fontSize: 28,
-                              color: AppTheme.textMuted)),
+                      loading: () => const _SkeletonLine(width: 180, height: 32),
                       error: (_, __) => const Text('Your Dashboard',
-                          style: TextStyle(fontFamily: 'Outfit', fontSize: 28,
-                              color: AppTheme.textPrimary)),
+                          style: TextStyle(fontFamily: 'Outfit', fontSize: 30,
+                              color: AppTheme.textPrimary, letterSpacing: -1.0)),
                     ),
+                    const SizedBox(height: 4),
                     dashAsync.when(
                       data: (data) => Text(
                         data['country'] ?? '',
@@ -80,7 +77,7 @@ class OperatorDashboardScreen extends ConsumerWidget {
                           color: AppTheme.textSecondary,
                         ),
                       ),
-                      loading: () => const SizedBox.shrink(),
+                      loading: () => const _SkeletonLine(width: 80, height: 14),
                       error: (_, __) => const SizedBox.shrink(),
                     ),
                   ],
@@ -90,9 +87,7 @@ class OperatorDashboardScreen extends ConsumerWidget {
           ),
         ],
         body: dashAsync.when(
-          loading: () => const Center(
-            child: CircularProgressIndicator(color: AppTheme.primary),
-          ),
+          loading: () => const _DashboardSkeleton(),
           error: (err, _) => _ErrorState(
             message: err.toString(),
             onRetry: () => ref.invalidate(dashboardProvider),
@@ -100,15 +95,33 @@ class OperatorDashboardScreen extends ConsumerWidget {
           data: (data) => _DashboardContent(data: data),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.pushNamed('add-listing', extra: _demoOperatorId),
-        backgroundColor: AppTheme.primary,
-        icon: const Icon(Icons.add, color: AppTheme.background),
-        label: const Text('Add Listing',
-            style: TextStyle(
-              fontFamily: 'Outfit', fontWeight: FontWeight.w700,
-              color: AppTheme.background,
-            )),
+      floatingActionButton: GestureDetector(
+        onTap: () => context.pushNamed('add-listing', extra: _demoOperatorId),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          decoration: BoxDecoration(
+            gradient: AppTheme.primaryGradient,
+            borderRadius: AppTheme.radiusLg,
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.primary.withValues(alpha: 0.25),
+                blurRadius: 16, offset: const Offset(0, 4),
+              )
+            ],
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.add_rounded, color: AppTheme.background, size: 18),
+              SizedBox(width: 8),
+              Text('Add Listing',
+                  style: TextStyle(
+                    fontFamily: 'Outfit', fontWeight: FontWeight.w700,
+                    color: AppTheme.background, fontSize: 14,
+                  )),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -165,18 +178,27 @@ class _DashboardContent extends StatelessWidget {
 
           const SizedBox(height: 28),
 
-          // ── Kwan Insight Banner ───────────────────────────────────────────
+          // ── Kwan AI Insight Banner ───────────────────────────────────────────────────
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppTheme.spaceMd),
             decoration: BoxDecoration(
-              gradient: AppTheme.primaryGradient,
+              color: AppTheme.surface,
               borderRadius: AppTheme.radiusMd,
-              boxShadow: AppTheme.goldGlow,
+              border: Border.all(color: AppTheme.border),
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('🤖', style: TextStyle(fontSize: 28)),
-                const SizedBox(width: 14),
+                Container(
+                  width: 36, height: 36,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withValues(alpha: 0.1),
+                    borderRadius: AppTheme.radiusSm,
+                  ),
+                  child: const Icon(Icons.auto_awesome_outlined,
+                      color: AppTheme.primary, size: 18),
+                ),
+                const SizedBox(width: AppTheme.spaceMd),
                 const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,14 +206,14 @@ class _DashboardContent extends StatelessWidget {
                       Text('Kwan AI is working for you',
                           style: TextStyle(
                             fontFamily: 'Outfit', fontWeight: FontWeight.w700,
-                            color: AppTheme.background, fontSize: 14,
+                            color: AppTheme.textPrimary, fontSize: 14,
                           )),
                       SizedBox(height: 4),
                       Text(
-                        'Your listings are embedded in Kwan\'s AI. Every tourist who plans a trip to your city sees your business.',
+                        'Your listings are embedded in Kwan AI. Every traveller who plans a trip to your city sees your business.',
                         style: TextStyle(
                           fontFamily: 'Outfit', fontSize: 12,
-                          color: AppTheme.background, height: 1.5,
+                          color: AppTheme.textSecondary, height: 1.5,
                         ),
                       ),
                     ],
@@ -408,18 +430,129 @@ class _ErrorState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, color: AppTheme.accent, size: 48),
-          const SizedBox(height: 16),
-          Text(message,
+      child: Padding(
+        padding: const EdgeInsets.all(AppTheme.spaceXl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 64, height: 64,
+              decoration: BoxDecoration(
+                color: AppTheme.surface,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: const Icon(Icons.wifi_off_rounded,
+                  color: AppTheme.textMuted, size: 28),
+            ),
+            const SizedBox(height: AppTheme.spaceLg),
+            const Text('Connection issue',
+              style: TextStyle(
+                fontFamily: 'Outfit', fontSize: 18,
+                fontWeight: FontWeight.w700, color: AppTheme.textPrimary,
+              )),
+            const SizedBox(height: AppTheme.spaceSm),
+            Text(
+              message,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppTheme.textSecondary, fontFamily: 'Outfit')),
-          const SizedBox(height: 16),
-          ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
+              style: const TextStyle(
+                fontFamily: 'Outfit', fontSize: 13,
+                color: AppTheme.textSecondary, height: 1.5,
+              ),
+            ),
+            const SizedBox(height: AppTheme.spaceXl),
+            GestureDetector(
+              onTap: onRetry,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                decoration: BoxDecoration(
+                  color: AppTheme.surface,
+                  borderRadius: AppTheme.radiusMd,
+                  border: Border.all(color: AppTheme.border),
+                ),
+                child: const Text('Try Again',
+                  style: TextStyle(
+                    fontFamily: 'Outfit', fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary, fontSize: 14,
+                  )),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Skeleton Loading ─────────────────────────────────────────────────────────────────────────────
+
+class _DashboardSkeleton extends StatelessWidget {
+  const _DashboardSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppTheme.spaceLg),
+      child: Column(
+        children: [
+          // Skeleton stat cards
+          Row(
+            children: [
+              Expanded(child: _SkeletonCard(height: 90)),
+              const SizedBox(width: AppTheme.spaceSm),
+              Expanded(child: _SkeletonCard(height: 90)),
+              const SizedBox(width: AppTheme.spaceSm),
+              Expanded(child: _SkeletonCard(height: 90)),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spaceLg),
+          _SkeletonCard(height: 80),
+          const SizedBox(height: AppTheme.spaceLg),
+          _SkeletonCard(height: 72),
+          const SizedBox(height: AppTheme.spaceSm),
+          _SkeletonCard(height: 72),
+          const SizedBox(height: AppTheme.spaceSm),
+          _SkeletonCard(height: 72),
         ],
       ),
     );
+  }
+}
+
+class _SkeletonCard extends StatelessWidget {
+  final double height;
+  const _SkeletonCard({required this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: AppTheme.radiusMd,
+        border: Border.all(color: AppTheme.border),
+      ),
+    ).animate(onPlay: (c) => c.repeat())
+      .shimmer(duration: 1000.ms,
+               color: AppTheme.surfaceElevated,
+               angle: 0.1);
+  }
+}
+
+class _SkeletonLine extends StatelessWidget {
+  final double width;
+  final double height;
+  const _SkeletonLine({required this.width, required this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width, height: height,
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceElevated,
+        borderRadius: AppTheme.radiusXs,
+      ),
+    ).animate(onPlay: (c) => c.repeat())
+      .shimmer(duration: 1000.ms, color: AppTheme.border);
   }
 }

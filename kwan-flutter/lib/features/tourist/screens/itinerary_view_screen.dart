@@ -41,8 +41,6 @@ class _ItineraryViewScreenState extends State<ItineraryViewScreen>
   @override
   Widget build(BuildContext context) {
     final it = widget.itinerary;
-    final isLagos = it.destination.toLowerCase().contains('lagos');
-    final hotelAnchor = isLagos ? '5-Star City Benchmark (\$320/n)' : '5-Star City Benchmark (\$350/n)';
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -50,17 +48,19 @@ class _ItineraryViewScreenState extends State<ItineraryViewScreen>
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
           // ── Hero App Bar ──────────────────────────────────────────────────
           SliverAppBar(
-            expandedHeight: 220,
+            expandedHeight: 240,
             floating: false,
             pinned: true,
             backgroundColor: AppTheme.background,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+              color: AppTheme.textSecondary,
               onPressed: () => context.pop(),
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.share_outlined),
+                icon: const Icon(Icons.share_outlined, size: 20),
+                color: AppTheme.textSecondary,
                 onPressed: () => Share.share(
                   'Check out my Kwan-planned trip to ${it.destination}! Generated with Kwan AI 🌍',
                 ),
@@ -68,45 +68,40 @@ class _ItineraryViewScreenState extends State<ItineraryViewScreen>
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
-                decoration: const BoxDecoration(gradient: AppTheme.heroGradient),
+                color: AppTheme.background,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 80, 20, 20),
+                  padding: const EdgeInsets.fromLTRB(24, 80, 24, 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Text(
-                        '${it.totalDays}-DAY WEST AFRICAN CONCIERGE PATH',
-                        style: const TextStyle(
-                          fontFamily: 'Outfit', fontSize: 11,
-                          color: AppTheme.primary, fontWeight: FontWeight.w700,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
+                      AppTheme.sectionBadge('${it.totalDays}-Day Concierge Path'),
+                      const SizedBox(height: 10),
                       Text(
                         it.destination,
                         style: const TextStyle(
-                          fontFamily: 'Outfit', fontSize: 30,
+                          fontFamily: 'Outfit', fontSize: 34,
                           fontWeight: FontWeight.w700, color: AppTheme.textPrimary,
+                          letterSpacing: -1.0,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
+                      // Clean stat row — no gold borders, just text with icons
                       Row(
                         children: [
-                          _StatChip(
-                            icon: Icons.attach_money,
-                            label: '\$${it.estimatedTotalCostUsd.toStringAsFixed(0)} USD Total',
+                          _StatItem(
+                            icon: Icons.attach_money_rounded,
+                            label: '\$${it.estimatedTotalCostUsd.toStringAsFixed(0)} total',
                           ),
-                          const SizedBox(width: 8),
-                          _StatChip(
-                            icon: Icons.speed_rounded,
+                          const SizedBox(width: 20),
+                          _StatItem(
+                            icon: Icons.directions_walk_rounded,
                             label: it.pace.toLowerCase().replaceAll('_', ' '),
                           ),
-                          const SizedBox(width: 8),
-                          _StatChip(
+                          const SizedBox(width: 20),
+                          _StatItem(
                             icon: Icons.savings_outlined,
-                            label: 'Save ~82% vs $hotelAnchor',
+                            label: '~82% cheaper',
                           ),
                         ],
                       ),
@@ -115,17 +110,30 @@ class _ItineraryViewScreenState extends State<ItineraryViewScreen>
                 ),
               ),
             ),
-            bottom: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              labelColor: AppTheme.primary,
-              unselectedLabelColor: AppTheme.textMuted,
-              indicatorColor: AppTheme.primary,
-              indicatorWeight: 3,
-              labelStyle: const TextStyle(
-                fontFamily: 'Outfit', fontWeight: FontWeight.w700, fontSize: 14,
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(48),
+              child: Container(
+                decoration: const BoxDecoration(
+                  border: Border(top: BorderSide(color: AppTheme.borderSubtle)),
+                ),
+                child: TabBar(
+                  controller: _tabController,
+                  isScrollable: true,
+                  labelColor: AppTheme.primary,
+                  unselectedLabelColor: AppTheme.textMuted,
+                  indicatorColor: AppTheme.primary,
+                  indicatorWeight: 2,
+                  indicatorSize: TabBarIndicatorSize.label,
+                  dividerColor: Colors.transparent,
+                  labelStyle: const TextStyle(
+                    fontFamily: 'Outfit', fontWeight: FontWeight.w700, fontSize: 13,
+                  ),
+                  unselectedLabelStyle: const TextStyle(
+                    fontFamily: 'Outfit', fontWeight: FontWeight.w400, fontSize: 13,
+                  ),
+                  tabs: it.days.map((d) => Tab(text: 'Day ${d.dayNumber}')).toList(),
+                ),
               ),
-              tabs: it.days.map((d) => Tab(text: 'Day ${d.dayNumber}')).toList(),
             ),
           ),
         ],
@@ -136,12 +144,29 @@ class _ItineraryViewScreenState extends State<ItineraryViewScreen>
       ),
 
       // ── Transport FAB ──────────────────────────────────────────────────────
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showTransportSheet(context, it),
-        backgroundColor: AppTheme.secondary,
-        icon: const Icon(Icons.directions_bus_outlined, color: Colors.white),
-        label: const Text('Trotros & Ride-Hailing',
-            style: TextStyle(fontFamily: 'Outfit', color: Colors.white, fontWeight: FontWeight.bold)),
+      floatingActionButton: GestureDetector(
+        onTap: () => _showTransportSheet(context, it),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          decoration: BoxDecoration(
+            color: AppTheme.surface,
+            borderRadius: AppTheme.radiusLg,
+            border: Border.all(color: AppTheme.border),
+            boxShadow: AppTheme.cardShadow,
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.directions_bus_outlined, color: AppTheme.textSecondary, size: 18),
+              SizedBox(width: 8),
+              Text('Transit Fares',
+                  style: TextStyle(
+                    fontFamily: 'Outfit', color: AppTheme.textPrimary,
+                    fontWeight: FontWeight.w600, fontSize: 14,
+                  )),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -156,35 +181,28 @@ class _ItineraryViewScreenState extends State<ItineraryViewScreen>
   }
 }
 
-class _StatChip extends StatelessWidget {
+// Clean text+icon stat — no chip border, just readable metadata
+class _StatItem extends StatelessWidget {
   final IconData icon;
   final String label;
 
-  const _StatChip({required this.icon, required this.label});
+  const _StatItem({required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: AppTheme.primary),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              fontFamily: 'Outfit', fontSize: 11,
-              color: Colors.white, fontWeight: FontWeight.w500,
-            ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 13, color: AppTheme.textMuted),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            fontFamily: 'Outfit', fontSize: 12,
+            color: AppTheme.textSecondary, fontWeight: FontWeight.w500,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -206,59 +224,63 @@ class _DayView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Day theme header
+          // Day theme header — left gold accent bar, clean layout
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            clipBehavior: Clip.hardEdge,
             decoration: BoxDecoration(
-              gradient: AppTheme.cardGradient,
+              color: AppTheme.surface,
               borderRadius: AppTheme.radiusMd,
               border: Border.all(color: AppTheme.border),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(day.theme,
-                    style: const TextStyle(
-                      fontFamily: 'Outfit', fontSize: 18,
-                      fontWeight: FontWeight.w700, color: AppTheme.primary,
-                    )),
-                const SizedBox(height: 6),
-                Text(day.aiNarrative,
-                    style: const TextStyle(
-                      fontFamily: 'Outfit', fontSize: 13,
-                      color: AppTheme.textSecondary, height: 1.6,
-                    )),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const Icon(Icons.attach_money, color: AppTheme.primary, size: 16),
-                    Text(
-                      '\$${day.estimatedDayCostUsd.toStringAsFixed(0)}.00 USD today',
-                      style: const TextStyle(
-                        fontFamily: 'Outfit', fontSize: 13,
-                        fontWeight: FontWeight.w700, color: AppTheme.primary,
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(width: 3, color: AppTheme.primary),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(day.theme,
+                              style: const TextStyle(
+                                fontFamily: 'Outfit', fontSize: 17,
+                                fontWeight: FontWeight.w700, color: AppTheme.textPrimary,
+                              )),
+                          const SizedBox(height: 6),
+                          Text(day.aiNarrative,
+                              style: const TextStyle(
+                                fontFamily: 'Outfit', fontSize: 13,
+                                color: AppTheme.textSecondary, height: 1.6,
+                              )),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Text(
+                                '\$${day.estimatedDayCostUsd.toStringAsFixed(0)} USD today',
+                                style: const TextStyle(
+                                  fontFamily: 'Outfit', fontSize: 13,
+                                  fontWeight: FontWeight.w600, color: AppTheme.primary,
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                '~85% cheaper',
+                                style: const TextStyle(
+                                  fontFamily: 'Outfit', fontSize: 11,
+                                  color: AppTheme.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.4)),
-                      ),
-                      child: Text(
-                        'Save ~85% $hotelBenchmarkText',
-                        style: const TextStyle(
-                          fontFamily: 'Outfit', fontSize: 11,
-                          fontWeight: FontWeight.w600, color: AppTheme.primary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           ).animate().fadeIn(duration: 400.ms),
 
@@ -378,7 +400,7 @@ class _ActivityCard extends StatelessWidget {
                       Text(activity.operatorName,
                           style: const TextStyle(
                             fontFamily: 'Outfit', fontSize: 13,
-                            color: AppTheme.primary, fontWeight: FontWeight.w600,
+                            color: AppTheme.textPrimary, fontWeight: FontWeight.w600,
                           )),
                       const SizedBox(width: 6),
                       Container(
@@ -587,16 +609,17 @@ class _TransportSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Trotro & Ride-Hailing Fare Comparator',
+            'Transit & Fare Comparator',
             style: TextStyle(
               fontFamily: 'Outfit', fontSize: 20,
               fontWeight: FontWeight.w700, color: AppTheme.textPrimary,
+              letterSpacing: -0.5,
             ),
           ),
           const SizedBox(height: 6),
           const Text(
-            'Compare local trotro buses, Pragya tuk-tuks, and Bolt / Uber estimated fares',
-            style: TextStyle(fontFamily: 'Outfit', fontSize: 13, color: AppTheme.textMuted),
+            'Compare local trotro buses, Pragya tuk-tuks, and Bolt / Uber.',
+            style: TextStyle(fontFamily: 'Outfit', fontSize: 13, color: AppTheme.textSecondary, height: 1.5),
           ),
           const SizedBox(height: 16),
 

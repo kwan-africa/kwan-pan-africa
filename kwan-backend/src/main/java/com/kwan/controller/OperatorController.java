@@ -9,6 +9,10 @@ import com.kwan.repository.OperatorRepository;
 import com.kwan.service.EmbeddingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +40,18 @@ public class OperatorController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Operator>> getOperators(@RequestParam(required = false) String country) {
+    public ResponseEntity<?> getOperators(
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        if (page != null && size != null) {
+            Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(100, Math.max(1, size)));
+            if (country != null && !country.isBlank()) {
+                return ResponseEntity.ok(operatorRepository.findByCountry(country, pageable));
+            }
+            return ResponseEntity.ok(operatorRepository.findByIsActiveTrue(pageable));
+        }
+
         if (country != null && !country.isBlank()) {
             return ResponseEntity.ok(operatorRepository.findByCountry(country));
         }
@@ -44,7 +59,7 @@ public class OperatorController {
     }
 
     @PostMapping
-    public ResponseEntity<Operator> createOperator(@RequestBody Operator operator) {
+    public ResponseEntity<Operator> createOperator(@Valid @RequestBody Operator operator) {
         Operator saved = operatorRepository.save(operator);
         return ResponseEntity.ok(saved);
     }
@@ -52,7 +67,7 @@ public class OperatorController {
     @PostMapping("/{operatorId}/listings")
     public ResponseEntity<?> createListing(
             @PathVariable UUID operatorId,
-            @RequestBody Listing listing) {
+            @Valid @RequestBody Listing listing) {
         try {
             Operator operator = operatorRepository.findById(operatorId)
                     .orElseThrow(() -> new IllegalArgumentException("Operator not found: " + operatorId));

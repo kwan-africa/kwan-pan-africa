@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ItineraryService {
@@ -35,15 +36,14 @@ public class ItineraryService {
     @Value("${gemini.api.generation-model}")
     private String generationModel;
 
-    private final OkHttpClient httpClient = new OkHttpClient.Builder()
-            .callTimeout(java.time.Duration.ofSeconds(120))
-            .build();
+    private final OkHttpClient httpClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
-    public ItineraryService(RagService ragService, ItineraryRepository itineraryRepository) {
+    public ItineraryService(RagService ragService, ItineraryRepository itineraryRepository, OkHttpClient httpClient) {
         this.ragService = ragService;
         this.itineraryRepository = itineraryRepository;
+        this.httpClient = httpClient;
     }
 
     public ItineraryResponse generateItinerary(ItineraryRequest request) throws IOException {
@@ -138,33 +138,51 @@ public class ItineraryService {
     }
 
     private String callGemini(String systemPrompt, String userMessage) throws IOException {
-        String url = geminiBaseUrl + "/models/" + generationModel + ":generateContent?key=" + geminiApiKey;
+        List<String> modelsToTry = List.of(generationModel, "gemini-flash-lite-latest", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-flash-latest");
+        IOException lastException = null;
 
-        var body = java.util.Map.of(
-                "system_instruction", java.util.Map.of("parts", List.of(java.util.Map.of("text", systemPrompt))),
-                "contents", List.of(java.util.Map.of("role", "user", "parts", List.of(java.util.Map.of("text", userMessage)))),
-                "generationConfig", java.util.Map.of(
-                        "responseMimeType", "application/json",
-                        "temperature", 0.7,
-                        "maxOutputTokens", 8192
-                )
-        );
+        for (String modelName : modelsToTry) {
+            String url = geminiBaseUrl + "/models/" + modelName + ":generateContent";
 
-        Request req = new Request.Builder()
-                .url(url)
-                .post(RequestBody.create(objectMapper.writeValueAsString(body), JSON))
-                .build();
+            var body = java.util.Map.of(
+                    "system_instruction", java.util.Map.of("parts", List.of(java.util.Map.of("text", systemPrompt))),
+                    "contents", List.of(java.util.Map.of("role", "user", "parts", List.of(java.util.Map.of("text", userMessage)))),
+                    "generationConfig", java.util.Map.of(
+                            "responseMimeType", "application/json",
+                            "temperature", 0.7,
+                            "maxOutputTokens", 8192
+                    )
+            );
 
-        try (Response response = httpClient.newCall(req).execute()) {
-            String respStr = response.body().string();
-            if (!response.isSuccessful()) {
-                throw new IOException("Gemini API call failed: " + response.code() + " " + respStr);
+            try {
+                Request req = new Request.Builder()
+                        .url(url)
+                        .header("x-goog-api-key", geminiApiKey)
+                        .post(RequestBody.create(objectMapper.writeValueAsString(body), JSON))
+                        .build();
+
+                try (Response response = httpClient.newCall(req).execute()) {
+                    String respStr = response.body() != null ? response.body().string() : "";
+                    if (response.isSuccessful()) {
+                        JsonNode root = objectMapper.readTree(respStr);
+                        return root.path("candidates").get(0)
+                                .path("content").path("parts").get(0)
+                                .path("text").asText();
+                    } else {
+                        log.warn("Gemini model {} returned {}: {}", modelName, response.code(), respStr);
+                        lastException = new IOException("Gemini API call failed for " + modelName + ": " + response.code() + " " + respStr);
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Failed calling Gemini model {}: {}", modelName, e.getMessage());
+                lastException = new IOException("Failed calling Gemini model " + modelName, e);
             }
-            JsonNode root = objectMapper.readTree(respStr);
-            return root.path("candidates").get(0)
-                    .path("content").path("parts").get(0)
-                    .path("text").asText();
         }
+
+        if (lastException != null) {
+            throw lastException;
+        }
+        throw new IOException("All Gemini generation attempts failed");
     }
 
     private ItineraryResponse parseGeminiResponse(String json, ItineraryRequest request) {
@@ -250,7 +268,7 @@ public class ItineraryService {
 
     private void saveItinerary(ItineraryRequest request, ItineraryResponse response, String rawJson) {
         try {
-            Itinerary itinerary = Itinerary.builder()
+            Itinerary itinerary = Objects.requireNonNull(Itinerary.builder()
                     .destination(request.getDestination())
                     .country(request.getCountry())
                     .totalDays(request.getTotalDays())
@@ -258,7 +276,7 @@ public class ItineraryService {
                     .pace(request.getPace())
                     .estimatedTotalCostUsd(response.getEstimatedTotalCostUsd() != null ? response.getEstimatedTotalCostUsd().doubleValue() : 0.0)
                     .preferredLanguage(request.getPreferredLanguage())
-                    .build();
+                    .build());
 
             Itinerary saved = itineraryRepository.save(itinerary);
             response.setItineraryId(saved.getId());

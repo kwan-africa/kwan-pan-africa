@@ -110,7 +110,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               style: const TextStyle(color: AppTheme.textPrimary, fontFamily: 'Outfit'),
               decoration: const InputDecoration(
                 labelText: 'Full Name',
-                prefixIcon: Icon(Icons.person_outline, color: AppTheme.primary),
+                prefixIcon: Icon(Icons.person_outline, color: AppTheme.textMuted),
               ),
             ),
             const SizedBox(height: 14),
@@ -121,7 +121,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               style: const TextStyle(color: AppTheme.textPrimary, fontFamily: 'Outfit'),
               decoration: const InputDecoration(
                 labelText: 'Email (for booking confirmation)',
-                prefixIcon: Icon(Icons.email_outlined, color: AppTheme.primary),
+                prefixIcon: Icon(Icons.email_outlined, color: AppTheme.textMuted),
               ),
             ),
             const SizedBox(height: 14),
@@ -132,7 +132,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               style: const TextStyle(color: AppTheme.textPrimary, fontFamily: 'Outfit'),
               decoration: const InputDecoration(
                 labelText: 'Special requests (optional)',
-                prefixIcon: Icon(Icons.note_outlined, color: AppTheme.primary),
+                prefixIcon: Icon(Icons.note_outlined, color: AppTheme.textMuted),
               ),
             ),
 
@@ -155,32 +155,53 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             const SizedBox(height: 32),
 
             // ── Pay Button ──────────────────────────────────────────────────
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                key: const ValueKey('btn-pay'),
-                onPressed: _isProcessing ? null : _initiatePayment,
+            GestureDetector(
+              key: const ValueKey('btn-pay'),
+              onTap: _isProcessing ? null : _initiatePayment,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: double.infinity,
+                height: 56,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  gradient: _isProcessing ? null : AppTheme.primaryGradient,
+                  color: _isProcessing ? AppTheme.surface : null,
+                  borderRadius: AppTheme.radiusMd,
+                  boxShadow: _isProcessing ? null : [
+                    BoxShadow(
+                      color: AppTheme.primary.withValues(alpha: 0.2),
+                      blurRadius: 16, offset: const Offset(0, 4),
+                    )
+                  ],
+                ),
                 child: _isProcessing
                     ? const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           SizedBox(
-                            width: 20, height: 20,
+                            width: 18, height: 18,
                             child: CircularProgressIndicator(
-                              color: AppTheme.background, strokeWidth: 2,
+                              color: AppTheme.primary, strokeWidth: 2,
                             ),
                           ),
                           SizedBox(width: 12),
-                          Text('Connecting to Paystack...'),
+                          Text('Connecting to Paystack...',
+                              style: TextStyle(
+                                fontFamily: 'Outfit', fontSize: 15,
+                                fontWeight: FontWeight.w600, color: AppTheme.textPrimary,
+                              )),
                         ],
                       )
                     : Text(
                         'Pay \$${widget.priceUsd.toStringAsFixed(2)} via Paystack',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                        style: const TextStyle(
+                          fontFamily: 'Outfit', fontSize: 16,
+                          fontWeight: FontWeight.w700, color: AppTheme.background,
+                          letterSpacing: -0.2,
+                        ),
                       ),
-              ).animate(delay: 400.ms).fadeIn().slideY(begin: 0.2, end: 0),
-            ),
+              ),
+            ).animate(delay: 400.ms).fadeIn().slideY(begin: 0.2, end: 0),
 
             // ── WhatsApp Alternative ────────────────────────────────────────
             if (widget.whatsapp != null) ...[
@@ -335,43 +356,46 @@ class _BookingSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppTheme.spaceLg),
       decoration: BoxDecoration(
-        gradient: AppTheme.cardGradient,
+        color: AppTheme.surface,
         borderRadius: AppTheme.radiusLg,
         border: Border.all(color: AppTheme.border),
-        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.receipt_long_outlined, color: AppTheme.primary),
+              const Icon(Icons.receipt_long_outlined,
+                  color: AppTheme.textSecondary, size: 18),
               const SizedBox(width: 10),
               const Text('Booking Summary',
                   style: TextStyle(
                     fontFamily: 'Outfit', fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
+                    color: AppTheme.textSecondary, fontSize: 13,
+                    letterSpacing: 0.5,
                   )),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppTheme.spaceMd),
           Text(title,
               style: const TextStyle(
                 fontFamily: 'Outfit', fontSize: 18,
                 fontWeight: FontWeight.w700, color: AppTheme.textPrimary,
+                letterSpacing: -0.4,
               )),
           const SizedBox(height: 4),
           Text('by $operatorName',
               style: const TextStyle(
-                fontFamily: 'Outfit', color: AppTheme.primary,
+                fontFamily: 'Outfit', color: AppTheme.textSecondary,
+                fontSize: 13,
               )),
-          const SizedBox(height: 16),
-          const Divider(color: AppTheme.border),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppTheme.spaceMd),
+          const Divider(color: AppTheme.borderSubtle),
+          const SizedBox(height: AppTheme.spaceMd),
           _SummaryRow('You pay', '\$${priceUsd.toStringAsFixed(2)}', bold: true),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppTheme.spaceSm),
           _SummaryRow('Operator receives (MoMo)',
               '\$${operatorReceives.toStringAsFixed(2)}',
               color: AppTheme.secondary),

@@ -103,51 +103,59 @@ class _PreferenceFormScreenState extends ConsumerState<PreferenceFormScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: _currentStep == 0
-              ? () => context.pop()
-              : () => _previousStep(),
-        ),
-        title: Text('Plan Your Kwan — Step ${_currentStep + 1} of $_totalSteps'),
-      ),
-      body: Column(
+      body: Stack(
         children: [
-          // ── Progress Bar ────────────────────────────────────────────────
-          _ProgressBar(current: _currentStep, total: _totalSteps),
+          Column(
+            children: [
+              // ── Custom AppBar ─────────────────────────────────────────────
+              SafeArea(
+                bottom: false,
+                child: _FormAppBar(
+                  currentStep: _currentStep,
+                  totalSteps: _totalSteps,
+                  onBack: _currentStep == 0
+                      ? () => context.pop()
+                      : () => _previousStep(),
+                ),
+              ),
 
-          // ── Page Content ────────────────────────────────────────────────
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _Step1Destination(form: form, onChanged: _updateForm),
-                _Step2DatesAndBudget(form: form, onChanged: _updateForm),
-                _Step3Interests(
-                  form: form,
-                  allInterests: _allInterests,
-                  onChanged: _updateForm,
+              // ── Page content ──────────────────────────────────────────────
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    _Step1Destination(form: form, onChanged: _updateForm),
+                    _Step2DatesAndBudget(form: form, onChanged: _updateForm),
+                    _Step3Interests(
+                      form: form,
+                      allInterests: _allInterests,
+                      onChanged: _updateForm,
+                    ),
+                    _Step4Preferences(
+                      form: form,
+                      languages: _languages,
+                      onChanged: _updateForm,
+                    ),
+                  ],
                 ),
-                _Step4Preferences(
-                  form: form,
-                  languages: _languages,
-                  onChanged: _updateForm,
-                ),
-              ],
-            ),
+              ),
+
+              // ── Bottom CTA ────────────────────────────────────────────────
+              _BottomBar(
+                isLastStep: _currentStep == _totalSteps - 1,
+                isGenerating: isGenerating,
+                canProceed: _canProceed(form),
+                onNext: () => _currentStep == _totalSteps - 1
+                    ? _generateItinerary(form)
+                    : _nextStep(),
+              ),
+            ],
           ),
 
-          // ── Bottom CTA ──────────────────────────────────────────────────
-          _BottomBar(
-            isLastStep: _currentStep == _totalSteps - 1,
-            isGenerating: isGenerating,
-            canProceed: _canProceed(form),
-            onNext: () => _currentStep == _totalSteps - 1
-                ? _generateItinerary(form)
-                : _nextStep(),
-          ),
+          // ── Generation loading overlay ─────────────────────────────────
+          if (isGenerating)
+            const _GeneratingOverlay(),
         ],
       ),
     );
@@ -222,6 +230,109 @@ class _PreferenceFormScreenState extends ConsumerState<PreferenceFormScreen> {
   }
 }
 
+// ── Custom AppBar with sleek progress bar ─────────────────────────────────────
+
+class _FormAppBar extends StatelessWidget {
+  final int currentStep;
+  final int totalSteps;
+  final VoidCallback onBack;
+
+  const _FormAppBar({
+    required this.currentStep,
+    required this.totalSteps,
+    required this.onBack,
+  });
+
+  static const _stepLabels = ['Destination', 'Dates & Budget', 'Interests', 'Preferences'];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppTheme.spaceMd,
+            vertical: AppTheme.spaceSm,
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+                color: AppTheme.textSecondary,
+                onPressed: onBack,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+              ),
+              const SizedBox(width: AppTheme.spaceSm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _stepLabels[currentStep],
+                      style: const TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    Text(
+                      'Step ${currentStep + 1} of $totalSteps',
+                      style: const TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 12,
+                        color: AppTheme.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Step dots
+              Row(
+                children: List.generate(totalSteps, (i) {
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    margin: const EdgeInsets.only(left: 4),
+                    width: i == currentStep ? 16 : 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: i <= currentStep
+                          ? AppTheme.primary
+                          : AppTheme.border,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ),
+        ),
+        // Thin progress line
+        SizedBox(
+          height: 2,
+          child: LayoutBuilder(builder: (ctx, constraints) {
+            return Stack(
+              children: [
+                Container(color: AppTheme.borderSubtle),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeInOut,
+                  width: constraints.maxWidth * (currentStep + 1) / totalSteps,
+                  decoration: const BoxDecoration(
+                    gradient: AppTheme.primaryGradient,
+                  ),
+                ),
+              ],
+            );
+          }),
+        ),
+      ],
+    );
+  }
+}
+
 // ── Step 1: Destination ────────────────────────────────────────────────────────
 
 class _Step1Destination extends StatelessWidget {
@@ -239,42 +350,52 @@ class _Step1Destination extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppTheme.spaceLg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: AppTheme.spaceSm),
+          AppTheme.sectionBadge('Step 1'),
+          const SizedBox(height: AppTheme.spaceMd),
           Text('Where are you headed?',
               style: Theme.of(context).textTheme.displaySmall),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppTheme.spaceSm),
           Text('Choose your destination country and city.',
               style: Theme.of(context).textTheme.bodyMedium),
-          const SizedBox(height: 32),
+          const SizedBox(height: AppTheme.spaceXl),
 
+          // Country grid — 2 columns, cleaner than wrap
           Text('Country', style: Theme.of(context).textTheme.labelLarge),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
+          const SizedBox(height: AppTheme.spaceMd),
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisSpacing: AppTheme.spaceSm,
+            mainAxisSpacing: AppTheme.spaceSm,
+            childAspectRatio: 3.2,
             children: _countries.entries.map((e) {
               final selected = form.country == e.key;
               return GestureDetector(
                 onTap: () => onChanged(form.copyWith(country: e.key)),
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  duration: const Duration(milliseconds: 180),
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: selected ? AppTheme.primary.withValues(alpha: 0.15) : AppTheme.surfaceElevated,
+                    color: selected
+                        ? AppTheme.primary.withValues(alpha: 0.12)
+                        : AppTheme.surface,
                     borderRadius: AppTheme.radiusSm,
                     border: Border.all(
                       color: selected ? AppTheme.primary : AppTheme.border,
-                      width: selected ? 2 : 1,
+                      width: selected ? 1.5 : 1,
                     ),
                   ),
                   child: Text(
                     e.value,
                     style: TextStyle(
                       fontFamily: 'Outfit',
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                       color: selected ? AppTheme.primary : AppTheme.textSecondary,
                     ),
@@ -284,21 +405,25 @@ class _Step1Destination extends StatelessWidget {
             }).toList(),
           ),
 
-          const SizedBox(height: 32),
-          Text('City', style: Theme.of(context).textTheme.labelLarge),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppTheme.spaceXl),
+          Text('City / Destination', style: Theme.of(context).textTheme.labelLarge),
+          const SizedBox(height: AppTheme.spaceMd),
           TextFormField(
-            key: ValueKey('destination-input'),
+            key: const ValueKey('destination-input'),
             initialValue: form.destination,
-            style: const TextStyle(color: AppTheme.textPrimary, fontFamily: 'Outfit'),
+            style: const TextStyle(
+              color: AppTheme.textPrimary,
+              fontFamily: 'Outfit',
+              fontSize: 15,
+            ),
             decoration: const InputDecoration(
               hintText: 'e.g. Accra, Lagos, Dakar...',
-              prefixIcon: Icon(Icons.location_on_outlined, color: AppTheme.primary),
+              prefixIcon: Icon(Icons.location_on_outlined, color: AppTheme.primary, size: 20),
             ),
             onChanged: (v) => onChanged(form.copyWith(destination: v)),
           ),
         ],
-      ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.1, end: 0),
+      ).animate().fadeIn(duration: 350.ms).slideX(begin: 0.06, end: 0),
     );
   }
 }
@@ -314,28 +439,31 @@ class _Step2DatesAndBudget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppTheme.spaceLg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('When & How much?',
+          const SizedBox(height: AppTheme.spaceSm),
+          AppTheme.sectionBadge('Step 2'),
+          const SizedBox(height: AppTheme.spaceMd),
+          Text('When & how much?',
               style: Theme.of(context).textTheme.displaySmall),
-          const SizedBox(height: 8),
-          Text('Kwan will plan your days and stay within your budget.',
+          const SizedBox(height: AppTheme.spaceSm),
+          Text('Kwan will plan your days and stay within budget.',
               style: Theme.of(context).textTheme.bodyMedium),
-          const SizedBox(height: 32),
+          const SizedBox(height: AppTheme.spaceXl),
 
           // Date pickers
           Row(
             children: [
               Expanded(child: _DatePickerCard(
-                label: 'Start Date',
+                label: 'Arrival',
                 date: form.startDate,
                 onPicked: (d) => onChanged(form.copyWith(startDate: d)),
               )),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppTheme.spaceSm),
               Expanded(child: _DatePickerCard(
-                label: 'End Date',
+                label: 'Departure',
                 date: form.endDate,
                 onPicked: (d) => onChanged(form.copyWith(endDate: d)),
               )),
@@ -343,23 +471,23 @@ class _Step2DatesAndBudget extends StatelessWidget {
           ),
 
           if (form.totalDays > 0) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: AppTheme.spaceMd),
             Container(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha: 0.1),
+                color: AppTheme.primary.withValues(alpha: 0.08),
                 borderRadius: AppTheme.radiusSm,
-                border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
+                border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.calendar_today, color: AppTheme.primary, size: 18),
+                  const Icon(Icons.wb_sunny_outlined, color: AppTheme.primary, size: 16),
                   const SizedBox(width: 10),
                   Text(
                     '${form.totalDays} day${form.totalDays > 1 ? "s" : ""} planned',
                     style: const TextStyle(
                       fontFamily: 'Outfit', color: AppTheme.primary,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w600, fontSize: 14,
                     ),
                   ),
                 ],
@@ -367,22 +495,29 @@ class _Step2DatesAndBudget extends StatelessWidget {
             ),
           ],
 
-          const SizedBox(height: 32),
-          Text('Total Budget (USD)', style: Theme.of(context).textTheme.labelLarge),
-          const SizedBox(height: 8),
-          Text(
-            '\$${form.budgetUsd.toStringAsFixed(0)}',
-            style: const TextStyle(
-              fontFamily: 'Outfit', fontSize: 36,
-              fontWeight: FontWeight.w700, color: AppTheme.primary,
-            ),
+          const SizedBox(height: AppTheme.spaceXl),
+
+          // Budget
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text('Total Budget', style: Theme.of(context).textTheme.labelLarge),
+              Text(
+                '\$${form.budgetUsd.toStringAsFixed(0)} USD',
+                style: const TextStyle(
+                  fontFamily: 'Outfit', fontSize: 28,
+                  fontWeight: FontWeight.w700, color: AppTheme.primary,
+                  letterSpacing: -1,
+                ),
+              ),
+            ],
           ),
+          const SizedBox(height: AppTheme.spaceSm),
           Slider(
             value: form.budgetUsd,
             min: 50, max: 5000,
             divisions: 99,
-            activeColor: AppTheme.primary,
-            inactiveColor: AppTheme.border,
             onChanged: (v) => onChanged(form.copyWith(budgetUsd: v)),
           ),
           Row(
@@ -393,36 +528,78 @@ class _Step2DatesAndBudget extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 28),
+          const SizedBox(height: AppTheme.spaceXl),
+
+          // Group size
           Text('Group Size', style: Theme.of(context).textTheme.labelLarge),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              IconButton(
-                onPressed: form.groupSize > 1
-                    ? () => onChanged(form.copyWith(groupSize: form.groupSize - 1))
-                    : null,
-                icon: const Icon(Icons.remove_circle_outline, color: AppTheme.primary),
-                iconSize: 32,
-              ),
-              const SizedBox(width: 8),
-              Text('${form.groupSize}',
-                  style: Theme.of(context).textTheme.headlineLarge),
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: () => onChanged(form.copyWith(groupSize: form.groupSize + 1)),
-                icon: const Icon(Icons.add_circle_outline, color: AppTheme.primary),
-                iconSize: 32,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                form.groupSize == 1 ? 'Solo traveller' : 'travellers',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
+          const SizedBox(height: AppTheme.spaceMd),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(
+              color: AppTheme.surface,
+              borderRadius: AppTheme.radiusMd,
+              border: Border.all(color: AppTheme.border),
+            ),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: form.groupSize > 1
+                      ? () => onChanged(form.copyWith(groupSize: form.groupSize - 1))
+                      : null,
+                  child: Container(
+                    width: 36, height: 36,
+                    decoration: BoxDecoration(
+                      color: AppTheme.surfaceElevated,
+                      borderRadius: AppTheme.radiusSm,
+                      border: Border.all(color: AppTheme.border),
+                    ),
+                    child: Icon(
+                      Icons.remove,
+                      color: form.groupSize > 1
+                          ? AppTheme.textPrimary : AppTheme.textMuted,
+                      size: 16,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Text(
+                          '${form.groupSize}',
+                          style: const TextStyle(
+                            fontFamily: 'Outfit', fontSize: 28,
+                            fontWeight: FontWeight.w700, color: AppTheme.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          form.groupSize == 1 ? 'Solo traveller' : 'travellers',
+                          style: const TextStyle(
+                            fontFamily: 'Outfit', fontSize: 12,
+                            color: AppTheme.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => onChanged(form.copyWith(groupSize: form.groupSize + 1)),
+                  child: Container(
+                    width: 36, height: 36,
+                    decoration: BoxDecoration(
+                      color: AppTheme.surfaceElevated,
+                      borderRadius: AppTheme.radiusSm,
+                      border: Border.all(color: AppTheme.border),
+                    ),
+                    child: const Icon(Icons.add, color: AppTheme.textPrimary, size: 16),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
-      ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.1, end: 0),
+      ).animate().fadeIn(duration: 350.ms).slideX(begin: 0.06, end: 0),
     );
   }
 }
@@ -436,6 +613,7 @@ class _DatePickerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasDate = date != null;
     return GestureDetector(
       onTap: () async {
         final picked = await showDatePicker(
@@ -452,22 +630,38 @@ class _DatePickerCard extends StatelessWidget {
         );
         if (picked != null) onPicked(picked);
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppTheme.surfaceElevated,
+          color: AppTheme.surface,
           borderRadius: AppTheme.radiusMd,
           border: Border.all(
-            color: date != null ? AppTheme.primary : AppTheme.border,
+            color: hasDate ? AppTheme.primary.withValues(alpha: 0.5) : AppTheme.border,
+            width: hasDate ? 1.5 : 1,
           ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: const TextStyle(
-              fontFamily: 'Outfit', fontSize: 11,
-              color: AppTheme.textMuted, letterSpacing: 0.5,
-            )),
+            Row(
+              children: [
+                Icon(
+                  hasDate ? Icons.check_circle_outline : Icons.calendar_today_outlined,
+                  color: hasDate ? AppTheme.primary : AppTheme.textMuted,
+                  size: 14,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontFamily: 'Outfit', fontSize: 11,
+                    color: AppTheme.textMuted, letterSpacing: 0.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 8),
             Text(
               date != null
@@ -475,7 +669,7 @@ class _DatePickerCard extends StatelessWidget {
                   : 'Pick date',
               style: TextStyle(
                 fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w600,
-                color: date != null ? AppTheme.textPrimary : AppTheme.textMuted,
+                color: hasDate ? AppTheme.textPrimary : AppTheme.textMuted,
               ),
             ),
           ],
@@ -501,18 +695,43 @@ class _Step3Interests extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppTheme.spaceLg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: AppTheme.spaceSm),
+          AppTheme.sectionBadge('Step 3'),
+          const SizedBox(height: AppTheme.spaceMd),
           Text('What moves you?', style: Theme.of(context).textTheme.displaySmall),
-          const SizedBox(height: 8),
-          Text('Kwan will build your trip around these passions.',
+          const SizedBox(height: AppTheme.spaceSm),
+          Text('Kwan builds your trip around these passions.',
               style: Theme.of(context).textTheme.bodyMedium),
-          const SizedBox(height: 32),
+          const SizedBox(height: AppTheme.spaceXl),
+
+          if (form.interests.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppTheme.spaceMd),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withValues(alpha: 0.08),
+                  borderRadius: AppTheme.radiusSm,
+                  border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+                ),
+                child: Text(
+                  '${form.interests.length} selected',
+                  style: const TextStyle(
+                    fontFamily: 'Outfit', fontSize: 13,
+                    fontWeight: FontWeight.w600, color: AppTheme.primary,
+                  ),
+                ),
+              ),
+            ),
+
+          // Interest chips in a wrap layout
           Wrap(
-            spacing: 10,
-            runSpacing: 10,
+            spacing: AppTheme.spaceSm,
+            runSpacing: AppTheme.spaceSm,
             children: allInterests.map((interest) {
               final selected = form.interests.contains(interest);
               return GestureDetector(
@@ -522,28 +741,33 @@ class _Step3Interests extends StatelessWidget {
                   onChanged(form.copyWith(interests: updated));
                 },
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  duration: const Duration(milliseconds: 180),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
                   decoration: BoxDecoration(
-                    color: selected ? AppTheme.primary.withValues(alpha: 0.15) : AppTheme.surfaceElevated,
-                    borderRadius: AppTheme.radiusMd,
+                    color: selected
+                        ? AppTheme.primary.withValues(alpha: 0.12)
+                        : AppTheme.surface,
+                    borderRadius: AppTheme.radiusSm,
                     border: Border.all(
                       color: selected ? AppTheme.primary : AppTheme.border,
-                      width: selected ? 2 : 1,
+                      width: selected ? 1.5 : 1,
                     ),
                   ),
-                  child: Text(interest,
+                  child: Text(
+                    interest,
                     style: TextStyle(
-                      fontFamily: 'Outfit', fontSize: 14,
+                      fontFamily: 'Outfit',
+                      fontSize: 13,
                       fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                       color: selected ? AppTheme.primary : AppTheme.textSecondary,
-                    )),
+                    ),
+                  ),
                 ),
               );
             }).toList(),
           ),
         ],
-      ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.1, end: 0),
+      ).animate().fadeIn(duration: 350.ms).slideX(begin: 0.06, end: 0),
     );
   }
 }
@@ -562,73 +786,95 @@ class _Step4Preferences extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppTheme.spaceLg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: AppTheme.spaceSm),
+          AppTheme.sectionBadge('Step 4'),
+          const SizedBox(height: AppTheme.spaceMd),
           Text('Almost there.', style: Theme.of(context).textTheme.displaySmall),
-          const SizedBox(height: 8),
-          Text('Kwan personalises every detail.',
+          const SizedBox(height: AppTheme.spaceSm),
+          Text('Kwan personalises every detail for you.',
               style: Theme.of(context).textTheme.bodyMedium),
-          const SizedBox(height: 32),
+          const SizedBox(height: AppTheme.spaceXl),
 
-          // Pace
+          // Pace selector
           Text('Travel Pace', style: Theme.of(context).textTheme.labelLarge),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppTheme.spaceMd),
           Row(
-            children: ['RELAXED', 'MODERATE', 'PACKED'].map((p) {
-              final label = p == 'RELAXED' ? '🧘 Relaxed'
-                  : p == 'MODERATE' ? '🚶 Moderate' : '🏃 Packed';
-              final selected = form.pace == p;
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () => onChanged(form.copyWith(pace: p)),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    decoration: BoxDecoration(
-                      color: selected ? AppTheme.primary.withValues(alpha: 0.15) : AppTheme.surfaceElevated,
-                      borderRadius: AppTheme.radiusSm,
-                      border: Border.all(color: selected ? AppTheme.primary : AppTheme.border),
+            children: [
+              for (final (pace, emoji, label) in [
+                ('RELAXED', '🧘', 'Relaxed'),
+                ('MODERATE', '🚶', 'Moderate'),
+                ('PACKED', '🏃', 'Packed'),
+              ])
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => onChanged(form.copyWith(pace: pace)),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      margin: EdgeInsets.only(
+                          right: pace != 'PACKED' ? AppTheme.spaceSm : 0),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        color: form.pace == pace
+                            ? AppTheme.primary.withValues(alpha: 0.12)
+                            : AppTheme.surface,
+                        borderRadius: AppTheme.radiusSm,
+                        border: Border.all(
+                          color: form.pace == pace
+                              ? AppTheme.primary : AppTheme.border,
+                          width: form.pace == pace ? 1.5 : 1,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(emoji, style: const TextStyle(fontSize: 20)),
+                          const SizedBox(height: 4),
+                          Text(
+                            label,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Outfit', fontSize: 12,
+                              fontWeight: form.pace == pace
+                                  ? FontWeight.w700 : FontWeight.w400,
+                              color: form.pace == pace
+                                  ? AppTheme.primary : AppTheme.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: Text(label,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Outfit', fontSize: 12,
-                        fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                        color: selected ? AppTheme.primary : AppTheme.textSecondary,
-                      )),
                   ),
                 ),
-              );
-            }).toList(),
+            ],
           ),
 
-          const SizedBox(height: 28),
+          const SizedBox(height: AppTheme.spaceXl),
           Text('Language', style: Theme.of(context).textTheme.labelLarge),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppTheme.spaceMd),
           DropdownButtonFormField<String>(
             initialValue: form.language,
             dropdownColor: AppTheme.surfaceElevated,
-            style: const TextStyle(fontFamily: 'Outfit', color: AppTheme.textPrimary),
+            style: const TextStyle(fontFamily: 'Outfit', color: AppTheme.textPrimary, fontSize: 14),
             items: languages.entries.map((e) => DropdownMenuItem(
               value: e.key,
               child: Text(e.value),
             )).toList(),
             onChanged: (v) => onChanged(form.copyWith(language: v ?? 'en')),
             decoration: const InputDecoration(
-              prefixIcon: Icon(Icons.translate, color: AppTheme.primary),
+              prefixIcon: Icon(Icons.translate_rounded, color: AppTheme.primary, size: 20),
             ),
           ),
 
-          const SizedBox(height: 28),
+          const SizedBox(height: AppTheme.spaceXl),
           Text('Include in my trip', style: Theme.of(context).textTheme.labelLarge),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppTheme.spaceMd),
 
           _ToggleTile(
             id: 'toggle-transport',
-            icon: '🚌',
+            icon: Icons.directions_bus_outlined,
             label: 'Informal Transport',
             subtitle: 'Trotros, matatus, boda bodas',
             value: form.includeTransport,
@@ -636,7 +882,7 @@ class _Step4Preferences extends StatelessWidget {
           ),
           _ToggleTile(
             id: 'toggle-markets',
-            icon: '🛒',
+            icon: Icons.storefront_outlined,
             label: 'Local Markets & Vendors',
             subtitle: 'Makola, Kejetia, street food stalls',
             value: form.includeMarkets,
@@ -644,7 +890,7 @@ class _Step4Preferences extends StatelessWidget {
           ),
           _ToggleTile(
             id: 'toggle-tips',
-            icon: '💬',
+            icon: Icons.forum_outlined,
             label: 'Community Travel Tips',
             subtitle: 'Insider knowledge from locals',
             value: form.includeCommunityTips,
@@ -652,21 +898,23 @@ class _Step4Preferences extends StatelessWidget {
           ),
           _ToggleTile(
             id: 'toggle-homestay',
-            icon: '🏠',
+            icon: Icons.house_outlined,
             label: 'Homestays & Guesthouses',
             subtitle: 'Authentic local stays',
             value: form.includeHomestays,
             onChanged: (v) => onChanged(form.copyWith(includeHomestays: v)),
           ),
+
+          const SizedBox(height: AppTheme.spaceMd),
         ],
-      ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.1, end: 0),
+      ).animate().fadeIn(duration: 350.ms).slideX(begin: 0.06, end: 0),
     );
   }
 }
 
 class _ToggleTile extends StatelessWidget {
   final String id;
-  final String icon;
+  final IconData icon;
   final String label;
   final String subtitle;
   final bool value;
@@ -679,19 +927,26 @@ class _ToggleTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
       key: ValueKey(id),
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      duration: const Duration(milliseconds: 180),
+      margin: const EdgeInsets.only(bottom: AppTheme.spaceSm),
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd, vertical: 14),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceElevated,
+        color: value ? AppTheme.primary.withValues(alpha: 0.06) : AppTheme.surface,
         borderRadius: AppTheme.radiusSm,
-        border: Border.all(color: value ? AppTheme.primary.withValues(alpha: 0.4) : AppTheme.border),
+        border: Border.all(
+          color: value ? AppTheme.primary.withValues(alpha: 0.3) : AppTheme.border,
+        ),
       ),
       child: Row(
         children: [
-          Text(icon, style: const TextStyle(fontSize: 22)),
-          const SizedBox(width: 14),
+          Icon(
+            icon,
+            color: value ? AppTheme.primary : AppTheme.textMuted,
+            size: 20,
+          ),
+          const SizedBox(width: AppTheme.spaceMd),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -709,33 +964,14 @@ class _ToggleTile extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeThumbColor: AppTheme.primary,
+            activeColor: AppTheme.primary,
+            trackOutlineColor: WidgetStateProperty.resolveWith(
+              (s) => s.contains(WidgetState.selected)
+                  ? AppTheme.primary.withValues(alpha: 0.4)
+                  : AppTheme.border,
+            ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ── Progress Bar ───────────────────────────────────────────────────────────────
-
-class _ProgressBar extends StatelessWidget {
-  final int current;
-  final int total;
-  const _ProgressBar({required this.current, required this.total});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 4,
-      color: AppTheme.border,
-      child: FractionallySizedBox(
-        widthFactor: (current + 1) / total,
-        alignment: Alignment.centerLeft,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 400),
-          decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
-        ),
       ),
     );
   }
@@ -757,35 +993,119 @@ class _BottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-      decoration: const BoxDecoration(
-        color: AppTheme.surface,
-        border: Border(top: BorderSide(color: AppTheme.border)),
+      padding: EdgeInsets.fromLTRB(
+        AppTheme.spaceLg, AppTheme.spaceMd, AppTheme.spaceLg,
+        MediaQuery.paddingOf(context).bottom + AppTheme.spaceMd,
       ),
-      child: SizedBox(
-        width: double.infinity,
-        height: 56,
-        child: ElevatedButton(
-          key: const ValueKey('btn-next'),
-          onPressed: canProceed && !isGenerating ? onNext : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: canProceed ? null : AppTheme.border,
+      decoration: const BoxDecoration(
+        color: AppTheme.background,
+        border: Border(top: BorderSide(color: AppTheme.borderSubtle)),
+      ),
+      child: GestureDetector(
+        key: const ValueKey('btn-next'),
+        onTap: canProceed && !isGenerating ? onNext : null,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: double.infinity,
+          height: 56,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            gradient: canProceed ? AppTheme.primaryGradient : null,
+            color: canProceed ? null : AppTheme.surface,
+            borderRadius: AppTheme.radiusMd,
+            border: canProceed ? null : Border.all(color: AppTheme.border),
+            boxShadow: canProceed
+                ? [
+                    BoxShadow(
+                      color: AppTheme.primary.withValues(alpha: 0.2),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    )
+                  ]
+                : null,
           ),
-          child: isGenerating
-              ? const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 20, height: 20,
-                      child: CircularProgressIndicator(
-                        color: AppTheme.background, strokeWidth: 2,
-                      ),
-                    ),
-                    SizedBox(width: 12),
-                    Text('Kwan is building your path...'),
-                  ],
-                )
-              : Text(isLastStep ? '✨ Generate My Kwan' : 'Continue →'),
+          child: Text(
+            isLastStep ? '✦  Generate My Kwan' : 'Continue',
+            style: TextStyle(
+              fontFamily: 'Outfit',
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: canProceed ? AppTheme.background : AppTheme.textMuted,
+              letterSpacing: -0.2,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Generating Overlay ─────────────────────────────────────────────────────────
+
+class _GeneratingOverlay extends StatelessWidget {
+  const _GeneratingOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppTheme.background.withValues(alpha: 0.92),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                gradient: AppTheme.primaryGradient,
+                borderRadius: AppTheme.radiusMd,
+                boxShadow: AppTheme.goldGlow,
+              ),
+              child: const Center(
+                child: Text(
+                  'K',
+                  style: TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 36,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.background,
+                  ),
+                ),
+              ),
+            )
+                .animate(onPlay: (c) => c.repeat())
+                .shimmer(duration: 1200.ms, color: AppTheme.primaryLight),
+            const SizedBox(height: AppTheme.spaceXl),
+            const Text(
+              'Planning your path...',
+              style: TextStyle(
+                fontFamily: 'Outfit',
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
+                letterSpacing: -0.5,
+              ),
+            ).animate().fadeIn(duration: 400.ms),
+            const SizedBox(height: AppTheme.spaceSm),
+            const Text(
+              'Kwan AI is weaving together local knowledge,\nroutes, and experiences for you.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Outfit',
+                fontSize: 14,
+                color: AppTheme.textMuted,
+                height: 1.6,
+              ),
+            ).animate(delay: 200.ms).fadeIn(duration: 400.ms),
+            const SizedBox(height: AppTheme.spaceXl),
+            const SizedBox(
+              width: 120,
+              child: LinearProgressIndicator(
+                color: AppTheme.primary,
+                backgroundColor: AppTheme.border,
+              ),
+            ).animate(delay: 300.ms).fadeIn(duration: 400.ms),
+          ],
         ),
       ),
     );

@@ -3,181 +3,223 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
-}
-
-class _OnboardingScreenState extends State<OnboardingScreen> {
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppTheme.heroGradient),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 28.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 48),
+      backgroundColor: AppTheme.background,
+      body: SafeArea(
+        child: Column(
+          children: [
+                // ── Top nav bar ───────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppTheme.spaceLg,
+                    vertical: AppTheme.spaceMd,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const _KwanLogo()
+                          .animate()
+                          .fadeIn(duration: 500.ms),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 7),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppTheme.border),
+                          borderRadius: AppTheme.radiusXl,
+                        ),
+                        child: const Text(
+                          'v1.0',
+                          style: TextStyle(
+                            fontFamily: 'Outfit',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: AppTheme.textMuted,
+                          ),
+                        ),
+                      ).animate().fadeIn(duration: 500.ms),
+                    ],
+                  ),
+                ),
 
-                // ── Logo & Tagline ──────────────────────────────────────────
-                _KwanLogo()
-                    .animate()
-                    .fadeIn(duration: 600.ms)
-                    .slideY(begin: -0.2, end: 0),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppTheme.spaceLg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: AppTheme.spaceXl),
 
-                const SizedBox(height: 56),
+                        // ── Section badge ─────────────────────────────────
+                        AppTheme.sectionBadge('AI-Powered · Mobile Money')
+                            .animate(delay: 100.ms)
+                            .fadeIn(duration: 500.ms)
+                            .slideY(begin: 0.2, end: 0),
 
-                // ── Hero Text ───────────────────────────────────────────────
-                Text(
-                  'Your path through\nAfrica\'s real\neconomy.',
-                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                        height: 1.15,
-                        foreground: Paint()
-                          ..shader = const LinearGradient(
-                            colors: [AppTheme.textPrimary, AppTheme.primary],
+                        const SizedBox(height: AppTheme.spaceMd),
+
+                        // ── Hero headline ─────────────────────────────────
+                        ShaderMask(
+                          blendMode: BlendMode.srcIn,
+                          shaderCallback: (bounds) =>
+                              const LinearGradient(
+                            colors: [
+                              AppTheme.textPrimary,
+                              Color(0xFFD4A832),
+                            ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                          ).createShader(
-                              const Rect.fromLTWH(0, 0, 300, 120)),
-                      ),
-                )
-                    .animate(delay: 200.ms)
-                    .fadeIn(duration: 700.ms)
-                    .slideY(begin: 0.3, end: 0),
+                          ).createShader(bounds),
+                          child: Text(
+                            'Your path\nthrough Africa.',
+                            style: Theme.of(context)
+                                .textTheme
+                                .displayLarge
+                                ?.copyWith(height: 1.04),
+                          ),
+                        )
+                            .animate(delay: 200.ms)
+                            .fadeIn(duration: 600.ms)
+                            .slideY(begin: 0.15, end: 0),
 
-                const SizedBox(height: 16),
+                        const SizedBox(height: AppTheme.spaceMd),
 
-                Text(
-                  'AI-powered. Mobile Money enabled.\nBuilt for the 90% the world ignores.',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.textSecondary,
-                        height: 1.6,
-                      ),
-                )
-                    .animate(delay: 400.ms)
-                    .fadeIn(duration: 700.ms)
-                    .slideY(begin: 0.3, end: 0),
+                        // ── Sub-copy ──────────────────────────────────────
+                        Text(
+                          'Built for the 90% the world ignores.\nReal economy. Real operators. Real Africa.',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.copyWith(
+                                color: AppTheme.textSecondary,
+                                height: 1.6,
+                              ),
+                        )
+                            .animate(delay: 350.ms)
+                            .fadeIn(duration: 600.ms)
+                            .slideY(begin: 0.15, end: 0),
 
-                const Spacer(),
+                        const SizedBox(height: AppTheme.spaceXl),
 
-                // ── Feature Pills ───────────────────────────────────────────
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _FeaturePill('🚌 Trotros & Matatus'),
-                    _FeaturePill('🛒 Local Markets'),
-                    _FeaturePill('📱 Mobile Money'),
-                    _FeaturePill('💬 Dialect Translation'),
-                    _FeaturePill('🏠 Homestays'),
-                    _FeaturePill('🗺️ Community Tips'),
-                  ],
-                )
-                    .animate(delay: 600.ms)
-                    .fadeIn(duration: 700.ms),
+                        // ── Feature strip ─────────────────────────────────
+                        const _FeatureStrip()
+                            .animate(delay: 500.ms)
+                            .fadeIn(duration: 500.ms),
 
-                const SizedBox(height: 48),
+                        const Spacer(),
 
-                // ── CTA Buttons ─────────────────────────────────────────────
-                Text(
-                  'I am a...',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.textMuted,
-                        letterSpacing: 1.5,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ).animate(delay: 800.ms).fadeIn(),
+                        // ── Role buttons ──────────────────────────────────
+                        _RoleButton(
+                          id: 'btn-tourist',
+                          label: 'Traveller',
+                          subtitle: 'Explore Africa authentically',
+                          icon: Icons.explore_outlined,
+                          isPrimary: true,
+                          onTap: () => context.pushNamed('plan'),
+                        )
+                            .animate(delay: 650.ms)
+                            .fadeIn(duration: 400.ms)
+                            .slideY(begin: 0.15, end: 0),
 
-                const SizedBox(height: 16),
+                        const SizedBox(height: AppTheme.spaceSm),
 
-                _RoleButton(
-                  id: 'btn-tourist',
-                  label: 'Traveller',
-                  subtitle: 'I want to explore Africa authentically',
-                  icon: Icons.explore_outlined,
-                  onTap: () => context.pushNamed('plan'),
-                )
-                    .animate(delay: 900.ms)
-                    .fadeIn(duration: 400.ms)
-                    .slideX(begin: -0.3, end: 0),
+                        _RoleButton(
+                          id: 'btn-operator',
+                          label: 'Local Operator',
+                          subtitle: 'List your business & get bookings',
+                          icon: Icons.storefront_outlined,
+                          isPrimary: false,
+                          onTap: () =>
+                              context.pushNamed('operator-dashboard'),
+                        )
+                            .animate(delay: 750.ms)
+                            .fadeIn(duration: 400.ms)
+                            .slideY(begin: 0.15, end: 0),
 
-                const SizedBox(height: 12),
+                        const SizedBox(height: AppTheme.spaceLg),
 
-                _RoleButton(
-                  id: 'btn-operator',
-                  label: 'Local Operator',
-                  subtitle: 'I want to list my business & get bookings',
-                  icon: Icons.storefront_outlined,
-                  outlined: true,
-                  onTap: () => context.pushNamed('operator-dashboard'),
-                )
-                    .animate(delay: 1000.ms)
-                    .fadeIn(duration: 400.ms)
-                    .slideX(begin: 0.3, end: 0),
+                        // ── Legal footnote ─────────────────────────────────
+                        Center(
+                          child: Text(
+                            'By continuing, you agree to our Terms & Privacy Policy.',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: AppTheme.textMuted),
+                            textAlign: TextAlign.center,
+                          ),
+                        ).animate(delay: 850.ms).fadeIn(duration: 500.ms),
 
-                const SizedBox(height: 40),
+                        const SizedBox(height: AppTheme.spaceMd),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
         ),
-      ),
     );
   }
 }
 
-// ── Sub-widgets ────────────────────────────────────────────────────────────────
+// ── Logo ───────────────────────────────────────────────────────────────────────
 
 class _KwanLogo extends StatelessWidget {
+  const _KwanLogo();
+
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 44,
-          height: 44,
+          width: 36,
+          height: 36,
           decoration: BoxDecoration(
             gradient: AppTheme.primaryGradient,
             borderRadius: AppTheme.radiusSm,
-            boxShadow: AppTheme.goldGlow,
           ),
           child: const Center(
             child: Text(
               'K',
               style: TextStyle(
                 fontFamily: 'Outfit',
-                fontSize: 26,
+                fontSize: 20,
                 fontWeight: FontWeight.w800,
                 color: AppTheme.background,
               ),
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 10),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
               'Kwan',
               style: TextStyle(
                 fontFamily: 'Outfit',
-                fontSize: 24,
+                fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: AppTheme.textPrimary,
                 letterSpacing: -0.5,
               ),
             ),
             Text(
-              'The Path · Kwan wo ho',
+              'The Path',
               style: TextStyle(
                 fontFamily: 'Outfit',
-                fontSize: 11,
-                color: AppTheme.primary.withValues(alpha: 0.8),
+                fontSize: 10,
+                color: AppTheme.primary.withValues(alpha: 0.7),
                 letterSpacing: 0.5,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -187,38 +229,72 @@ class _KwanLogo extends StatelessWidget {
   }
 }
 
-class _FeaturePill extends StatelessWidget {
-  final String label;
-  const _FeaturePill(this.label);
+// ── Feature Strip ──────────────────────────────────────────────────────────────
+
+class _FeatureStrip extends StatelessWidget {
+  const _FeatureStrip();
+
+  static const _features = [
+    (icon: Icons.directions_bus_outlined, label: 'Trotros & Matatus'),
+    (icon: Icons.storefront_outlined, label: 'Local Markets'),
+    (icon: Icons.phone_android_outlined, label: 'Mobile Money'),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceElevated,
-        borderRadius: AppTheme.radiusSm,
+        color: AppTheme.surface,
+        borderRadius: AppTheme.radiusMd,
         border: Border.all(color: AppTheme.border),
       ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontFamily: 'Outfit',
-          fontSize: 12,
-          color: AppTheme.textSecondary,
-          fontWeight: FontWeight.w500,
-        ),
+      child: Row(
+        children: [
+          for (int i = 0; i < _features.length; i++) ...[
+            Expanded(
+              child: Column(
+                children: [
+                  Icon(
+                    _features[i].icon,
+                    color: AppTheme.primary,
+                    size: 22,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _features[i].label,
+                    style: const TextStyle(
+                      fontFamily: 'Outfit',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            if (i < _features.length - 1)
+              Container(
+                width: 1,
+                height: 36,
+                color: AppTheme.border,
+              ),
+          ],
+        ],
       ),
     );
   }
 }
 
-class _RoleButton extends StatelessWidget {
+// ── Role Button ────────────────────────────────────────────────────────────────
+
+class _RoleButton extends StatefulWidget {
   final String id;
   final String label;
   final String subtitle;
   final IconData icon;
-  final bool outlined;
+  final bool isPrimary;
   final VoidCallback onTap;
 
   const _RoleButton({
@@ -226,69 +302,110 @@ class _RoleButton extends StatelessWidget {
     required this.label,
     required this.subtitle,
     required this.icon,
+    required this.isPrimary,
     required this.onTap,
-    this.outlined = false,
   });
+
+  @override
+  State<_RoleButton> createState() => _RoleButtonState();
+}
+
+class _RoleButtonState extends State<_RoleButton> {
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        key: ValueKey(id),
-        duration: const Duration(milliseconds: 150),
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: outlined ? null : AppTheme.primaryGradient,
-          color: outlined ? Colors.transparent : null,
-          borderRadius: AppTheme.radiusMd,
-          border: outlined
-              ? Border.all(color: AppTheme.primary.withValues(alpha: 0.5), width: 1.5)
-              : null,
-          boxShadow: outlined ? null : AppTheme.goldGlow,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: outlined ? AppTheme.primary : AppTheme.background,
-              size: 28,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontFamily: 'Outfit',
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: outlined ? AppTheme.textPrimary : AppTheme.background,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontFamily: 'Outfit',
-                      fontSize: 13,
-                      color: outlined
-                          ? AppTheme.textSecondary
-                          : AppTheme.background.withValues(alpha: 0.7),
-                    ),
-                  ),
-                ],
+      key: ValueKey(widget.id),
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _pressed ? 0.975 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppTheme.spaceLg,
+            vertical: 20,
+          ),
+          decoration: widget.isPrimary
+              ? BoxDecoration(
+                  gradient: AppTheme.primaryGradient,
+                  borderRadius: AppTheme.radiusMd,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primary.withValues(alpha: 0.2),
+                      blurRadius: 20,
+                      offset: const Offset(0, 6),
+                    )
+                  ],
+                )
+              : BoxDecoration(
+                  color: AppTheme.surface,
+                  borderRadius: AppTheme.radiusMd,
+                  border: Border.all(color: AppTheme.border),
+                ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: widget.isPrimary
+                      ? AppTheme.background.withValues(alpha: 0.2)
+                      : AppTheme.surfaceElevated,
+                  borderRadius: AppTheme.radiusSm,
+                ),
+                child: Icon(
+                  widget.icon,
+                  color: widget.isPrimary
+                      ? AppTheme.background
+                      : AppTheme.primary,
+                  size: 20,
+                ),
               ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              color: outlined ? AppTheme.primary : AppTheme.background,
-              size: 16,
-            ),
-          ],
+              const SizedBox(width: AppTheme.spaceMd),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.label,
+                      style: TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: widget.isPrimary
+                            ? AppTheme.background
+                            : AppTheme.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      widget.subtitle,
+                      style: TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                        color: widget.isPrimary
+                            ? AppTheme.background.withValues(alpha: 0.65)
+                            : AppTheme.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_rounded,
+                color: widget.isPrimary
+                    ? AppTheme.background.withValues(alpha: 0.7)
+                    : AppTheme.textMuted,
+                size: 18,
+              ),
+            ],
+          ),
         ),
       ),
     );
