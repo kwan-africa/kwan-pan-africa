@@ -374,13 +374,80 @@
     .signal-guide-box { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px; margin-top: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
     .signal-item { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px; display: flex; gap: 12px; align-items: center; }
 
-    /* Dialect Soundboard */
-    .soundboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+    /* Dialect Soundboard & Native Pronunciation Studio */
+    .soundboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .dialect-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      transition: var(--ease-smooth);
+      position: relative;
+      cursor: pointer;
+    }
+    .dialect-card:hover {
+      border-color: var(--border-gold);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .dialect-card.playing {
+      border-color: var(--gold);
+      background: radial-gradient(circle at 100% 0%, rgba(245, 166, 35, 0.16) 0%, var(--bg-card) 75%);
+      box-shadow: 0 0 24px rgba(245, 166, 35, 0.22);
+    }
+    .phonetic-badge {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gold);
+      background: var(--gold-dim);
+      border: 1px dashed var(--border-gold);
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dialect-play-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-medium);
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      cursor: pointer;
+      transition: var(--ease-smooth);
+      flex-shrink: 0;
+    }
+    .dialect-card:hover .dialect-play-btn, .dialect-play-btn:hover {
+      background: var(--gold);
+      color: #0B0D13;
+      transform: scale(1.08);
+      box-shadow: 0 4px 16px rgba(245, 166, 35, 0.4);
+    }
+    .dialect-card.playing .dialect-play-btn {
+      background: var(--gold);
+      color: #0B0D13;
+      animation: pulsePlay 1s infinite alternate;
+    }
+    @keyframes pulsePlay {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 166, 35, 0.5); }
+      100% { transform: scale(1.12); box-shadow: 0 0 0 8px rgba(245, 166, 35, 0); }
+    }
     .audio-chip {
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
-      padding: 14px 18px;
+      padding: 12px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -602,6 +669,7 @@
       <nav class="nav-links" id="travelerNavLinks">
         <a href="#planner" class="nav-link active">Trip Studio</a>
         <a href="#transit" class="nav-link">Transit Guide</a>
+        <a href="#dialects" class="nav-link">Twi Dialect</a>
         <a href="#hosts" class="nav-link">Verified Hosts</a>
       </nav>
 
@@ -669,6 +737,7 @@
     <div id="mobileTravelerLinks" style="display: flex; flex-direction: column; gap: 8px;">
       <a href="#planner" class="mobile-nav-item active" onclick="toggleMobileMenu()"><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--gold);"></i> AI Trip Studio</a>
       <a href="#transit" class="mobile-nav-item" onclick="toggleMobileMenu()"><i class="fa-solid fa-van-shuttle" style="color: var(--cyan);"></i> Transit Navigator</a>
+      <a href="#dialects" class="mobile-nav-item" onclick="toggleMobileMenu()"><i class="fa-solid fa-volume-high" style="color: var(--gold);"></i> Twi Dialect Audio</a>
       <a href="#hosts" class="mobile-nav-item" onclick="toggleMobileMenu()"><i class="fa-solid fa-users" style="color: var(--green);"></i> Verified Hosts</a>
     </div>
 
@@ -891,6 +960,22 @@
             <span style="font-size: 13px; color: var(--text-secondary);">Tap to listen:</span>
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="compactPhraseChips"></div>
+        </div>
+
+        <!-- Twi Dialect Soundboard & Native Pronunciation Studio -->
+        <div class="section-wrap" id="dialects" style="margin-top: 36px;">
+          <div class="section-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <span class="badge gold" style="margin-bottom: 8px;"><i class="fa-solid fa-volume-high"></i> Twi Dialect (Ghana 🇬🇭)</span>
+              <h2 class="section-title">Twi Pronunciation Studio</h2>
+              <p class="section-desc">Authentic voice recordings from local speakers. Tap any card or speaker button to hear native Twi pronunciation.</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="badge green"><i class="fa-solid fa-microphone"></i> 3 Authentic Voice Recordings</span>
+            </div>
+          </div>
+
+          <div class="soundboard-grid" id="soundboardGrid" style="margin-top: 20px;"></div>
         </div>
 
       <!-- Verified Hosts Directory -->
@@ -1268,6 +1353,31 @@
   <script>
     const API_BASE = 'http://localhost:8080/api';
 
+    // User Audio Folder Files: Akwaaba.m4a, Te so kakra.m4a, Medaase.m4a
+    const TWI_AUDIO_WORDS = [
+      {
+        word: "Akwaaba",
+        phonetic: "Ah-kwah-bah",
+        meaning: "Welcome",
+        audio: "audio/Akwaaba.m4a",
+        context: "Warm traditional Twi greeting welcoming visitors to Ghanaian homes, markets, and shops."
+      },
+      {
+        word: "Te so kakra",
+        phonetic: "Teh soh kah-krah",
+        meaning: "Bargain / Reduce price",
+        audio: "audio/Te%20so%20kakra.m4a",
+        context: "Essential Twi phrase used when shopping and bargaining respectfully in open-air markets like Makola."
+      },
+      {
+        word: "Medaase",
+        phonetic: "Meh-dah-ah-seh",
+        meaning: "Thank you",
+        audio: "audio/Medaase.m4a",
+        context: "Heartfelt Twi expression of gratitude to hosts, artisans, and tour guides."
+      }
+    ];
+
     const LOCAL_CONTEXTS = {
       'GH': {
         flag: '🇬🇭',
@@ -1275,11 +1385,7 @@
         desc: 'Welcome to Ghana',
         transitShort: 'Trotro & MoMo',
         transitTitle: 'Transit Navigator (Accra & Coast)',
-        phrases: [
-          { word: 'Akwaaba', meaning: 'Welcome', audio: 'assets/audio/akwaaba.mp3' },
-          { word: 'Medaase', meaning: 'Thank you', audio: 'assets/audio/medaase.mp3' },
-          { word: 'Te so kakra', meaning: 'Reduce price', audio: 'assets/audio/tesokakra.mp3' }
-        ],
+        phrases: TWI_AUDIO_WORDS,
         t1: { type: 'TROTRO', fare: '₵4.50 - ₵12.00', desc: 'Fixed routes between stations.' },
         t2: { type: 'SHARED TAXI', fare: '₵10.00 - ₵25.00', desc: 'Yellow-fender 4-passenger cabs.' },
         t3: { type: 'OKADA BIKE', fare: '₵15.00 - ₵35.00', desc: 'Quickest through market corridors.' },
@@ -1287,15 +1393,11 @@
       },
       'NG': {
         flag: '🇳🇬',
-        greeting: 'Ẹ káàbọ̀!',
+        greeting: 'Ẹ kāabọ̀!',
         desc: 'Welcome to Nigeria',
         transitShort: 'Danfo & OPay',
         transitTitle: 'Transit Navigator (Lagos)',
-        phrases: [
-          { word: 'Ẹ káàbọ̀', meaning: 'Welcome', audio: 'assets/audio/ekaabo.mp3' },
-          { word: 'Ẹ ṣeun', meaning: 'Thank you', audio: 'assets/audio/eseun.mp3' },
-          { word: 'No wahala', meaning: 'No problem', audio: 'assets/audio/nowahala.mp3' }
-        ],
+        phrases: TWI_AUDIO_WORDS,
         t1: { type: 'DANFO BUS', fare: '₦300 - ₦800', desc: 'Yellow buses across Lagos.' },
         t2: { type: 'KEKE NAPEP', fare: '₦200 - ₦500', desc: '3-wheelers for neighborhood hops.' },
         t3: { type: 'OKADA BIKE', fare: '₦500 - ₦1,200', desc: 'Fastest way through go-slow traffic.' },
@@ -1307,11 +1409,7 @@
         desc: 'Welcome to Kenya',
         transitShort: 'Matatu & M-PESA',
         transitTitle: 'Transit Navigator (Nairobi)',
-        phrases: [
-          { word: 'Karibu', meaning: 'Welcome', audio: 'assets/audio/sannudazuwa.mp3' },
-          { word: 'Asante', meaning: 'Thank you', audio: 'assets/audio/nagode.mp3' },
-          { word: 'Sawa', meaning: 'All good', audio: 'assets/audio/nowahala.mp3' }
-        ],
+        phrases: TWI_AUDIO_WORDS,
         t1: { type: 'MATATU', fare: 'KSh 50 - KSh 150', desc: 'Famous graffiti sound buses.' },
         t2: { type: 'BODA BODA', fare: 'KSh 100 - KSh 250', desc: 'Motorbike taxis everywhere.' },
         t3: { type: 'TUK TUK', fare: 'KSh 100 - KSh 200', desc: 'Coastal 3-wheelers.' },
@@ -1323,17 +1421,53 @@
         desc: 'Welcome to Senegal',
         transitShort: 'Car Rapide & Wave',
         transitTitle: 'Transit Navigator (Dakar)',
-        phrases: [
-          { word: 'Dalal ak jàmm', meaning: 'Welcome', audio: 'assets/audio/akwaaba.mp3' },
-          { word: 'Jërejëf', meaning: 'Thank you', audio: 'assets/audio/medaase.mp3' },
-          { word: 'Waaw', meaning: 'Yes / Sawa', audio: 'assets/audio/etisen.mp3' }
-        ],
+        phrases: TWI_AUDIO_WORDS,
         t1: { type: 'CAR RAPIDE', fare: '150 - 400 CFA', desc: 'Painted blue-and-yellow vintage vans.' },
         t2: { type: 'CLANDO TAXI', fare: '300 - 600 CFA', desc: 'Shared neighborhood cabs.' },
         t3: { type: 'GORÉE FERRY', fare: '5,200 CFA', desc: 'Ferry to historic Gorée island.' },
         t4: { type: 'YELLOW TAXI', fare: '2,000 - 5,000 CFA', desc: 'Metered cabs across Plateau & Ngor.' }
       }
     };
+
+    function renderDialectSoundboard() {
+      const grid = document.getElementById('soundboardGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      TWI_AUDIO_WORDS.forEach((item, index) => {
+        const cardId = `soundboard-twi-card-${index}`;
+        const card = document.createElement('div');
+        card.className = 'dialect-card';
+        card.id = cardId;
+        card.onclick = () => playDialectAudio(item.audio, cardId);
+
+        card.innerHTML = `
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span class="badge gold">🇬🇭 Twi (Ghana)</span>
+              <button class="dialect-play-btn" aria-label="Play pronunciation" onclick="event.stopPropagation(); playDialectAudio('${item.audio}', '${cardId}');">
+                <i class="fa-solid fa-volume-high"></i>
+              </button>
+            </div>
+            <h3 style="font-family: var(--font-display); font-size: 26px; font-weight: 800; color: var(--text-white); margin-bottom: 6px;">
+              ${escapeHtml(item.word)}
+            </h3>
+            <div style="margin-bottom: 10px;">
+              <span class="phonetic-badge">
+                <i class="fa-solid fa-microphone"></i> ${escapeHtml(item.phonetic)}
+              </span>
+            </div>
+            <div style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
+              Meaning: <span style="color: var(--gold);">${escapeHtml(item.meaning)}</span>
+            </div>
+          </div>
+          <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.45; padding-top: 10px; border-top: 1px solid var(--border-subtle);">
+            ${escapeHtml(item.context)}
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
 
     function onCityChanged(val) {
       const parts = val.split(',');
@@ -1380,30 +1514,47 @@
       const phrases = ctx.phrases || [];
 
       phrases.forEach((item, index) => {
+        const chipId = `phrase-chip-${index}`;
         const chip = document.createElement('button');
         chip.className = 'btn btn-outline';
         chip.style.cssText = 'padding: 6px 14px; font-size: 12px; gap: 6px;';
-        chip.id = `phrase-chip-${index}`;
-        chip.onclick = () => playDialectAudio(item.audio, `phrase-chip-${index}`);
+        chip.id = chipId;
+        chip.onclick = () => playDialectAudio(item.audio, chipId);
         chip.innerHTML = `
           <i class="fa-solid fa-volume-high" style="color: var(--gold); font-size: 11px;"></i>
-          <strong>${item.word}</strong>
-          <span style="color: var(--text-muted);">(${item.meaning})</span>
+          <strong>${escapeHtml(item.word)}</strong>
+          <span style="font-family: var(--font-mono); color: var(--gold); font-size: 11px;">[${escapeHtml(item.phonetic || '')}]</span>
+          <span style="color: var(--text-muted);">(${escapeHtml(item.meaning)})</span>
         `;
         container.appendChild(chip);
       });
     }
 
-    function playDialectAudio(audioSrc, chipId) {
+    function playDialectAudio(audioSrc, elementId) {
       const player = document.getElementById('audioPlayer');
-      document.querySelectorAll('.audio-chip').forEach(c => c.classList.remove('playing'));
-      const activeChip = document.getElementById(chipId);
-      if (activeChip) activeChip.classList.add('playing');
+      if (!player) return;
+
+      document.querySelectorAll('.dialect-card, .audio-chip, #compactPhraseChips button').forEach(c => c.classList.remove('playing'));
+      const activeEl = document.getElementById(elementId);
+      if (activeEl) activeEl.classList.add('playing');
+
+      player.onerror = () => {
+        if (audioSrc.endsWith('.m4a')) {
+          player.src = audioSrc.replace('.m4a', '.mp3');
+          player.play().catch(e => console.warn('Fallback play:', e));
+        }
+      };
 
       player.src = audioSrc;
-      player.play().catch(e => console.warn(e));
+      player.play().catch(e => {
+        console.warn('Audio playback notice:', e);
+        if (audioSrc.endsWith('.m4a')) {
+          player.src = audioSrc.replace('.m4a', '.mp3');
+          player.play().catch(err => console.warn(err));
+        }
+      });
       player.onended = () => {
-        if (activeChip) activeChip.classList.remove('playing');
+        if (activeEl) activeEl.classList.remove('playing');
       };
     }
 
@@ -1755,6 +1906,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       renderCompactPhrases('GH');
+      renderDialectSoundboard();
       loadVerifiedOperators();
       applyUserSession(currentUser);
 
