@@ -1,73 +1,115 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../features/splash/splash_screen.dart';
 import '../../features/onboarding/screens/onboarding_screen.dart';
-import '../../features/tourist/screens/preference_form_screen.dart';
-import '../../features/tourist/screens/itinerary_view_screen.dart';
-import '../../features/tourist/screens/checkout_screen.dart';
-import '../../features/operator/screens/dashboard_screen.dart';
-import '../../features/operator/screens/add_listing_screen.dart';
-import '../../core/models/itinerary_model.dart';
+import '../../features/discover/screens/discover_screen.dart';
+import '../../features/operator/screens/operator_detail_screen.dart';
+import '../../features/booking/screens/booking_screen.dart';
+import '../../features/booking/screens/escrow_confirmation_screen.dart';
+import '../../features/dialect/screens/dialect_screen.dart';
+import '../../features/transit/screens/transit_screen.dart';
+import '../../features/shell/main_shell.dart';
+
+// ─── Route name constants ─────────────────────────────────────────────────────
+class AppRoutes {
+  static const splash       = '/';
+  static const onboarding   = '/onboarding';
+  static const discover     = '/discover';
+  static const operatorDetail = '/operator/:id';
+  static const booking      = '/booking';
+  static const confirmation = '/confirmation';
+  static const dialect      = '/dialect';
+  static const transit      = '/transit';
+}
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: '/onboarding',
-    debugLogDiagnostics: true,
+    initialLocation: AppRoutes.splash,
+    debugLogDiagnostics: false,
     routes: [
       GoRoute(
-        path: '/onboarding',
-        name: 'onboarding',
-        builder: (context, state) => const OnboardingScreen(),
-      ),
-
-      // ── Tourist Flow ──────────────────────────────────────────────────────
-      GoRoute(
-        path: '/plan',
-        name: 'plan',
-        builder: (context, state) => const PreferenceFormScreen(),
+        path: AppRoutes.splash,
+        builder: (_, __) => const SplashScreen(),
       ),
       GoRoute(
-        path: '/itinerary',
-        name: 'itinerary',
-        builder: (context, state) {
-          final itinerary = state.extra as ItineraryModel;
-          return ItineraryViewScreen(itinerary: itinerary);
-        },
+        path: AppRoutes.onboarding,
+        pageBuilder: (_, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const OnboardingScreen(),
+          transitionsBuilder: _slideUp,
+        ),
+      ),
+      ShellRoute(
+        builder: (_, __, child) => MainShell(child: child),
+        routes: [
+          GoRoute(
+            path: AppRoutes.discover,
+            builder: (_, __) => const DiscoverScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.dialect,
+            builder: (_, __) => const DialectScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.transit,
+            builder: (_, __) => const TransitScreen(),
+          ),
+        ],
       ),
       GoRoute(
-        path: '/checkout',
-        name: 'checkout',
-        builder: (context, state) {
-          final args = state.extra as Map<String, dynamic>;
-          return CheckoutScreen(
-            listingId: args['listingId'],
-            listingTitle: args['listingTitle'],
-            priceUsd: args['priceUsd'],
-            operatorName: args['operatorName'],
-            whatsapp: args['whatsapp'],
+        path: '/operator/:id',
+        pageBuilder: (_, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: OperatorDetailScreen(operatorId: state.pathParameters['id']!),
+          transitionsBuilder: _slideLeft,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.booking,
+        pageBuilder: (_, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: BookingScreen(
+              operatorId:   extra['operatorId']   as String,
+              experienceId: extra['experienceId'] as String,
+            ),
+            transitionsBuilder: _slideUp,
           );
         },
       ),
-
-      // ── Operator Flow ─────────────────────────────────────────────────────
       GoRoute(
-        path: '/operator',
-        name: 'operator-dashboard',
-        builder: (context, state) => const OperatorDashboardScreen(),
-      ),
-      GoRoute(
-        path: '/operator/listing/add',
-        name: 'add-listing',
-        builder: (context, state) {
-          final operatorId = state.extra as String?;
-          return AddListingScreen(operatorId: operatorId ?? '');
+        path: AppRoutes.confirmation,
+        pageBuilder: (_, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: EscrowConfirmationScreen(bookingRef: extra['ref'] as String),
+            transitionsBuilder: _slideUp,
+          );
         },
       ),
     ],
-    errorBuilder: (context, state) => Scaffold(
-      body: Center(
-        child: Text('Page not found: ${state.error}'),
-      ),
-    ),
   );
 });
+
+// ─── Transition builders ──────────────────────────────────────────────────────
+Widget _slideLeft(BuildContext ctx, Animation<double> anim,
+    Animation<double> sec, Widget child) {
+  return SlideTransition(
+    position: Tween(begin: const Offset(1, 0), end: Offset.zero)
+        .animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
+    child: child,
+  );
+}
+
+Widget _slideUp(BuildContext ctx, Animation<double> anim,
+    Animation<double> sec, Widget child) {
+  return SlideTransition(
+    position: Tween(begin: const Offset(0, 0.08), end: Offset.zero)
+        .animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
+    child: FadeTransition(opacity: anim, child: child),
+  );
+}

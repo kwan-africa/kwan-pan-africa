@@ -2,58 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>Kwan — Discover Authentic Africa | AI Travel & Host Platform</title>
-  <meta name="description" content="Kwan connects travelers to authentic West African travel: AI itineraries, real-time Trotro guides, Mobile Money escrow, and native dialect audio.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kwan — Authentic Africa, Paid Directly to Grassroots Hosts</title>
+  <meta name="description" content="Book verified grassroots guides and artisans in Accra. Pay with your international card into a secure Mobile Money escrow vault.">
   
-  <!-- Modern Google Fonts: Syne, Plus Jakarta Sans, IBM Plex Mono -->
+  <!-- Google Fonts: Syne (Display), Plus Jakarta Sans (Body), IBM Plex Mono (Data/Code) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   
   <!-- FontAwesome 6 Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
-  <!-- Paystack Inline JS -->
-  <script src="https://js.paystack.co/v1/inline.js"></script>
 
   <style>
-    /* ==========================================================================
-       TRIPPO & NAVICA-INSPIRED DESIGN SYSTEM — WORLD-CLASS AFRICAN TRAVEL TECH
-       ========================================================================== */
     :root {
-      --bg-base: #0B0D13;
-      --bg-surface: #121520;
-      --bg-card: #181C2B;
-      --bg-card-hover: #21263B;
-      --bg-elevated: #2A3047;
+      --bg-base: #0B0E14;
+      --bg-surface: #121622;
+      --bg-card: #171C2B;
+      --bg-card-hover: #1F253A;
+      --bg-elevated: #262E48;
 
       --gold: #F5A623;
+      --gold-hover: #E0961B;
       --gold-dim: rgba(245, 166, 35, 0.12);
       --gold-glow: rgba(245, 166, 35, 0.25);
+
+      --green: #10B981;
+      --green-dim: rgba(16, 185, 129, 0.12);
       
       --terracotta: #E06D3B;
-      --terracotta-dim: rgba(224, 109, 59, 0.12);
-      
-      --green: #2BB582;
-      --green-dim: rgba(43, 181, 130, 0.12);
-      
-      --cyan: #4ECDC4;
-      --cyan-dim: rgba(78, 205, 196, 0.12);
+      --cyan: #38BDF8;
 
       --text-white: #FFFFFF;
-      --text-primary: #F1F4FA;
-      --text-secondary: #9AA4BC;
-      --text-muted: #606C88;
+      --text-primary: #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
 
       --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-gold: rgba(245, 166, 35, 0.3);
       --border-medium: rgba(255, 255, 255, 0.14);
+      --border-gold: rgba(245, 166, 35, 0.35);
 
       --radius-sm: 8px;
       --radius-md: 14px;
-      --radius-lg: 22px;
-      --radius-xl: 30px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
       --radius-full: 9999px;
 
       --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -64,2177 +56,1310 @@
       --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.5);
       --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.7);
 
-      --ease-smooth: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-smooth: 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; background-color: var(--bg-base); color: var(--text-primary); font-family: var(--font-sans); }
-    
-    body {
-      min-height: 100vh;
-      line-height: 1.6;
-      overflow-x: hidden;
-      background: radial-gradient(circle at 15% 10%, rgba(245, 166, 35, 0.05) 0%, transparent 45%),
-                  radial-gradient(circle at 85% 15%, rgba(78, 205, 196, 0.04) 0%, transparent 50%),
-                  var(--bg-base);
+    html { scroll-behavior: smooth; background: var(--bg-base); color: var(--text-primary); font-family: var(--font-sans); }
+    body { min-height: 100vh; overflow-x: hidden; line-height: 1.55; }
+
+    /* Top Trust Bar */
+    .top-bar {
+      background: rgba(18, 22, 34, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 8px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
     }
-
-    ::selection { background: var(--gold); color: var(--bg-base); }
-
-    /* Badge & Button System */
-    .badge {
+    .trust-indicator {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
-      border-radius: var(--radius-full);
-      font-size: 11.5px;
+      gap: 7px;
+      color: var(--green);
       font-weight: 600;
       letter-spacing: 0.02em;
-      border: 1px solid var(--border-subtle);
-      background: var(--bg-surface);
-      color: var(--text-primary);
     }
-    .badge.gold { background: var(--gold-dim); border-color: var(--border-gold); color: var(--gold); }
-    .badge.green { background: var(--green-dim); border-color: rgba(43, 181, 130, 0.3); color: var(--green); }
-    .badge.terracotta { background: var(--terracotta-dim); border-color: rgba(224, 109, 59, 0.3); color: var(--terracotta); }
-    .badge.cyan { background: var(--cyan-dim); border-color: rgba(78, 205, 196, 0.3); color: var(--cyan); }
+    .trust-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulseDot 2s infinite;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+    .pilot-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gold);
+      background: var(--gold-dim);
+      padding: 3px 9px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-gold);
+    }
 
-    .btn {
-      display: inline-flex;
+    /* Main Navigation Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11, 14, 20, 0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 14px 24px;
+    }
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 22px;
-      border-radius: var(--radius-full);
-      font-size: 13.5px;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid transparent;
-      text-decoration: none;
-      transition: var(--ease-smooth);
-      outline: none;
     }
-    .btn-gold { background: var(--gold); color: #0B0D13; box-shadow: 0 4px 18px rgba(245, 166, 35, 0.25); }
-    .btn-gold:hover { background: #ffb644; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(245, 166, 35, 0.38); }
-    .btn-outline { background: var(--bg-surface); border-color: var(--border-medium); color: var(--text-primary); }
-    .btn-outline:hover { background: var(--bg-card); border-color: rgba(255, 255, 255, 0.25); color: var(--text-white); }
-    .btn-icon-circle { width: 26px; height: 26px; border-radius: 50%; background: rgba(0, 0, 0, 0.16); display: flex; align-items: center; justify-content: center; font-size: 11px; }
-
-    /* App Role Switcher Capsule */
-    .role-switcher-capsule {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-medium);
-      border-radius: var(--radius-full);
-      padding: 3px;
+    .brand {
       display: flex;
       align-items: center;
-      gap: 2px;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-white);
     }
-    .role-pill-btn {
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--terracotta) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 20px;
+      color: #0B0E14;
+      box-shadow: 0 4px 14px var(--gold-glow);
+    }
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+    .brand-title span { color: var(--gold); }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .view-toggle {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      padding: 4px;
+      display: flex;
+      gap: 4px;
+    }
+    .view-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
       padding: 6px 14px;
       border-radius: var(--radius-full);
       font-size: 12px;
       font-weight: 600;
-      color: var(--text-secondary);
-      background: transparent;
-      border: none;
       cursor: pointer;
-      transition: var(--ease-smooth);
       display: flex;
       align-items: center;
       gap: 6px;
+      transition: var(--ease-smooth);
     }
-    .role-pill-btn:hover { color: var(--text-white); }
-    .role-pill-btn.active {
-      color: #0B0D13;
+    .view-btn.active {
       background: var(--gold);
+      color: #0B0E14;
       font-weight: 700;
     }
-
-    /* Top Live Currency & Status Ticker */
-    .top-ticker {
+    .currency-pill {
       background: var(--bg-surface);
-      border-bottom: 1px solid var(--border-subtle);
-      padding: 6px 4%;
-      font-size: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-family: var(--font-mono);
-      color: var(--text-secondary);
-    }
-    .ticker-rates { display: flex; gap: 16px; }
-    .ticker-rate-val { color: var(--gold); font-weight: 600; }
-
-    /* Floating Navigation Bar (Trippo Style) */
-    header { position: sticky; top: 14px; z-index: 1000; margin: 0 auto; max-width: 1280px; padding: 0 16px; }
-    .navbar {
-      background: rgba(18, 21, 32, 0.88);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--border-medium);
-      border-radius: var(--radius-full);
-      padding: 10px 22px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: var(--shadow-md);
-    }
-    .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .brand-mark { width: 32px; height: 32px; border-radius: 9px; background: linear-gradient(135deg, var(--gold), var(--terracotta)); display: flex; align-items: center; justify-content: center; color: #0B0D13; font-weight: 800; font-family: var(--font-display); font-size: 18px; }
-    .brand-text { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--text-white); letter-spacing: -0.02em; }
-    .nav-links { display: flex; align-items: center; gap: 4px; }
-    .nav-link { color: var(--text-secondary); text-decoration: none; padding: 7px 15px; border-radius: var(--radius-full); font-size: 13px; font-weight: 500; transition: var(--ease-smooth); }
-    .nav-link:hover { color: var(--text-white); background: rgba(255, 255, 255, 0.06); }
-    .nav-link.active { color: var(--gold); background: var(--gold-dim); font-weight: 600; }
-    .nav-actions { display: flex; align-items: center; gap: 10px; }
-    .currency-select { background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-primary); padding: 6px 12px; border-radius: var(--radius-full); font-family: var(--font-mono); font-size: 12px; font-weight: 600; cursor: pointer; outline: none; }
-
-    .user-auth-badge {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 6px 14px;
-      background: var(--bg-card);
       border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-full);
-      cursor: pointer;
-      transition: var(--ease-smooth);
-    }
-    .user-auth-badge:hover { border-color: var(--border-gold); }
-    .user-avatar { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--cyan)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #0B0D13; }
-
-    /* Profile Dropdown Menu */
-    .profile-dropdown-menu {
-      position: absolute;
-      top: calc(100% + 10px);
-      right: 0;
-      background: var(--bg-card);
-      border: 1px solid var(--border-gold);
-      border-radius: var(--radius-md);
-      min-width: 230px;
-      box-shadow: var(--shadow-lg);
-      display: none;
-      z-index: 1500;
-      animation: modalFadeIn 0.15s ease;
-    }
-    .profile-dropdown-menu.open { display: block; }
-    .dropdown-item {
-      width: 100%;
-      background: transparent;
-      border: none;
-      padding: 9px 14px;
-      border-radius: var(--radius-sm);
       color: var(--text-primary);
-      font-size: 12.5px;
-      font-weight: 500;
-      text-align: left;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-family: var(--font-mono);
+      font-weight: 600;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      transition: var(--ease-smooth);
+      outline: none;
     }
-    .dropdown-item:hover { background: var(--bg-surface); color: var(--gold); }
-    .dropdown-item.text-danger { color: #FF6B6B; }
-    .dropdown-item.text-danger:hover { background: rgba(255, 107, 107, 0.12); color: #FF8787; }
 
-    /* App Views (Traveler vs Host) */
-    .app-view { display: block; }
-    .app-view.hidden { display: none; }
-
-    /* ==========================================================================
-       TRAVELER APP (TRIPPO + NAVICA AI ITINERARY STUDIO)
-       ========================================================================== */
-    .hero-container { max-width: 1280px; margin: 28px auto 0; padding: 0 16px; }
-    .hero-card {
-      position: relative;
-      background: linear-gradient(180deg, rgba(24, 28, 43, 0.9) 0%, rgba(18, 21, 32, 0.98) 100%);
-      border: 1px solid var(--border-medium);
-      border-radius: var(--radius-xl);
-      padding: 56px 48px 44px;
-      overflow: hidden;
-      box-shadow: var(--shadow-lg);
+    /* Hero Section */
+    .hero {
+      max-width: 1200px;
+      margin: 36px auto 0;
+      padding: 0 20px;
+      text-align: center;
     }
-    .hero-image-bg {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 55%;
-      height: 100%;
-      background: url('assets/images/hero_accra.jpg') center/cover no-repeat;
-      opacity: 0.22;
-      mask-image: linear-gradient(to left, rgba(0,0,0,1) 0%, transparent 100%);
-      -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 0%, transparent 100%);
-      pointer-events: none;
-    }
-    .hero-content { position: relative; z-index: 2; max-width: 820px; }
-    .hero-title {
-      font-family: var(--font-display);
-      font-size: clamp(38px, 6vw, 64px);
-      font-weight: 800;
-      letter-spacing: -0.04em;
-      line-height: 1.05;
-      color: var(--text-white);
-      text-transform: uppercase;
-    }
-    .hero-title .gold-text {
-      background: linear-gradient(135deg, var(--gold) 0%, #FFD68A 50%, var(--terracotta) 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .hero-subtitle { font-size: 16px; color: var(--text-secondary); margin-top: 14px; max-width: 640px; }
-
-    /* Dynamic Welcome Bar */
-    .local-welcome-bar {
+    .hero-badge {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       background: var(--gold-dim);
-      border: 1px dashed var(--border-gold);
+      border: 1px solid var(--border-gold);
       border-radius: var(--radius-full);
-      padding: 6px 16px;
-      margin-top: 20px;
-      font-size: 13px;
+      padding: 5px 16px;
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
     }
-    .local-greeting { color: var(--gold); font-weight: 700; }
+    .hero-headline {
+      font-family: var(--font-display);
+      font-size: clamp(34px, 5.5vw, 56px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+      color: var(--text-white);
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .hero-headline .highlight {
+      background: linear-gradient(135deg, var(--gold) 0%, #FFD68A 50%, var(--terracotta) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-subtext {
+      font-size: clamp(15px, 2vw, 17px);
+      color: var(--text-secondary);
+      max-width: 660px;
+      margin: 16px auto 0;
+      line-height: 1.6;
+    }
 
-    /* Search Widget (Trippo Style) */
-    .search-widget {
-      position: relative;
-      z-index: 2;
-      background: var(--bg-card);
+    /* Visual Escrow Pipeline (Zero Jargon, 100% Visual Clarity) */
+    .escrow-pipeline {
+      max-width: 840px;
+      margin: 36px auto 0;
+      background: var(--bg-surface);
       border: 1px solid var(--border-medium);
-      border-radius: var(--radius-lg);
-      padding: 18px 24px;
-      margin-top: 28px;
+      border-radius: var(--radius-xl);
+      padding: 22px 28px;
+      display: grid;
+      grid-template-columns: 1fr auto 1.3fr auto 1fr;
+      align-items: center;
+      gap: 14px;
       box-shadow: var(--shadow-md);
     }
-    .search-grid { display: grid; grid-template-columns: 1.8fr 1.1fr 1.1fr 1.1fr 1.2fr auto; gap: 12px; align-items: end; }
-    .field-group { display: flex; flex-direction: column; gap: 5px; }
-    .field-label { font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.05em; font-family: var(--font-mono); display: flex; align-items: center; gap: 5px; }
-    .field-input, .field-select { background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-primary); padding: 9px 12px; border-radius: var(--radius-sm); font-size: 13px; font-family: var(--font-sans); outline: none; width: 100%; transition: var(--ease-smooth); }
-    .field-input:focus, .field-select:focus { border-color: var(--gold); }
+    .pipeline-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 6px;
+    }
+    .step-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .step-icon.card { background: rgba(56, 189, 248, 0.15); color: var(--cyan); }
+    .step-icon.vault { background: var(--gold-dim); color: var(--gold); border: 1px solid var(--border-gold); }
+    .step-icon.momo { background: var(--green-dim); color: var(--green); }
 
-    /* Navica-Inspired AI Itinerary Studio */
-    .section-wrap { max-width: 1280px; margin: 72px auto 0; padding: 0 16px; }
-    .section-header { display: flex; flex-direction: column; gap: 8px; margin-bottom: 28px; }
-    .section-title { font-family: var(--font-display); font-size: clamp(26px, 3.5vw, 36px); font-weight: 800; letter-spacing: -0.03em; color: var(--text-white); }
-    .section-desc { font-size: 14.5px; color: var(--text-secondary); }
+    .step-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+    .step-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .pipeline-arrow {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
 
-    .itinerary-studio-card {
+    /* Section Layout */
+    .section-wrap {
+      max-width: 1200px;
+      margin: 56px auto 0;
+      padding: 0 20px;
+    }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-white);
+      letter-spacing: -0.02em;
+    }
+    .section-desc {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* Experience Cards Grid */
+    .experience-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 20px;
+    }
+    .exp-card {
       background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: var(--ease-smooth);
+      position: relative;
+    }
+    .exp-card:hover {
+      border-color: var(--border-gold);
+      background: var(--bg-card-hover);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+    .exp-image-wrap {
+      position: relative;
+      height: 180px;
+      background: #1C2235;
+      overflow: hidden;
+    }
+    .exp-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    .exp-card:hover .exp-image { transform: scale(1.05); }
+    .exp-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(11, 14, 20, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: var(--green);
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .exp-duration {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(11, 14, 20, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-family: var(--font-mono);
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+    }
+
+    .exp-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+    .host-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .host-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--gold);
+    }
+    .host-name {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .host-rating {
+      margin-left: auto;
+      font-size: 11.5px;
+      color: var(--gold);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .exp-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-white);
+      line-height: 1.35;
+    }
+    .exp-summary {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .exp-payout-info {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .exp-payout-info span { color: var(--green); font-weight: 600; }
+
+    .exp-footer {
+      padding: 14px 20px 20px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .exp-price-block {
+      display: flex;
+      flex-direction: column;
+    }
+    .price-main {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+    .price-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .btn-book {
+      background: var(--gold);
+      color: #0B0E14;
+      border: none;
+      padding: 9px 18px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--ease-smooth);
+    }
+    .btn-book:hover {
+      background: var(--gold-hover);
+      transform: scale(1.03);
+      box-shadow: 0 4px 14px var(--gold-glow);
+    }
+
+    /* Live Host Payout View (Toggleable) */
+    .host-dashboard-view {
+      display: none;
+      background: var(--bg-surface);
       border: 1px solid var(--border-medium);
       border-radius: var(--radius-xl);
       padding: 32px;
-      box-shadow: var(--shadow-lg);
+      margin-top: 24px;
     }
-    .day-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; }
-    .day-tab { background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-secondary); padding: 8px 18px; border-radius: var(--radius-full); font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: var(--ease-smooth); }
-    .day-tab.active { background: var(--gold); color: #0B0D13; border-color: var(--gold); }
+    .host-dashboard-view.active { display: block; }
 
-    .navica-activity-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: 20px 24px;
+    .wallet-banner {
       display: grid;
-      grid-template-columns: 85px 1fr auto;
-      gap: 20px;
-      align-items: center;
-      margin-top: 14px;
-      transition: var(--ease-smooth);
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
     }
-    .navica-activity-card:hover { border-color: var(--border-gold); background: var(--bg-card-hover); transform: translateY(-2px); }
-    .activity-time-chip { font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; color: var(--gold); background: var(--gold-dim); padding: 6px 10px; border-radius: 8px; text-align: center; }
-
-    /* 3 Essentials Bento */
-    .essentials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-    .essential-card {
+    .wallet-card {
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: 28px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 18px;
-      transition: var(--ease-smooth);
-    }
-    .essential-card:hover { border-color: var(--border-gold); background: var(--bg-card-hover); transform: translateY(-2px); }
-    .essential-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-
-    /* Transit Grid */
-    .transit-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-    .transit-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; gap: 8px; transition: var(--ease-smooth); }
-    .transit-card:hover { border-color: var(--border-gold); }
-    .transit-fare { font-family: var(--font-mono); font-size: 19px; font-weight: 700; color: var(--text-white); }
-    .signal-guide-box { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px; margin-top: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-    .signal-item { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px; display: flex; gap: 12px; align-items: center; }
-
-    /* Dialect Soundboard & Native Pronunciation Studio */
-    .soundboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-    .dialect-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
+      border-radius: var(--radius-md);
       padding: 20px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 14px;
-      transition: var(--ease-smooth);
-      position: relative;
-      cursor: pointer;
     }
-    .dialect-card:hover {
-      border-color: var(--border-gold);
-      background: var(--bg-card-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    }
-    .dialect-card.playing {
-      border-color: var(--gold);
-      background: radial-gradient(circle at 100% 0%, rgba(245, 166, 35, 0.16) 0%, var(--bg-card) 75%);
-      box-shadow: 0 0 24px rgba(245, 166, 35, 0.22);
-    }
-    .phonetic-badge {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--gold);
-      background: var(--gold-dim);
+    .wallet-label { font-size: 11px; font-family: var(--font-mono); color: var(--text-muted); text-transform: uppercase; }
+    .wallet-value { font-size: 26px; font-family: var(--font-mono); font-weight: 700; color: var(--text-white); margin-top: 4px; }
+    .wallet-value.green { color: var(--green); }
+    .wallet-sub { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
+
+    .pin-release-terminal {
+      background: var(--bg-card);
       border: 1px dashed var(--border-gold);
-      padding: 4px 10px;
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      max-width: 580px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .terminal-title { font-size: 17px; font-weight: 800; color: var(--text-white); }
+    .terminal-sub { font-size: 12.5px; color: var(--text-secondary); margin-top: 6px; }
+    .pin-input-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .pin-box {
+      width: 50px;
+      height: 56px;
+      background: var(--bg-surface);
+      border: 2px solid var(--border-medium);
+      border-radius: var(--radius-md);
+      font-size: 24px;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      color: var(--gold);
+      text-align: center;
+      outline: none;
+    }
+    .pin-box:focus { border-color: var(--gold); }
+    .btn-redeem {
+      background: var(--green);
+      color: #0B0E14;
+      border: none;
+      padding: 12px 28px;
       border-radius: var(--radius-full);
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-    }
-    .dialect-play-btn {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-medium);
-      color: var(--gold);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      cursor: pointer;
-      transition: var(--ease-smooth);
-      flex-shrink: 0;
-    }
-    .dialect-card:hover .dialect-play-btn, .dialect-play-btn:hover {
-      background: var(--gold);
-      color: #0B0D13;
-      transform: scale(1.08);
-      box-shadow: 0 4px 16px rgba(245, 166, 35, 0.4);
-    }
-    .dialect-card.playing .dialect-play-btn {
-      background: var(--gold);
-      color: #0B0D13;
-      animation: pulsePlay 1s infinite alternate;
-    }
-    @keyframes pulsePlay {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 166, 35, 0.5); }
-      100% { transform: scale(1.12); box-shadow: 0 0 0 8px rgba(245, 166, 35, 0); }
-    }
-    .audio-chip {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
+      gap: 8px;
       transition: var(--ease-smooth);
     }
-    .audio-chip:hover { border-color: var(--gold); background: var(--bg-card-hover); transform: translateY(-1px); }
-    .audio-chip.playing { border-color: var(--gold); background: var(--gold-dim); }
+    .btn-redeem:hover { transform: scale(1.03); box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4); }
 
-    /* Operators Cards */
-    .operators-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 18px; }
-    .operator-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 24px; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; transition: var(--ease-smooth); }
-    .operator-card:hover { border-color: var(--border-gold); transform: translateY(-2px); }
-
-    /* ==========================================================================
-       DEDICATED HOST OPERATING SYSTEM (NAVICA DASHBOARD FOR HOSTS)
-       ========================================================================== */
-    .host-dashboard-container { max-width: 1280px; margin: 32px auto 60px; padding: 0 16px; }
-    
-    .host-header-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-medium);
-      border-radius: var(--radius-xl);
-      padding: 32px 36px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 20px;
-      box-shadow: var(--shadow-md);
-    }
-    .host-avatar-lg { width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, var(--gold), var(--terracotta)); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 24px; font-weight: 800; color: #0B0D13; }
-
-    /* Host KPI Metrics Grid */
-    .kpi-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px; }
-    .kpi-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      transition: var(--ease-smooth);
-    }
-    .kpi-card:hover { border-color: var(--border-gold); background: var(--bg-card-hover); }
-    .kpi-val { font-family: var(--font-display); font-size: 28px; font-weight: 800; color: var(--text-white); }
-    .kpi-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
-
-    /* Host Management 2-Col Layout */
-    .host-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
-    .host-panel { background: var(--bg-card); border: 1px solid var(--border-medium); border-radius: var(--radius-lg); padding: 28px; }
-
-    /* Ledger Table */
-    .ledger-table { width: 100%; border-collapse: collapse; margin-top: 14px; }
-    .ledger-table th { text-align: left; padding: 10px 12px; font-size: 11px; font-family: var(--font-mono); color: var(--gold); text-transform: uppercase; border-bottom: 1px solid var(--border-subtle); }
-    .ledger-table td { padding: 12px; font-size: 13px; color: var(--text-primary); border-bottom: 1px solid var(--border-subtle); }
-
-    /* Modals (Auth, Booking, Create Listing) */
-    .modal-backdrop { position: fixed; inset: 0; background: rgba(11, 13, 19, 0.88); backdrop-filter: blur(14px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
-    .modal-backdrop.open { display: flex; animation: modalFadeIn 0.2s ease; }
-    @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
-    .modal-panel { background: var(--bg-card); border: 1px solid var(--border-gold); border-radius: var(--radius-xl); padding: 36px; width: 100%; max-width: 480px; box-shadow: var(--shadow-lg); }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border-subtle); }
-    .modal-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--text-white); }
-    .modal-close { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; }
-
-    /* Auth Buttons */
-    .auth-btn-social {
-      width: 100%;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-      padding: 11px;
-      border-radius: var(--radius-md);
-      font-size: 13px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      cursor: pointer;
-      transition: var(--ease-smooth);
-    }
-    .auth-btn-social:hover { background: var(--bg-card-hover); border-color: rgba(255, 255, 255, 0.2); }
-
-    /* Footer */
-    footer { max-width: 1280px; margin: 80px auto 30px; padding: 0 16px; }
-    .footer-box { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 36px 44px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
-    .footer-bottom { margin-top: 20px; padding: 0 44px; display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); }
-
-    /* Skeleton Shimmer Animations */
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-    .skeleton-shimmer {
-      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.09) 50%, rgba(255,255,255,0.03) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: var(--radius-sm);
-    }
-    .skeleton-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    /* Mobile Hamburger & Off-Canvas Drawer */
-    .mobile-menu-btn {
-      display: none;
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-      width: 36px;
-      height: 36px;
-      border-radius: var(--radius-full);
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      cursor: pointer;
-      transition: var(--ease-smooth);
-    }
-    .mobile-menu-btn:hover { border-color: var(--gold); color: var(--gold); }
-
-    .mobile-nav-drawer {
+    /* Modal Architecture (Booking & Escrow Release) */
+    .modal-backdrop {
       position: fixed;
-      top: 66px;
-      left: 12px;
-      right: 12px;
-      background: rgba(18, 21, 32, 0.98);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid var(--border-gold);
-      border-radius: var(--radius-xl);
-      padding: 20px;
-      box-shadow: var(--shadow-lg);
-      z-index: 1500;
-      display: none;
-      flex-direction: column;
-      gap: 10px;
-      animation: modalFadeIn 0.2s ease;
-    }
-    .mobile-nav-drawer.open { display: flex; }
-    .mobile-nav-item {
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(11, 14, 20, 0.85);
+      backdrop-filter: blur(14px);
       display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      padding: 16px;
+    }
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal-window {
+      background: var(--bg-card);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-xl);
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      animation: modalPop 0.22s var(--ease-smooth);
+    }
+    @keyframes modalPop {
+      0% { transform: scale(0.95); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .modal-head {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-title { font-size: 16px; font-weight: 800; color: var(--text-white); }
+    .modal-close {
+      background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;
+    }
+    .modal-close:hover { color: var(--text-white); }
+    .modal-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 11px; font-family: var(--font-mono); font-weight: 700; color: var(--gold); text-transform: uppercase; }
+    .form-input, .form-select {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: var(--text-primary);
+      font-size: 13px;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--gold); }
+
+    .escrow-breakdown {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 12.5px;
+    }
+    .breakdown-row { display: flex; justify-content: space-between; }
+    .breakdown-row.total {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 8px;
+      margin-top: 2px;
+      font-weight: 700;
+      color: var(--text-white);
+      font-size: 14px;
+    }
+    .breakdown-row.total .gold { color: var(--gold); font-family: var(--font-mono); }
+
+    .btn-pay {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--terracotta) 100%);
+      color: #0B0E14;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 13px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--ease-smooth);
+    }
+    .btn-pay:hover { opacity: 0.95; transform: translateY(-1px); }
+
+    /* Success / Escrow Vault State */
+    .success-state {
+      text-align: center;
+      padding: 10px 0;
+      display: flex;
+      flex-direction: column;
       align-items: center;
       gap: 12px;
-      padding: 12px 16px;
-      border-radius: var(--radius-md);
-      color: var(--text-primary);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 13.5px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      transition: var(--ease-smooth);
     }
-    .mobile-nav-item:hover, .mobile-nav-item.active {
-      background: var(--gold-dim);
-      border-color: var(--border-gold);
+    .success-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: var(--green-dim);
+      color: var(--green);
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pin-display-card {
+      background: var(--bg-surface);
+      border: 1px dashed var(--border-gold);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      width: 100%;
+      margin: 8px 0;
+    }
+    .pin-digits {
+      font-family: var(--font-mono);
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: 0.15em;
       color: var(--gold);
+      margin-top: 4px;
+    }
+    .sms-simulation-box {
+      background: #0F131C;
+      border: 1px solid var(--border-subtle);
+      border-left: 3px solid var(--gold);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      width: 100%;
     }
 
-    /* Escrow Receipt Modal Elements */
-    .receipt-box {
+    /* 3 Value Pillars (Visual & Sleek) */
+    .value-pillars {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin: 48px auto 0;
+      max-width: 1200px;
+      padding: 0 20px;
+    }
+    .pillar-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
-      padding: 20px;
+      padding: 22px;
       display: flex;
-      flex-direction: column;
-      gap: 10px;
+      align-items: flex-start;
+      gap: 16px;
     }
-    .receipt-row {
+    .pillar-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+    .pillar-title { font-size: 14px; font-weight: 700; color: var(--text-white); }
+    .pillar-desc { font-size: 12px; color: var(--text-secondary); margin-top: 3px; line-height: 1.5; }
+
+    /* Footer */
+    footer {
+      max-width: 1200px;
+      margin: 64px auto 32px;
+      padding: 24px 20px 0;
+      border-top: 1px solid var(--border-subtle);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 13px;
+      font-size: 12px;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
-    @media (max-width: 1024px) { .search-grid, .essentials-grid, .transit-grid, .kpi-grid-4, .host-grid-2 { grid-template-columns: 1fr 1fr; } .signal-guide-box { grid-template-columns: 1fr; } }
     @media (max-width: 768px) {
-      .search-grid, .essentials-grid, .transit-grid, .kpi-grid-4, .host-grid-2 { grid-template-columns: 1fr; }
-      .nav-links { display: none !important; }
-      .mobile-menu-btn { display: flex; }
-      .hero-card { padding: 36px 20px; }
-      .hero-image-bg { display: none; }
-      .navica-activity-card { grid-template-columns: 1fr; }
+      .escrow-pipeline { grid-template-columns: 1fr; gap: 16px; }
+      .pipeline-arrow { transform: rotate(90deg); margin: 0 auto; }
+      .header-actions { gap: 8px; }
+      .top-bar { flex-direction: column; gap: 4px; text-align: center; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Rates & Protection Bar -->
-  <div class="top-ticker">
-    <div class="ticker-rates">
-      <span>USD/GHS: <span class="ticker-rate-val">15.60</span></span>
-      <span>USD/NGN: <span class="ticker-rate-val">1,580</span></span>
-      <span>USD/KES: <span class="ticker-rate-val">129.50</span></span>
-      <span>USD/XOF: <span class="ticker-rate-val">605.00</span></span>
+  <!-- Top Trust & Status Bar -->
+  <div class="top-bar">
+    <div class="trust-indicator">
+      <span class="trust-dot"></span>
+      <span>Live Escrow Vault Active · MTN Mobile Money & Telecel Cash Connected</span>
     </div>
-    <span class="badge gold"><i class="fa-solid fa-shield-halved"></i> Mobile Money Escrow Protected</span>
+    <div class="pilot-tag">
+      <i class="fa-solid fa-location-crosshairs"></i> ACCRA PILOT BEACHHEAD
+    </div>
   </div>
 
-  <!-- Floating Navigation Bar -->
+  <!-- Navigation Header -->
   <header>
-    <div class="navbar">
-      <a href="#" class="nav-brand" onclick="navigateHome()">
+    <div class="nav-container">
+      <a href="#" class="brand" onclick="switchView('explorer')">
         <div class="brand-mark">K</div>
-        <span class="brand-text" id="navBrandText">Kwan</span>
+        <div class="brand-title">Kwan<span>.</span></div>
       </a>
 
-      <!-- Traveler Nav Links -->
-      <nav class="nav-links" id="travelerNavLinks">
-        <a href="#planner" class="nav-link active">Trip Studio</a>
-        <a href="#transit" class="nav-link">Transit Guide</a>
-        <a href="#dialects" class="nav-link">Twi Dialect</a>
-        <a href="#hosts" class="nav-link">Verified Hosts</a>
-      </nav>
-
-      <!-- Host Nav Links (Only visible when Host is logged in) -->
-      <nav class="nav-links" id="hostNavLinks" style="display: none;">
-        <a href="#viewHost" class="nav-link active">Overview</a>
-        <a href="#hostListingsContainer" class="nav-link">My Listings</a>
-        <a href="#hostWalletSection" class="nav-link">MoMo Wallet</a>
-        <a href="#hostEscrowSection" class="nav-link">Escrow Vault</a>
-      </nav>
-
-      <div class="nav-actions">
-        <select class="currency-select" id="globalCurrencySelect" onchange="updateCurrency(this.value)">
+      <div class="header-actions">
+        <!-- Currency Selector -->
+        <select class="currency-pill" id="currencySelector" onchange="changeCurrency(this.value)">
           <option value="USD">USD ($)</option>
-          <option value="GHS">GHS (₵)</option>
-          <option value="NGN">NGN (₦)</option>
-          <option value="KES">KES (KSh)</option>
-          <option value="XOF">XOF (CFA)</option>
+          <option value="GHS" selected>GHS (₵)</option>
         </select>
 
-        <!-- Auth Profile Badge with Dropdown -->
-        <div style="position: relative;">
-          <div class="user-auth-badge" id="navAuthBadge" onclick="toggleProfileDropdown()">
-            <div class="user-avatar" id="navUserAvatar">A</div>
-            <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.15;">
-              <span style="font-size: 12.5px; font-weight: 700; color: var(--text-white);" id="navUserName">Alex Rivera</span>
-              <span style="font-size: 10px; color: var(--gold); font-family: var(--font-mono);" id="navUserRole">EXPLORER</span>
-            </div>
-            <i class="fa-solid fa-chevron-down" style="font-size: 10px; color: var(--text-muted); margin-left: 2px;"></i>
-          </div>
-
-          <!-- Profile Dropdown Menu -->
-          <div class="profile-dropdown-menu" id="profileDropdownMenu">
-            <div style="padding: 10px 14px; border-bottom: 1px solid var(--border-subtle);">
-              <div style="font-size: 12.5px; font-weight: 700; color: var(--text-white);" id="dropdownFullName">Alex Rivera</div>
-              <div style="font-size: 11px; color: var(--text-muted);" id="dropdownEmail">alex.rivera@gmail.com</div>
-            </div>
-            <div style="padding: 6px;">
-              <button class="dropdown-item" id="dropdownSwitchRoleBtn" onclick="toggleAccountRole()">
-                <i class="fa-solid fa-repeat" style="color: var(--gold);"></i> <span id="dropdownSwitchRoleLabel">Switch to Host View</span>
-              </button>
-              <button class="dropdown-item" onclick="openAuthModal()">
-                <i class="fa-solid fa-user-plus"></i> Switch Account / Sign In
-              </button>
-              <button class="dropdown-item text-danger" onclick="signOut()">
-                <i class="fa-solid fa-right-from-bracket"></i> Sign Out
-              </button>
-            </div>
-          </div>
-        <!-- Mobile Hamburger Button -->
-        <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-label="Toggle navigation menu">
-          <i class="fa-solid fa-bars"></i>
-        </button>
+        <!-- View Switcher: Tourist vs Host -->
+        <div class="view-toggle">
+          <button class="view-btn active" id="btnExplorerView" onclick="switchView('explorer')">
+            <i class="fa-solid fa-compass"></i> Explorer
+          </button>
+          <button class="view-btn" id="btnHostView" onclick="switchView('host')">
+            <i class="fa-solid fa-wallet"></i> Host Terminal
+          </button>
+        </div>
       </div>
     </div>
   </header>
 
-  <!-- Mobile Off-Canvas Nav Drawer -->
-  <div class="mobile-nav-drawer" id="mobileNavDrawer">
-    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle);">
-      <span style="font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--gold);" id="mobileNavTitle">Navigation</span>
-      <button onclick="toggleMobileMenu()" style="background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer;">&times;</button>
-    </div>
-    
-    <div id="mobileTravelerLinks" style="display: flex; flex-direction: column; gap: 8px;">
-      <a href="#planner" class="mobile-nav-item active" onclick="toggleMobileMenu()"><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--gold);"></i> AI Trip Studio</a>
-      <a href="#transit" class="mobile-nav-item" onclick="toggleMobileMenu()"><i class="fa-solid fa-van-shuttle" style="color: var(--cyan);"></i> Transit Navigator</a>
-      <a href="#dialects" class="mobile-nav-item" onclick="toggleMobileMenu()"><i class="fa-solid fa-volume-high" style="color: var(--gold);"></i> Twi Dialect Audio</a>
-      <a href="#hosts" class="mobile-nav-item" onclick="toggleMobileMenu()"><i class="fa-solid fa-users" style="color: var(--green);"></i> Verified Hosts</a>
-    </div>
-
-    <div id="mobileHostLinks" style="display: none; flex-direction: column; gap: 8px;">
-      <a href="#viewHost" class="mobile-nav-item active" onclick="toggleMobileMenu()"><i class="fa-solid fa-gauge" style="color: var(--gold);"></i> Host Overview</a>
-      <a href="#hostListingsContainer" class="mobile-nav-item" onclick="toggleMobileMenu()"><i class="fa-solid fa-list-check" style="color: var(--cyan);"></i> My Listings</a>
-      <a href="#hostWalletSection" class="mobile-nav-item" onclick="toggleMobileMenu()"><i class="fa-solid fa-wallet" style="color: var(--green);"></i> MoMo Wallet</a>
-    </div>
-
-    <div style="margin-top: 6px; padding-top: 10px; border-top: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 8px;">
-      <button class="mobile-nav-item" style="border: 1px dashed var(--border-gold); background: var(--gold-dim); cursor: pointer;" onclick="toggleAccountRole(); toggleMobileMenu();">
-        <i class="fa-solid fa-repeat" style="color: var(--gold);"></i> <span id="mobileSwitchRoleLabel">Switch to Host View</span>
-      </button>
-      <button class="mobile-nav-item" style="cursor: pointer;" onclick="openAuthModal(); toggleMobileMenu();">
-        <i class="fa-solid fa-user-circle"></i> Switch Account
-      </button>
-    </div>
-  </div>
-
-  <!-- ==========================================================================
-       VIEW 1: TRAVELER & EXPLORER APP (TRIPPO + NAVICA AI STUDIO)
-       ========================================================================== -->
-  <div class="app-view" id="viewTraveler">
+  <!-- =========================================================================
+       VIEW 1: EXPLORER / TOURIST MVP EXPERIENCE
+       ========================================================================= -->
+  <main id="explorerView">
     <!-- Hero Section -->
-    <main>
-      <div class="hero-container">
-        <div class="hero-card">
-          <div class="hero-image-bg"></div>
-          <div class="hero-content">
-            <div class="badge gold"><i class="fa-solid fa-sparkles"></i> Authentic West African Travel</div>
-            
-            <h1 class="hero-title" style="margin-top: 14px;">
-              Travel Africa <br><span class="gold-text">Like a Local.</span>
-            </h1>
-
-            <p class="hero-subtitle">
-              AI itineraries paired with verified grassroots guides, informal transit routes, and secure Mobile Money payouts.
-            </p>
-
-            <div class="local-welcome-bar">
-              <span id="countryFlag">🇬🇭</span>
-              <span class="local-greeting" id="localGreeting">Akwaaba!</span>
-              <span id="localDesc" style="color: var(--text-primary);">Welcome to Ghana</span>
-              <span style="color: var(--text-muted);">·</span>
-              <span id="localTransitShort" style="color: var(--gold); font-family: var(--font-mono); font-size: 11.5px;">Trotro & MoMo</span>
-            </div>
-          </div>
-
-          <!-- Trippo-Inspired Search Capsule -->
-          <div class="search-widget" id="planner">
-            <div class="search-grid">
-              <div class="field-group">
-                <label class="field-label"><i class="fa-solid fa-location-dot"></i> Destination</label>
-                <select class="field-select" id="searchCity" onchange="onCityChanged(this.value)">
-                  <option value="Accra,GH">Accra, Ghana 🇬🇭</option>
-                  <option value="Cape Coast,GH">Cape Coast, Ghana 🇬🇭</option>
-                  <option value="Lagos,NG">Lagos, Nigeria 🇳🇬</option>
-                  <option value="Nairobi,KE">Nairobi, Kenya 🇰🇪</option>
-                  <option value="Dakar,SN">Dakar, Senegal 🇸🇳</option>
-                </select>
-              </div>
-
-              <div class="field-group">
-                <label class="field-label"><i class="fa-regular fa-calendar"></i> Start</label>
-                <input type="date" class="field-input" id="searchStartDate" value="2026-09-01">
-              </div>
-
-              <div class="field-group">
-                <label class="field-label"><i class="fa-regular fa-calendar-check"></i> End</label>
-                <input type="date" class="field-input" id="searchEndDate" value="2026-09-04">
-              </div>
-
-              <div class="field-group">
-                <label class="field-label"><i class="fa-solid fa-gauge-high"></i> Pace</label>
-                <select class="field-select" id="searchPace">
-                  <option value="MODERATE">Moderate</option>
-                  <option value="RELAXED">Relaxed</option>
-                  <option value="INTENSE">Active</option>
-                </select>
-              </div>
-
-              <div class="field-group">
-                <label class="field-label"><i class="fa-solid fa-coins"></i> Budget ($)</label>
-                <input type="number" class="field-input" id="searchBudget" value="450" min="50" step="25">
-              </div>
-
-              <button class="btn btn-gold" id="generateBtn" onclick="triggerItineraryGeneration()">
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
-                <span>Generate</span>
-              </button>
-            </div>
-          </div>
-        </div>
+    <section class="hero">
+      <div class="hero-badge">
+        <i class="fa-solid fa-shield-check"></i> ZERO CASH RISK · 100% DIRECT IMPACT
       </div>
 
-      <!-- Navica-Style AI Itinerary Studio Section -->
-      <div class="section-wrap" id="itineraryResultSection" style="display: none;">
-        <div class="itinerary-studio-card">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
-            <div>
-              <span class="badge gold" id="itineraryStatusBadge"><i class="fa-solid fa-sparkles"></i> AI Generated Itinerary</span>
-              <h3 style="font-family: var(--font-display); font-size: 26px; font-weight: 800; color: var(--text-white); margin-top: 6px;" id="itineraryTitle">Accra Cultural Tour</h3>
-              <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 2px;" id="itinerarySubtitle">Crafted around verified grassroots guides & trotro corridors.</p>
-            </div>
-            <div style="text-align: right;">
-              <span style="font-size: 11.5px; color: var(--text-muted); font-family: var(--font-mono);">TOTAL ESTIMATED</span>
-              <div style="font-family: var(--font-mono); font-size: 20px; font-weight: 800; color: var(--gold);" id="itineraryCostBadge">$75 USD Total</div>
-            </div>
-          </div>
+      <h1 class="hero-headline">
+        Book Authentic Africa. <br>
+        <span class="highlight">Pay Grassroots Hosts Directly.</span>
+      </h1>
 
-          <div class="day-tabs" id="itineraryDayTabs"></div>
-          <div id="dayActivitiesList" style="margin-top: 16px;"></div>
+      <p class="hero-subtext">
+        Discover verified street guides, artisans, and cultural hosts in Accra. Pay with your international card — funds stay secured in escrow until your tour finishes, then release directly to your host's Mobile Money.
+      </p>
+
+      <!-- Visual Escrow Pipeline (Self-explanatory, Zero Text Jargon) -->
+      <div class="escrow-pipeline">
+        <div class="pipeline-step">
+          <div class="step-icon card"><i class="fa-regular fa-credit-card"></i></div>
+          <div class="step-title">1. Card Checkout</div>
+          <div class="step-desc">Visa / Mastercard ($ or ₵)</div>
+        </div>
+
+        <div class="pipeline-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+
+        <div class="pipeline-step">
+          <div class="step-icon vault"><i class="fa-solid fa-vault"></i></div>
+          <div class="step-title">2. Escrow Vault Locked</div>
+          <div class="step-desc">You receive a 4-digit release PIN</div>
+        </div>
+
+        <div class="pipeline-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+
+        <div class="pipeline-step">
+          <div class="step-icon momo"><i class="fa-solid fa-mobile-screen-button"></i></div>
+          <div class="step-title">3. MoMo Payout</div>
+          <div class="step-desc">Host gets paid post-tour</div>
         </div>
       </div>
+    </section>
 
-      <!-- 3 Real Economy Essentials Bento -->
-      <div class="section-wrap">
-        <div class="section-header">
-          <h2 class="section-title">The Real Economy Essentials</h2>
-          <p class="section-desc">Everything you need to navigate West Africa with ease.</p>
+    <!-- Verified Experiences Catalog (Accra Pilot) -->
+    <section class="section-wrap">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">Verified Grassroots Experiences</h2>
+          <p class="section-desc">Hand-verified community guides and master artisans across Accra.</p>
         </div>
-
-        <div class="essentials-grid">
-          <div class="essential-card">
-            <div class="essential-icon" style="background: var(--gold-dim); color: var(--gold);">
-              <i class="fa-solid fa-map-location-dot"></i>
-            </div>
-            <div>
-              <h3 style="font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text-white);">Hidden Local Spots</h3>
-              <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 4px; line-height: 1.5;">Artisan workshops, coastal food strips, and cultural walks tour buses never find.</p>
-            </div>
-          </div>
-
-          <div class="essential-card">
-            <div class="essential-icon" style="background: var(--terracotta-dim); color: var(--terracotta);">
-              <i class="fa-solid fa-van-shuttle"></i>
-            </div>
-            <div>
-              <h3 style="font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text-white);">Ride Like a Local</h3>
-              <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 4px; line-height: 1.5;">Fair Trotro & Danfo fares, station maps, and roadside hand signal guides.</p>
-            </div>
-          </div>
-
-          <div class="essential-card">
-            <div class="essential-icon" style="background: var(--green-dim); color: var(--green);">
-              <i class="fa-solid fa-shield-check"></i>
-            </div>
-            <div>
-              <h3 style="font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text-white);">Safe MoMo Escrow</h3>
-              <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 4px; line-height: 1.5;">Pay safely with your card. Your host receives instant Mobile Money after the tour.</p>
-            </div>
-          </div>
-        </div>
+        <span class="pilot-tag" style="align-self: center;">
+          <i class="fa-solid fa-circle-check"></i> 4 Experiences Ready to Book
+        </span>
       </div>
 
-      <!-- Informal Transit Navigator -->
-      <div class="section-wrap" id="transit">
-        <div class="section-header">
-          <h2 class="section-title" id="transitTitle">Transit Navigator (Accra)</h2>
-          <p class="section-desc">Fair fares and local hand signals.</p>
-        </div>
-
-        <div class="transit-grid">
-          <div class="transit-card">
-            <span style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--gold);" id="t1Type">TROTRO</span>
-            <span class="transit-fare" id="t1Fare">₵4.50 - ₵12.00</span>
-            <p style="font-size: 12px; color: var(--text-secondary);" id="t1Desc">Fixed routes between major stations.</p>
+      <div class="experience-grid" id="experienceGrid">
+        <!-- Card 1: Jamestown -->
+        <div class="exp-card">
+          <div class="exp-image-wrap">
+            <img src="assets/images/hero_accra.jpg" alt="Jamestown Boxing & Heritage" class="exp-image">
+            <span class="exp-badge"><i class="fa-solid fa-id-card"></i> Ghana Card Verified</span>
+            <span class="exp-duration"><i class="fa-regular fa-clock"></i> 2.5 hrs</span>
           </div>
-
-          <div class="transit-card">
-            <span style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--gold);" id="t2Type">SHARED TAXI</span>
-            <span class="transit-fare" id="t2Fare">₵10.00 - ₵25.00</span>
-            <p style="font-size: 12px; color: var(--text-secondary);" id="t2Desc">Fast yellow-fender 4-passenger cabs.</p>
-          </div>
-
-          <div class="transit-card">
-            <span style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--gold);" id="t3Type">OKADA BIKE</span>
-            <span class="transit-fare" id="t3Fare">₵15.00 - ₵35.00</span>
-            <p style="font-size: 12px; color: var(--text-secondary);" id="t3Desc">Quickest through market traffic.</p>
-          </div>
-
-          <div class="transit-card">
-            <span style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--gold);" id="t4Type">PRIVATE RIDE</span>
-            <span class="transit-fare" id="t4Fare">₵60.00 - ₵150.00</span>
-            <p style="font-size: 12px; color: var(--text-secondary);" id="t4Desc">Private AC rides for day trips.</p>
-          </div>
-        </div>
-
-        <div class="signal-guide-box">
-          <div class="signal-item">
-            <div style="font-size: 22px; color: var(--gold);"><i class="fa-solid fa-hand-point-up"></i></div>
-            <div>
-              <h5 style="font-size: 13.5px; font-weight: 700; color: var(--text-white);">Finger Up</h5>
-              <p style="font-size: 12px; color: var(--text-secondary);">Circle & Overhead Interchange route.</p>
-            </div>
-          </div>
-
-          <div class="signal-item">
-            <div style="font-size: 22px; color: var(--gold);"><i class="fa-solid fa-hand-point-down"></i></div>
-            <div>
-              <h5 style="font-size: 13.5px; font-weight: 700; color: var(--text-white);">Finger Down</h5>
-              <p style="font-size: 12px; color: var(--text-secondary);">Tema Station & Accra High Street.</p>
-            </div>
-          </div>
-
-          <div class="signal-item">
-            <div style="font-size: 22px; color: var(--gold);"><i class="fa-solid fa-hand"></i></div>
-            <div>
-              <h5 style="font-size: 13.5px; font-weight: 700; color: var(--text-white);">Hand Wave</h5>
-              <p style="font-size: 12px; color: var(--text-secondary);">Spintex Road & highway short hops.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-        <!-- Compact 3-Word Native Phrase Bar -->
-        <div style="margin-top: 18px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span class="badge gold"><i class="fa-solid fa-volume-high"></i> Local Words</span>
-            <span style="font-size: 13px; color: var(--text-secondary);">Tap to listen:</span>
-          </div>
-          <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="compactPhraseChips"></div>
-        </div>
-
-        <!-- Twi Dialect Soundboard & Native Pronunciation Studio -->
-        <div class="section-wrap" id="dialects" style="margin-top: 36px;">
-          <div class="section-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 14px;">
-            <div>
-              <span class="badge gold" style="margin-bottom: 8px;"><i class="fa-solid fa-volume-high"></i> Twi Dialect (Ghana 🇬🇭)</span>
-              <h2 class="section-title">Twi Pronunciation Studio</h2>
-              <p class="section-desc">Authentic voice recordings from local speakers. Tap any card or speaker button to hear native Twi pronunciation.</p>
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="badge green"><i class="fa-solid fa-microphone"></i> 3 Authentic Voice Recordings</span>
-            </div>
-          </div>
-
-          <div class="soundboard-grid" id="soundboardGrid" style="margin-top: 20px;"></div>
-        </div>
-
-      <!-- Verified Hosts Directory -->
-      <div class="section-wrap" id="hosts">
-        <div class="section-header">
-          <h2 class="section-title">Verified Local Hosts</h2>
-          <p class="section-desc">Grassroots guides, eco-homestays, and artisan collectives.</p>
-        </div>
-
-        <div class="operators-grid" id="operatorsContainer"></div>
-      </div>
-    </main>
-  </div>
-
-  <!-- ==========================================================================
-       VIEW 2: DEDICATED HOST OPERATING SYSTEM (NAVICA DASHBOARD FOR HOSTS)
-       ========================================================================== -->
-  <div class="app-view hidden" id="viewHost">
-    <div class="host-dashboard-container">
-      <!-- Host Header Profile & KYC Status -->
-      <div class="host-header-card">
-        <div style="display: flex; align-items: center; gap: 18px;">
-          <div class="host-avatar-lg">K</div>
-          <div>
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <h2 style="font-family: var(--font-display); font-size: 26px; font-weight: 800; color: var(--text-white);">Kwame Mensah</h2>
-              <span class="badge green"><i class="fa-solid fa-circle-check"></i> Ghana Card Verified</span>
-            </div>
-            <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 2px;">Jamestown Ga-Mashie Heritage Walk Collective &bull; Host ID #KWAN-GH-882</p>
-          </div>
-        </div>
-
-        <div style="display: flex; gap: 10px;">
-          <button class="btn btn-outline" onclick="openListingModal()">
-            <i class="fa-solid fa-plus"></i> Create Experience
-          </button>
-          <button class="btn btn-gold" onclick="simulatePayoutWithdrawal()">
-            <i class="fa-solid fa-money-bill-transfer"></i> Withdraw to MoMo
-          </button>
-        </div>
-      </div>
-
-      <!-- Host KPI Metrics Grid (Navica Style) -->
-      <div class="kpi-grid-4">
-        <div class="kpi-card">
-          <span class="kpi-label">TOTAL EARNINGS</span>
-          <div class="kpi-val" style="color: var(--gold);">₵22,150 <span style="font-size: 14px; color: var(--text-muted);">($1,420)</span></div>
-          <span style="font-size: 11.5px; color: var(--green); font-weight: 600;"><i class="fa-solid fa-arrow-trend-up"></i> +18.4% this month</span>
-        </div>
-
-        <div class="kpi-card">
-          <span class="kpi-label">ACTIVE ESCROW VAULT</span>
-          <div class="kpi-val" style="color: var(--cyan);">₵3,450</div>
-          <span style="font-size: 11.5px; color: var(--text-secondary);">4 bookings awaiting completion</span>
-        </div>
-
-        <div class="kpi-card">
-          <span class="kpi-label">COMPLETED TOURS</span>
-          <div class="kpi-val">38</div>
-          <span style="font-size: 11.5px; color: var(--green); font-weight: 600;">100% on-time completion</span>
-        </div>
-
-        <div class="kpi-card">
-          <span class="kpi-label">HOST RATING</span>
-          <div class="kpi-val">4.96 <span style="font-size: 16px; color: var(--gold);">★</span></div>
-          <span style="font-size: 11.5px; color: var(--text-secondary);">42 verified traveler reviews</span>
-        </div>
-      </div>
-
-      <!-- Host Management 2-Column Grid -->
-      <div class="host-grid-2">
-        <!-- Panel 1: Active Listings Manager -->
-        <div class="host-panel">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3 style="font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text-white);">My Active Listings</h3>
-            <button class="btn btn-outline" style="padding: 5px 12px; font-size: 11.5px;" onclick="openListingModal()">+ Add New</button>
-          </div>
-
-          <div style="display: flex; flex-direction: column; gap: 12px;" id="hostListingsContainer">
-            <div style="background: var(--bg-surface); padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+          <div class="exp-body">
+            <div class="host-row">
+              <div class="host-avatar">N</div>
               <div>
-                <h5 style="font-size: 14px; font-weight: 700; color: var(--text-white);">Jamestown Heritage Walk & Boxing Gyms</h5>
-                <span style="font-size: 12px; color: var(--gold); font-family: var(--font-mono);">₵250 GHS &bull; 3 Hours</span>
+                <div class="host-name">Nii Tackie</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Ga-Mashie Heritage Guild</div>
               </div>
-              <span class="badge green">LIVE</span>
+              <div class="host-rating"><i class="fa-solid fa-star"></i> 5.0 (48)</div>
             </div>
-
-            <div style="background: var(--bg-surface); padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <h5 style="font-size: 14px; font-weight: 700; color: var(--text-white);">Makola Market Textile & Spice Walk</h5>
-                <span style="font-size: 12px; color: var(--gold); font-family: var(--font-mono);">₵180 GHS &bull; 2.5 Hours</span>
-              </div>
-              <span class="badge green">LIVE</span>
+            <h3 class="exp-title">Jamestown Coastal Walk & Boxing Gym Experience</h3>
+            <p class="exp-summary">Explore Old Accra's colonial alleyways, historic lighthouses, and train alongside world-class boxers in an iconic open-air gym.</p>
+            <div class="exp-payout-info">
+              <i class="fa-solid fa-wallet"></i> Payout: <span>MTN MoMo (024••••654)</span>
             </div>
+          </div>
+          <div class="exp-footer">
+            <div class="exp-price-block">
+              <span class="price-main" data-usd="25" data-ghs="380">₵380</span>
+              <span class="price-sub">per person · all fees incl.</span>
+            </div>
+            <button class="btn-book" onclick="openBookingModal('Jamestown Coastal Walk & Boxing Gym', 'Nii Tackie', 25, 380, 'MTN MoMo (024••••654)')">
+              <span>Book with Escrow</span>
+              <i class="fa-solid fa-lock"></i>
+            </button>
           </div>
         </div>
 
-        <!-- Panel 2: Mobile Money Payout Wallet -->
-        <div class="host-panel">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3 style="font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text-white);">Payout Wallet (MTN MoMo)</h3>
-            <span class="badge gold">INSTANT PAYOUT</span>
+        <!-- Card 2: Makola Market -->
+        <div class="exp-card">
+          <div class="exp-image-wrap">
+            <img src="assets/images/artisan_guide.jpg" alt="Makola Textile & Kente" class="exp-image">
+            <span class="exp-badge"><i class="fa-solid fa-id-card"></i> Ghana Card Verified</span>
+            <span class="exp-duration"><i class="fa-regular fa-clock"></i> 3.0 hrs</span>
           </div>
-
-          <div style="background: var(--bg-surface); padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="exp-body">
+            <div class="host-row">
+              <div class="host-avatar" style="color: var(--terracotta); border-color: var(--terracotta);">A</div>
               <div>
-                <span style="font-size: 11.5px; color: var(--text-muted); font-family: var(--font-mono);">CONNECTED WALLET</span>
-                <p style="font-size: 16px; font-weight: 700; color: var(--text-white); margin-top: 2px;">MTN Mobile Money</p>
-                <p style="font-family: var(--font-mono); font-size: 13px; color: var(--gold);">+233 24 498 7654</p>
+                <div class="host-name">Auntie Naa</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Makola Textile Collective</div>
               </div>
-              <i class="fa-solid fa-mobile-screen-button" style="font-size: 28px; color: var(--gold);"></i>
+              <div class="host-rating"><i class="fa-solid fa-star"></i> 4.9 (62)</div>
             </div>
-            
-            <button class="btn btn-gold" style="width: 100%; margin-top: 14px; padding: 9px;" onclick="simulatePayoutWithdrawal()">
-              <i class="fa-solid fa-bolt"></i> Withdraw ₵3,450 to MTN Wallet
+            <h3 class="exp-title">Makola Market Fabric & Kente Sourcing Masterclass</h3>
+            <p class="exp-summary">Navigate West Africa's largest textile labyrinth with a master cloth merchant. Learn authentic Kente patterns and get insider wholesale prices.</p>
+            <div class="exp-payout-info">
+              <i class="fa-solid fa-wallet"></i> Payout: <span>Telecel Cash (020••••234)</span>
+            </div>
+          </div>
+          <div class="exp-footer">
+            <div class="exp-price-block">
+              <span class="price-main" data-usd="30" data-ghs="450">₵450</span>
+              <span class="price-sub">per person · all fees incl.</span>
+            </div>
+            <button class="btn-book" onclick="openBookingModal('Makola Market Fabric & Kente Sourcing', 'Auntie Naa', 30, 450, 'Telecel Cash (020••••234)')">
+              <span>Book with Escrow</span>
+              <i class="fa-solid fa-lock"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Card 3: Osu Nightlife -->
+        <div class="exp-card">
+          <div class="exp-image-wrap">
+            <img src="assets/images/hero_accra.jpg" alt="Osu Live Music Trail" class="exp-image" style="filter: hue-rotate(180deg);">
+            <span class="exp-badge"><i class="fa-solid fa-id-card"></i> Ghana Card Verified</span>
+            <span class="exp-duration"><i class="fa-regular fa-clock"></i> 3.5 hrs</span>
+          </div>
+          <div class="exp-body">
+            <div class="host-row">
+              <div class="host-avatar" style="color: var(--cyan); border-color: var(--cyan);">K</div>
+              <div>
+                <div class="host-name">Kofi Mensah</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Accra Creative Scene</div>
+              </div>
+              <div class="host-rating"><i class="fa-solid fa-star"></i> 4.9 (39)</div>
+            </div>
+            <h3 class="exp-title">Osu Nightlife, Vinyl Bars & Live Highlife Trail</h3>
+            <p class="exp-summary">Skip the tourist traps. Join an independent music curator through intimate Osu courtyard bars, live Afrobeat jam spots, and street grills.</p>
+            <div class="exp-payout-info">
+              <i class="fa-solid fa-wallet"></i> Payout: <span>MTN MoMo (055••••981)</span>
+            </div>
+          </div>
+          <div class="exp-footer">
+            <div class="exp-price-block">
+              <span class="price-main" data-usd="35" data-ghs="530">₵530</span>
+              <span class="price-sub">per person · all fees incl.</span>
+            </div>
+            <button class="btn-book" onclick="openBookingModal('Osu Nightlife & Live Highlife Trail', 'Kofi Mensah', 35, 530, 'MTN MoMo (055••••981)')">
+              <span>Book with Escrow</span>
+              <i class="fa-solid fa-lock"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Card 4: Arts Centre -->
+        <div class="exp-card">
+          <div class="exp-image-wrap">
+            <img src="assets/images/artisan_guide.jpg" alt="Woodcarving & Beads" class="exp-image" style="filter: sepia(0.3);">
+            <span class="exp-badge"><i class="fa-solid fa-id-card"></i> Ghana Card Verified</span>
+            <span class="exp-duration"><i class="fa-regular fa-clock"></i> 2.0 hrs</span>
+          </div>
+          <div class="exp-body">
+            <div class="host-row">
+              <div class="host-avatar" style="color: var(--green); border-color: var(--green);">M</div>
+              <div>
+                <div class="host-name">Master Kwesi</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Centre for National Culture</div>
+              </div>
+              <div class="host-rating"><i class="fa-solid fa-star"></i> 5.0 (51)</div>
+            </div>
+            <h3 class="exp-title">Hands-On Woodcarving & Traditional Bead Craft</h3>
+            <p class="exp-summary">Carve your own symbol stool with a 3rd-generation wood sculptor and learn trade bead threading inside the Accra Arts Centre workshop.</p>
+            <div class="exp-payout-info">
+              <i class="fa-solid fa-wallet"></i> Payout: <span>MTN MoMo (024••••112)</span>
+            </div>
+          </div>
+          <div class="exp-footer">
+            <div class="exp-price-block">
+              <span class="price-main" data-usd="20" data-ghs="300">₵300</span>
+              <span class="price-sub">per person · all fees incl.</span>
+            </div>
+            <button class="btn-book" onclick="openBookingModal('Hands-On Woodcarving Workshop', 'Master Kwesi', 20, 300, 'MTN MoMo (024••••112)')">
+              <span>Book with Escrow</span>
+              <i class="fa-solid fa-lock"></i>
             </button>
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- Live Escrow Bookings Table (Host View) -->
-      <div class="host-panel" style="margin-top: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <h3 style="font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text-white);">Live Escrow Bookings & Settlements</h3>
-          <span style="font-size: 12px; color: var(--text-muted);">Funds held in Kwan Vault</span>
+    <!-- 3 Core Guarantees -->
+    <section class="value-pillars">
+      <div class="pillar-card">
+        <div class="pillar-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div>
+          <div class="pillar-title">100% Escrow Protection</div>
+          <div class="pillar-desc">Your payment remains safely in the escrow vault until your tour is finished. The host is paid only when you share your PIN.</div>
+        </div>
+      </div>
+
+      <div class="pillar-card">
+        <div class="pillar-icon" style="color: var(--green);"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+        <div>
+          <div class="pillar-title">90% Direct to Local Hosts</div>
+          <div class="pillar-desc">Legacy agencies siphon 30%–40%. Kwan delivers 90% straight to the host's Mobile Money wallet within seconds of tour completion.</div>
+        </div>
+      </div>
+
+      <div class="pillar-card">
+        <div class="pillar-icon" style="color: var(--cyan);"><i class="fa-solid fa-receipt"></i></div>
+        <div>
+          <div class="pillar-title">Zero Cash Friction</div>
+          <div class="pillar-desc">No foreign ATM lines, withdrawal fees, or carrying bulky cash envelopes through crowded markets.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================================
+       VIEW 2: HOST TERMINAL & ESCROW REDEMPTION (FUNCTIONAL DUAL PERSPECTIVE)
+       ========================================================================= -->
+  <section class="section-wrap host-dashboard-view" id="hostDashboardView">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">Host Mobile Money Terminal</h2>
+        <p class="section-desc">Logged in as: <strong>Nii Tackie</strong> (Jamestown Cultural Collective) · MTN MoMo: 024••••654</p>
+      </div>
+      <button class="view-btn active" onclick="switchView('explorer')">
+        <i class="fa-solid fa-arrow-left"></i> Back to Explorer View
+      </button>
+    </div>
+
+    <!-- Live Wallet Status -->
+    <div class="wallet-banner">
+      <div class="wallet-card">
+        <div class="wallet-label">MoMo Available Balance</div>
+        <div class="wallet-value green" id="hostBalance">₵1,840.00</div>
+        <div class="wallet-sub"><i class="fa-solid fa-circle-check" style="color: var(--green);"></i> Ready for instant cashout</div>
+      </div>
+
+      <div class="wallet-card">
+        <div class="wallet-label">Funds in Active Escrow</div>
+        <div class="wallet-value" id="hostEscrowPending">₵380.00</div>
+        <div class="wallet-sub">Awaiting tour completion & PIN</div>
+      </div>
+
+      <div class="wallet-card">
+        <div class="wallet-label">Tours Completed (This Month)</div>
+        <div class="wallet-value">14</div>
+        <div class="wallet-sub">100% 5.0 Star Guest Rating</div>
+      </div>
+    </div>
+
+    <!-- Escrow PIN Redemption Terminal -->
+    <div class="pin-release-terminal">
+      <div class="step-icon momo" style="margin: 0 auto 12px; width: 50px; height: 50px;"><i class="fa-solid fa-key"></i></div>
+      <div class="terminal-title">Redeem Traveler Escrow PIN</div>
+      <div class="terminal-sub">
+        Ask your guest for their 4-digit Kwan PIN once the tour concludes. Entering it releases funds instantly to your MTN MoMo wallet.
+      </div>
+
+      <div class="pin-input-group">
+        <input type="text" maxlength="1" class="pin-box" id="p1" oninput="focusNext(this, 'p2')">
+        <input type="text" maxlength="1" class="pin-box" id="p2" oninput="focusNext(this, 'p3')">
+        <input type="text" maxlength="1" class="pin-box" id="p3" oninput="focusNext(this, 'p4')">
+        <input type="text" maxlength="1" class="pin-box" id="p4">
+      </div>
+
+      <button class="btn-redeem" onclick="submitHostPin()">
+        <i class="fa-solid fa-check"></i>
+        <span>Release ₵342.00 to My MTN MoMo</span>
+      </button>
+      <div id="pinFeedback" style="margin-top: 14px; font-size: 13px; font-weight: 600;"></div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       MODAL: ESCROW CHECKOUT & PIN GENERATION (END-TO-END FLOW)
+       ========================================================================= -->
+  <div class="modal-backdrop" id="bookingModal">
+    <div class="modal-window">
+      <!-- Step 1: Checkout Form -->
+      <div id="modalStepCheckout">
+        <div class="modal-head">
+          <div>
+            <div class="modal-title">Book with Escrow Protection</div>
+            <div style="font-size: 12px; color: var(--text-muted);" id="modalTourName">Jamestown Coastal Walk</div>
+          </div>
+          <button class="modal-close" onclick="closeBookingModal()">&times;</button>
         </div>
 
-        <table class="ledger-table">
-          <thead>
-            <tr>
-              <th>Traveler</th>
-              <th>Experience</th>
-              <th>Date</th>
-              <th>Amount</th>
-              <th>Escrow Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Alex Rivera</strong><br><span style="font-size: 11px; color: var(--text-muted);">alex@gmail.com</span></td>
-              <td>Jamestown Heritage Walk</td>
-              <td>Sep 2, 2026</td>
-              <td style="font-family: var(--font-mono); font-weight: 700; color: var(--gold);">₵250 GHS</td>
-              <td><span class="badge cyan">LOCKED IN ESCROW</span></td>
-              <td>
-                <button class="btn btn-outline" style="padding: 5px 10px; font-size: 11px;" onclick="releaseBookingEscrow('Alex Rivera', 250)">
-                  Confirm Completion &rarr;
-                </button>
-              </td>
-            </tr>
-            <tr>
-              <td><strong>Sarah Jenkins</strong><br><span style="font-size: 11px; color: var(--text-muted);">sarah.j@outlook.com</span></td>
-              <td>Makola Market Textile Walk</td>
-              <td>Aug 28, 2026</td>
-              <td style="font-family: var(--font-mono); font-weight: 700; color: var(--gold);">₵180 GHS</td>
-              <td><span class="badge green">PAID TO MOMO</span></td>
-              <td><span style="font-size: 11.5px; color: var(--green);"><i class="fa-solid fa-check"></i> Settled</span></td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label"><i class="fa-regular fa-calendar"></i> Tour Date</label>
+            <input type="date" class="form-input" id="bookingDate">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label"><i class="fa-solid fa-user-group"></i> Number of Guests</label>
+            <select class="form-select" id="bookingGuests" onchange="recalculatePrice()">
+              <option value="1">1 Traveler</option>
+              <option value="2">2 Travelers</option>
+              <option value="3">3 Travelers</option>
+            </select>
+          </div>
+
+          <div class="escrow-breakdown">
+            <div class="breakdown-row">
+              <span style="color: var(--text-secondary);">Host Rate:</span>
+              <span id="breakdownHostRate">₵380.00</span>
+            </div>
+            <div class="breakdown-row">
+              <span style="color: var(--text-secondary);">Escrow Vault Protection:</span>
+              <span style="color: var(--green); font-weight: 600;">FREE (0%)</span>
+            </div>
+            <div class="breakdown-row">
+              <span style="color: var(--text-secondary);">Host MoMo Payout (90%):</span>
+              <span id="breakdownHostPayout" style="color: var(--gold); font-family: var(--font-mono);">₵342.00</span>
+            </div>
+            <div class="breakdown-row total">
+              <span>Total Charged to Card:</span>
+              <span class="gold" id="breakdownTotal">₵380.00</span>
+            </div>
+          </div>
+
+          <button class="btn-pay" id="btnPayAction" onclick="processMockCardPayment()">
+            <i class="fa-solid fa-lock"></i>
+            <span id="btnPayLabel">Pay ₵380 with Card & Lock Escrow</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Escrow Locked Confirmation & PIN Display -->
+      <div id="modalStepSuccess" style="display: none;">
+        <div class="modal-head">
+          <div class="modal-title" style="color: var(--green);"><i class="fa-solid fa-circle-check"></i> Escrow Vault Locked</div>
+          <button class="modal-close" onclick="closeBookingModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="success-state">
+            <div class="success-icon"><i class="fa-solid fa-shield-check"></i></div>
+            <h3 style="font-size: 18px; font-weight: 800; color: var(--text-white);">Payment Secured in Escrow</h3>
+            <p style="font-size: 12.5px; color: var(--text-secondary);">
+              Your funds are held safely in the Kwan Vault. Present this 4-digit code to your host <strong>only when your tour is finished</strong>.
+            </p>
+
+            <div class="pin-display-card">
+              <div style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted); text-transform: uppercase;">Your Release PIN</div>
+              <div class="pin-digits" id="generatedPin">4829</div>
+            </div>
+
+            <div class="sms-simulation-box">
+              <div style="font-weight: 700; color: var(--gold); margin-bottom: 2px;"><i class="fa-solid fa-comment-sms"></i> Instant SMS Dispatched:</div>
+              "Kwan Escrow: Your booking with <span id="smsHost">Nii Tackie</span> is confirmed. Your release PIN is <strong id="smsPin">4829</strong>. Do not share until tour completes."
+            </div>
+
+            <button class="btn-pay" style="width: 100%; margin-top: 8px;" onclick="testInHostTerminal()">
+              <span>Test Host Redemption in Terminal →</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Clean Footer -->
+  <!-- Footer -->
   <footer>
-    <div class="footer-box">
-      <div>
-        <h4 style="font-family: var(--font-display); font-size: 22px; font-weight: 800; color: var(--text-white);" id="footerBrand">Kwan</h4>
-        <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 4px;" id="footerDesc">Real African travel. Grassroots guides. Instant Mobile Money payouts.</p>
-      </div>
-
-      <div style="display: flex; gap: 12px;" id="footerActions">
-        <button class="btn btn-outline" id="footerHostBtn" onclick="openHostLogin()">
-          <i class="fa-solid fa-store" style="color: var(--gold);"></i> Host on Kwan &rarr;
-        </button>
-        <button class="btn btn-outline" onclick="openAuthModal()">
-          <i class="fa-solid fa-user"></i> Account Sign In
-        </button>
-      </div>
+    <div>
+      <strong>Kwan Africa Inc.</strong> — Digitizing Grassroots Tourism via Mobile Money.
     </div>
-
-    <div class="footer-bottom">
-      <span>&copy; 2026 Kwan Africa Inc. Built with love for Africa.</span>
-      <span>Accra &bull; Lagos &bull; Nairobi &bull; Dakar</span>
+    <div>
+      Accra Beachhead Pilot · Built for Authentic Cultural Impact.
     </div>
   </footer>
 
-  <!-- ==========================================================================
-       MODALS: AUTH, BOOKING, CREATE LISTING
-       ========================================================================== -->
-  
-  <!-- Universal Auth Modal (Sign In / Sign Up) -->
-  <div class="modal-backdrop" id="authModal">
-    <div class="modal-panel">
-      <div class="modal-header">
-        <div>
-          <h3 class="modal-title" id="authModalTitle">Sign In to Kwan</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;" id="authModalSubtitle">Choose your role to load your dedicated portal</p>
-        </div>
-        <button class="modal-close" onclick="closeAuthModal()">&times;</button>
-      </div>
-
-      <div style="display: flex; flex-direction: column; gap: 14px;">
-        <div style="display: flex; gap: 10px;">
-          <button class="role-pill-btn active" id="authTabTraveler" style="flex: 1; justify-content: center; padding: 8px 12px;" onclick="setAuthRole('traveler')">
-            <i class="fa-solid fa-compass"></i> Explorer (Alex)
-          </button>
-          <button class="role-pill-btn" id="authTabHost" style="flex: 1; justify-content: center; padding: 8px 12px;" onclick="setAuthRole('host')">
-            <i class="fa-solid fa-store"></i> Host Partner (Kwame)
-          </button>
-        </div>
-
-        <button class="auth-btn-social" onclick="performSocialLogin('Google')">
-          <i class="fa-brands fa-google" style="color: #EA4335;"></i> Continue with Google
-        </button>
-        <button class="auth-btn-social" onclick="performSocialLogin('Apple')">
-          <i class="fa-brands fa-apple" style="color: #FFFFFF;"></i> Continue with Apple
-        </button>
-
-        <div style="display: flex; align-items: center; gap: 10px; margin: 4px 0;">
-          <div style="flex: 1; height: 1px; background: var(--border-subtle);"></div>
-          <span style="font-size: 11.5px; color: var(--text-muted);">OR EMAIL</span>
-          <div style="flex: 1; height: 1px; background: var(--border-subtle);"></div>
-        </div>
-
-        <div class="field-group">
-          <label class="field-label" id="authEmailLabel">Explorer Email</label>
-          <input type="email" class="field-input" id="authEmail" placeholder="you@example.com" value="alex.rivera@gmail.com">
-        </div>
-
-        <button class="btn btn-gold" id="authSubmitBtn" style="width: 100%; padding: 11px;" onclick="performEmailLogin()">
-          Sign In as Explorer
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Booking Modal -->
-  <div class="modal-backdrop" id="bookingModal">
-    <div class="modal-panel">
-      <div class="modal-header">
-        <h3 class="modal-title" id="modalListingTitle">Book Experience</h3>
-        <button class="modal-close" onclick="closeBookingModal()">&times;</button>
-      </div>
-
-      <div style="display: flex; flex-direction: column; gap: 14px;">
-        <div class="field-group">
-          <label class="field-label">Your Name</label>
-          <input type="text" class="field-input" id="bookTouristName" value="Alex Rivera">
-        </div>
-
-        <div class="field-group">
-          <label class="field-label">Email Address</label>
-          <input type="email" class="field-input" id="bookTouristEmail" value="alex@gmail.com">
-        </div>
-
-        <div style="background: var(--bg-surface); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
-          <div style="display: flex; justify-content: space-between; font-size: 13px;">
-            <span style="color: var(--text-secondary);">Total Price:</span>
-            <span style="color: var(--text-white); font-weight: 700;" id="modalPriceLabel">₵250 GHS (~$16 USD)</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 13px; margin-top: 4px;">
-            <span style="color: var(--text-secondary);">Escrow Protection:</span>
-            <span style="color: var(--green); font-weight: 600;">Active (Free)</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 13px; margin-top: 4px;">
-            <span style="color: var(--text-secondary);">Host Payout:</span>
-            <span style="color: var(--gold); font-weight: 600;" id="modalHostMoMo">MTN MoMo</span>
-          </div>
-        </div>
-
-        <button class="btn btn-gold" style="width: 100%; padding: 12px; margin-top: 6px;" onclick="executePaystackPayment()">
-          <i class="fa-solid fa-credit-card"></i> Pay via Paystack & Lock into Escrow
-        </button>
-        <button class="btn btn-outline" style="width: 100%; padding: 9px; margin-top: 4px; font-size: 12px; border-color: rgba(43, 181, 130, 0.4); color: var(--green);" onclick="executeDemoEscrowSimulation()">
-          <i class="fa-solid fa-shield-halved"></i> Instant Escrow Settlement (Demo Mode)
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Paystack Escrow Payment Success & Receipt Modal -->
-  <div class="modal-backdrop" id="paymentSuccessModal">
-    <div class="modal-panel" style="max-width: 520px;">
-      <div style="text-align: center; margin-bottom: 20px;">
-        <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--green-dim); border: 1px solid rgba(43, 181, 130, 0.4); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
-          <i class="fa-solid fa-shield-halved" style="color: var(--green); font-size: 30px;"></i>
-        </div>
-        <h3 class="modal-title" style="font-size: 22px;">Payment Secured in Escrow</h3>
-        <p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
-          Your payment is held in the Kwan Smart Escrow Vault. Funds disburse to the host's Mobile Money wallet only after your tour.
-        </p>
-      </div>
-
-      <div class="receipt-box" style="margin-bottom: 20px;">
-        <div class="receipt-row">
-          <span style="color: var(--text-muted); font-size: 12px; font-family: var(--font-mono);">EXPERIENCE</span>
-          <span style="color: var(--text-white); font-weight: 700;" id="successReceiptTitle">Jamestown Heritage Walk</span>
-        </div>
-        <div class="receipt-row">
-          <span style="color: var(--text-muted); font-size: 12px; font-family: var(--font-mono);">GUEST</span>
-          <span style="color: var(--text-white);" id="successReceiptGuest">Alex Rivera</span>
-        </div>
-        <div class="receipt-row">
-          <span style="color: var(--text-muted); font-size: 12px; font-family: var(--font-mono);">AMOUNT LOCKED</span>
-          <span style="color: var(--gold); font-weight: 700; font-family: var(--font-mono); font-size: 15px;" id="successReceiptAmount">₵250 GHS</span>
-        </div>
-        <div class="receipt-row">
-          <span style="color: var(--text-muted); font-size: 12px; font-family: var(--font-mono);">ESCROW VAULT REF</span>
-          <span style="color: var(--cyan); font-family: var(--font-mono); font-size: 12px;" id="successReceiptRef">kwan-escrow-9941</span>
-        </div>
-        <div class="receipt-row">
-          <span style="color: var(--text-muted); font-size: 12px; font-family: var(--font-mono);">ESCROW STATUS</span>
-          <span class="badge cyan"><i class="fa-solid fa-lock"></i> LOCKED IN VAULT</span>
-        </div>
-        <div class="receipt-row" style="padding-top: 8px; border-top: 1px dashed var(--border-subtle);">
-          <span style="color: var(--text-muted); font-size: 12px; font-family: var(--font-mono);">SETTLEMENT TARGET</span>
-          <span style="color: var(--green); font-size: 12.5px; font-weight: 600;"><i class="fa-solid fa-mobile-screen"></i> Host MTN MoMo</span>
-        </div>
-      </div>
-
-      <div style="display: flex; gap: 10px;">
-        <a id="successWhatsAppBtn" href="https://wa.me/233244987654" target="_blank" class="btn btn-outline" style="flex: 1; justify-content: center; font-size: 12.5px;">
-          <i class="fa-brands fa-whatsapp" style="color: #25D366;"></i> Chat with Host
-        </a>
-        <button class="btn btn-gold" style="flex: 1.2; justify-content: center; font-size: 12.5px;" onclick="closePaymentSuccessModal()">
-          Done &bull; View Itinerary
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Create Listing Modal (Host View) -->
-  <div class="modal-backdrop" id="listingModal">
-    <div class="modal-panel">
-      <div class="modal-header">
-        <h3 class="modal-title">Publish New Experience</h3>
-        <button class="modal-close" onclick="closeListingModal()">&times;</button>
-      </div>
-
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <div class="field-group">
-          <label class="field-label">Experience Title</label>
-          <input type="text" class="field-input" id="newListingTitle" placeholder="e.g. Osu Food & Highlife Music Crawl">
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <div class="field-group">
-            <label class="field-label">Price (GHS)</label>
-            <input type="number" class="field-input" id="newListingPrice" placeholder="200">
-          </div>
-          <div class="field-group">
-            <label class="field-label">Duration (Hours)</label>
-            <input type="number" class="field-input" id="newListingDuration" placeholder="3">
-          </div>
-        </div>
-
-        <div class="field-group">
-          <label class="field-label">Description</label>
-          <textarea class="field-input" id="newListingDesc" rows="3" placeholder="Describe the authentic cultural moments..."></textarea>
-        </div>
-
-        <button class="btn btn-gold" style="width: 100%; padding: 12px; margin-top: 6px;" onclick="saveNewListing()">
-          <i class="fa-solid fa-cloud-arrow-up"></i> Publish Live Listing
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <audio id="audioPlayer"></audio>
-
+  <!-- =========================================================================
+       LEAN JAVASCRIPT CONTROLLER (100% FOCUSED, FUNCTIONAL LOGIC)
+       ========================================================================= -->
   <script>
-    const API_BASE = 'http://localhost:8080/api';
+    let currentCurrency = 'GHS';
+    const FX_USD_TO_GHS = 15.2;
 
-    // User Audio Folder Files: Akwaaba.m4a, Te so kakra.m4a, Medaase.m4a
-    const TWI_AUDIO_WORDS = [
-      {
-        word: "Akwaaba",
-        phonetic: "Ah-kwah-bah",
-        meaning: "Welcome",
-        audio: "audio/Akwaaba.m4a",
-        context: "Warm traditional Twi greeting welcoming visitors to Ghanaian homes, markets, and shops."
-      },
-      {
-        word: "Te so kakra",
-        phonetic: "Teh soh kah-krah",
-        meaning: "Bargain / Reduce price",
-        audio: "audio/Te%20so%20kakra.m4a",
-        context: "Essential Twi phrase used when shopping and bargaining respectfully in open-air markets like Makola."
-      },
-      {
-        word: "Medaase",
-        phonetic: "Meh-dah-ah-seh",
-        meaning: "Thank you",
-        audio: "audio/Medaase.m4a",
-        context: "Heartfelt Twi expression of gratitude to hosts, artisans, and tour guides."
-      }
-    ];
-
-    const LOCAL_CONTEXTS = {
-      'GH': {
-        flag: '🇬🇭',
-        greeting: 'Akwaaba!',
-        desc: 'Welcome to Ghana',
-        transitShort: 'Trotro & MoMo',
-        transitTitle: 'Transit Navigator (Accra & Coast)',
-        phrases: TWI_AUDIO_WORDS,
-        t1: { type: 'TROTRO', fare: '₵4.50 - ₵12.00', desc: 'Fixed routes between stations.' },
-        t2: { type: 'SHARED TAXI', fare: '₵10.00 - ₵25.00', desc: 'Yellow-fender 4-passenger cabs.' },
-        t3: { type: 'OKADA BIKE', fare: '₵15.00 - ₵35.00', desc: 'Quickest through market corridors.' },
-        t4: { type: 'PRIVATE RIDE', fare: '₵60.00 - ₵150.00', desc: 'Private AC rides for day trips.' }
-      },
-      'NG': {
-        flag: '🇳🇬',
-        greeting: 'Ẹ kāabọ̀!',
-        desc: 'Welcome to Nigeria',
-        transitShort: 'Danfo & OPay',
-        transitTitle: 'Transit Navigator (Lagos)',
-        phrases: TWI_AUDIO_WORDS,
-        t1: { type: 'DANFO BUS', fare: '₦300 - ₦800', desc: 'Yellow buses across Lagos.' },
-        t2: { type: 'KEKE NAPEP', fare: '₦200 - ₦500', desc: '3-wheelers for neighborhood hops.' },
-        t3: { type: 'OKADA BIKE', fare: '₦500 - ₦1,200', desc: 'Fastest way through go-slow traffic.' },
-        t4: { type: 'UBER / BOLT', fare: '₦4,000 - ₦12,000', desc: 'Private AC rides from VI & Lekki.' }
-      },
-      'KE': {
-        flag: '🇰🇪',
-        greeting: 'Karibu!',
-        desc: 'Welcome to Kenya',
-        transitShort: 'Matatu & M-PESA',
-        transitTitle: 'Transit Navigator (Nairobi)',
-        phrases: TWI_AUDIO_WORDS,
-        t1: { type: 'MATATU', fare: 'KSh 50 - KSh 150', desc: 'Famous graffiti sound buses.' },
-        t2: { type: 'BODA BODA', fare: 'KSh 100 - KSh 250', desc: 'Motorbike taxis everywhere.' },
-        t3: { type: 'TUK TUK', fare: 'KSh 100 - KSh 200', desc: 'Coastal 3-wheelers.' },
-        t4: { type: 'BOLT / LITTLE', fare: 'KSh 500 - KSh 1,800', desc: 'Private airport transfers.' }
-      },
-      'SN': {
-        flag: '🇸🇳',
-        greeting: 'Dalal ak jàmm!',
-        desc: 'Welcome to Senegal',
-        transitShort: 'Car Rapide & Wave',
-        transitTitle: 'Transit Navigator (Dakar)',
-        phrases: TWI_AUDIO_WORDS,
-        t1: { type: 'CAR RAPIDE', fare: '150 - 400 CFA', desc: 'Painted blue-and-yellow vintage vans.' },
-        t2: { type: 'CLANDO TAXI', fare: '300 - 600 CFA', desc: 'Shared neighborhood cabs.' },
-        t3: { type: 'GORÉE FERRY', fare: '5,200 CFA', desc: 'Ferry to historic Gorée island.' },
-        t4: { type: 'YELLOW TAXI', fare: '2,000 - 5,000 CFA', desc: 'Metered cabs across Plateau & Ngor.' }
-      }
+    let selectedTour = {
+      name: 'Jamestown Coastal Walk',
+      host: 'Nii Tackie',
+      priceUsd: 25,
+      priceGhs: 380,
+      payoutAccount: 'MTN MoMo (024••••654)'
     };
 
-    function renderDialectSoundboard() {
-      const grid = document.getElementById('soundboardGrid');
-      if (!grid) return;
-      grid.innerHTML = '';
+    let activeEscrowPin = '4829';
+    let hostBalanceGhs = 1840;
 
-      TWI_AUDIO_WORDS.forEach((item, index) => {
-        const cardId = `soundboard-twi-card-${index}`;
-        const card = document.createElement('div');
-        card.className = 'dialect-card';
-        card.id = cardId;
-        card.onclick = () => playDialectAudio(item.audio, cardId);
-
-        card.innerHTML = `
-          <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <span class="badge gold">🇬🇭 Twi (Ghana)</span>
-              <button class="dialect-play-btn" aria-label="Play pronunciation" onclick="event.stopPropagation(); playDialectAudio('${item.audio}', '${cardId}');">
-                <i class="fa-solid fa-volume-high"></i>
-              </button>
-            </div>
-            <h3 style="font-family: var(--font-display); font-size: 26px; font-weight: 800; color: var(--text-white); margin-bottom: 6px;">
-              ${escapeHtml(item.word)}
-            </h3>
-            <div style="margin-bottom: 10px;">
-              <span class="phonetic-badge">
-                <i class="fa-solid fa-microphone"></i> ${escapeHtml(item.phonetic)}
-              </span>
-            </div>
-            <div style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
-              Meaning: <span style="color: var(--gold);">${escapeHtml(item.meaning)}</span>
-            </div>
-          </div>
-          <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.45; padding-top: 10px; border-top: 1px solid var(--border-subtle);">
-            ${escapeHtml(item.context)}
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-    }
-
-    function onCityChanged(val) {
-      const parts = val.split(',');
-      const countryCode = parts[1] || 'GH';
-      const ctx = LOCAL_CONTEXTS[countryCode] || LOCAL_CONTEXTS['GH'];
-
-      document.getElementById('countryFlag').textContent = ctx.flag;
-      document.getElementById('localGreeting').textContent = ctx.greeting;
-      document.getElementById('localDesc').textContent = ctx.desc;
-      document.getElementById('localTransitShort').textContent = ctx.transitShort;
-      document.getElementById('transitTitle').textContent = ctx.transitTitle;
-
-      document.getElementById('t1Type').textContent = ctx.t1.type;
-      document.getElementById('t1Fare').textContent = ctx.t1.fare;
-      document.getElementById('t1Desc').textContent = ctx.t1.desc;
-
-      document.getElementById('t2Type').textContent = ctx.t2.type;
-      document.getElementById('t2Fare').textContent = ctx.t2.fare;
-      document.getElementById('t2Desc').textContent = ctx.t2.desc;
-
-      document.getElementById('t3Type').textContent = ctx.t3.type;
-      document.getElementById('t3Fare').textContent = ctx.t3.fare;
-      document.getElementById('t3Desc').textContent = ctx.t3.desc;
-
-      document.getElementById('t4Type').textContent = ctx.t4.type;
-      document.getElementById('t4Fare').textContent = ctx.t4.fare;
-      document.getElementById('t4Desc').textContent = ctx.t4.desc;
-
-      renderCompactPhrases(countryCode);
-    }
-
-    function updateCurrency(curr) {
-      loadVerifiedOperators();
-      if (currentItineraryData) {
-        renderItinerary(currentItineraryData);
-      }
-    }
-
-    function renderCompactPhrases(countryCode) {
-      const container = document.getElementById('compactPhraseChips');
-      if (!container) return;
-      container.innerHTML = '';
-      const ctx = LOCAL_CONTEXTS[countryCode] || LOCAL_CONTEXTS['GH'];
-      const phrases = ctx.phrases || [];
-
-      phrases.forEach((item, index) => {
-        const chipId = `phrase-chip-${index}`;
-        const chip = document.createElement('button');
-        chip.className = 'btn btn-outline';
-        chip.style.cssText = 'padding: 6px 14px; font-size: 12px; gap: 6px;';
-        chip.id = chipId;
-        chip.onclick = () => playDialectAudio(item.audio, chipId);
-        chip.innerHTML = `
-          <i class="fa-solid fa-volume-high" style="color: var(--gold); font-size: 11px;"></i>
-          <strong>${escapeHtml(item.word)}</strong>
-          <span style="font-family: var(--font-mono); color: var(--gold); font-size: 11px;">[${escapeHtml(item.phonetic || '')}]</span>
-          <span style="color: var(--text-muted);">(${escapeHtml(item.meaning)})</span>
-        `;
-        container.appendChild(chip);
-      });
-    }
-
-    function playDialectAudio(audioSrc, elementId) {
-      const player = document.getElementById('audioPlayer');
-      if (!player) return;
-
-      document.querySelectorAll('.dialect-card, .audio-chip, #compactPhraseChips button').forEach(c => c.classList.remove('playing'));
-      const activeEl = document.getElementById(elementId);
-      if (activeEl) activeEl.classList.add('playing');
-
-      player.onerror = () => {
-        if (audioSrc.endsWith('.m4a')) {
-          player.src = audioSrc.replace('.m4a', '.mp3');
-          player.play().catch(e => console.warn('Fallback play:', e));
-        }
-      };
-
-      player.src = audioSrc;
-      player.play().catch(e => {
-        console.warn('Audio playback notice:', e);
-        if (audioSrc.endsWith('.m4a')) {
-          player.src = audioSrc.replace('.m4a', '.mp3');
-          player.play().catch(err => console.warn(err));
-        }
-      });
-      player.onended = () => {
-        if (activeEl) activeEl.classList.remove('playing');
-      };
-    }
-
-    const FALLBACK_OPERATORS = [
-      {
-        businessName: "Jamestown Ga-Mashie Heritage Walk",
-        city: "Accra",
-        country: "Ghana",
-        description: "Community-led walking collective preserving Old Accra history, colonial Brazilian quarters, and coastal boxing gyms.",
-        whatsappNumber: "+233244987654",
-        momoProvider: "MTN",
-        momoWalletNumber: "0244987654",
-        listings: [{ title: "Jamestown Heritage Walk & Boxing Gyms", priceAmount: 250, priceCurrency: "GHS" }]
-      },
-      {
-        businessName: "Makola Textile & Cultural Guides",
-        city: "Accra",
-        country: "Ghana",
-        description: "Women-run merchant collective offering insider routes through West Africa's most vibrant textile corridors.",
-        whatsappNumber: "+233201234567",
-        momoProvider: "Telecel",
-        momoWalletNumber: "0201234567",
-        listings: [{ title: "Makola Market Textile & Spice Walk", priceAmount: 180, priceCurrency: "GHS" }]
-      },
-      {
-        businessName: "Lagos Mainland Underground & Afrobeat Crawl",
-        city: "Lagos",
-        country: "Nigeria",
-        description: "Nightlife and street-food curators connecting explorers to authentic highlife clubs and New Afrika Shrine.",
-        whatsappNumber: "+2348031234567",
-        momoProvider: "OPay",
-        momoWalletNumber: "08031234567",
-        listings: [{ title: "Fela Shrine & Mainland Nightlife Trail", priceAmount: 35000, priceCurrency: "NGN" }]
-      },
-      {
-        businessName: "Dakar Gorée Heritage & Fishermen Collective",
-        city: "Dakar",
-        country: "Senegal",
-        description: "Grassroots maritime guides exploring Ngor Island, artisanal surf spots, and historic Gorée memorials.",
-        whatsappNumber: "+221771234567",
-        momoProvider: "Wave",
-        momoWalletNumber: "771234567",
-        listings: [{ title: "Gorée Memorial & Ngor Island Art Tour", priceAmount: 25000, priceCurrency: "XOF" }]
-      }
-    ];
-
-    async function loadVerifiedOperators() {
-      const container = document.getElementById('operatorsContainer');
-      if (!container) return;
-
-      // Show sleek loading skeleton
-      container.innerHTML = `
-        <div class="skeleton-card">
-          <div class="skeleton-shimmer" style="height: 22px; width: 65%;"></div>
-          <div class="skeleton-shimmer" style="height: 14px; width: 35%; margin-top: 4px;"></div>
-          <div class="skeleton-shimmer" style="height: 48px; width: 100%; margin-top: 10px;"></div>
-          <div class="skeleton-shimmer" style="height: 38px; width: 100%; margin-top: 12px;"></div>
-        </div>
-        <div class="skeleton-card">
-          <div class="skeleton-shimmer" style="height: 22px; width: 65%;"></div>
-          <div class="skeleton-shimmer" style="height: 14px; width: 35%; margin-top: 4px;"></div>
-          <div class="skeleton-shimmer" style="height: 48px; width: 100%; margin-top: 10px;"></div>
-          <div class="skeleton-shimmer" style="height: 38px; width: 100%; margin-top: 12px;"></div>
-        </div>
-        <div class="skeleton-card">
-          <div class="skeleton-shimmer" style="height: 22px; width: 65%;"></div>
-          <div class="skeleton-shimmer" style="height: 14px; width: 35%; margin-top: 4px;"></div>
-          <div class="skeleton-shimmer" style="height: 48px; width: 100%; margin-top: 10px;"></div>
-          <div class="skeleton-shimmer" style="height: 38px; width: 100%; margin-top: 12px;"></div>
-        </div>
-      `;
-
-      let operators = [];
-      try {
-        const resp = await fetch(`${API_BASE}/operators`);
-        if (resp.ok) {
-          operators = await resp.json();
-        }
-      } catch (err) {
-        console.info('Backend offline, using verified partner registry:', err.message);
-      }
-
-      if (!operators || operators.length === 0) {
-        operators = FALLBACK_OPERATORS;
-      }
-
-      renderOperators(operators);
-    }
-
-    function renderOperators(operators) {
-      const container = document.getElementById('operatorsContainer');
-      if (!container) return;
-      container.innerHTML = '';
-
-      operators.forEach(op => {
-        const firstListing = (op.listings && op.listings.length > 0) ? op.listings[0] : null;
-        const listingTitle = firstListing ? firstListing.title : 'Grassroots Cultural Tour';
-        const priceAmount = firstListing ? firstListing.priceAmount : 200;
-        const currency = firstListing ? firstListing.priceCurrency : 'GHS';
-        const whatsappLink = op.whatsappNumber ? `https://wa.me/${op.whatsappNumber.replace(/[^0-9]/g, '')}` : '#';
-
-        const card = document.createElement('div');
-        card.className = 'operator-card';
-        card.innerHTML = `
-          <div>
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-              <div>
-                <h4 style="font-family: var(--font-display); font-size: 19px; font-weight: 700; color: var(--text-white);">${escapeHtml(op.businessName)}</h4>
-                <div style="font-size: 12px; color: var(--gold); margin-top: 2px;">
-                  <i class="fa-solid fa-location-dot"></i> ${escapeHtml(op.city || '')}, ${escapeHtml(op.country || '')}
-                </div>
-              </div>
-              <span class="badge green"><i class="fa-solid fa-circle-check"></i> VERIFIED</span>
-            </div>
-            <p style="font-size: 13px; color: var(--text-secondary); margin-top: 10px; line-height: 1.45;">${escapeHtml(op.description || 'Authentic community-led cultural experience.')}</p>
-          </div>
-
-          <div>
-            <div style="background: var(--bg-surface); padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 12px;">
-              <span style="font-size: 10.5px; font-weight: 700; color: var(--text-muted); font-family: var(--font-mono); text-transform: uppercase;">Featured Tour</span>
-              <p style="font-size: 13px; font-weight: 600; color: var(--text-white); margin-top: 2px;">${escapeHtml(listingTitle)}</p>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid var(--border-subtle);">
-              <div style="font-family: var(--font-mono); font-size: 17px; font-weight: 700; color: var(--text-white);">
-                ${currency} ${priceAmount}
-              </div>
-              <div style="display: flex; gap: 8px;">
-                <a href="${whatsappLink}" target="_blank" class="btn btn-outline" style="padding: 7px 12px; font-size: 12px;">
-                  <i class="fa-brands fa-whatsapp" style="color: #25D366;"></i> Chat
-                </a>
-                <button class="btn btn-gold" style="padding: 7px 14px; font-size: 12px;" onclick="openBookingModal('${escapeHtml(listingTitle)}', '${currency} ${priceAmount}', '${op.momoProvider || 'MTN'} MoMo: ${op.momoWalletNumber || op.whatsappNumber || ''}')">
-                  Book & Escrow
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    async function triggerItineraryGeneration() {
-      const cityCountry = document.getElementById('searchCity').value.split(',');
-      const destination = cityCountry[0];
-      const country = cityCountry[1] || 'GH';
-      const startDate = document.getElementById('searchStartDate').value;
-      const endDate = document.getElementById('searchEndDate').value;
-      const pace = document.getElementById('searchPace').value;
-      const budgetUsd = parseFloat(document.getElementById('searchBudget').value) || 450;
-
-      const btn = document.getElementById('generateBtn');
-      const section = document.getElementById('itineraryResultSection');
-      const activitiesContainer = document.getElementById('dayActivitiesList');
-      const statusBadge = document.getElementById('itineraryStatusBadge');
-
-      section.style.display = 'block';
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
-      if (statusBadge) {
-        statusBadge.className = 'badge gold';
-        statusBadge.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating Grounded Itinerary...';
-      }
-
-      // Render Skeleton loader while generating
-      if (activitiesContainer) {
-        activitiesContainer.innerHTML = `
-          <div class="navica-activity-card" style="opacity: 0.8;">
-            <div class="skeleton-shimmer" style="height: 36px; border-radius: 8px;"></div>
-            <div>
-              <div class="skeleton-shimmer" style="height: 18px; width: 70%; margin-bottom: 8px;"></div>
-              <div class="skeleton-shimmer" style="height: 14px; width: 95%;"></div>
-            </div>
-            <div class="skeleton-shimmer" style="height: 32px; width: 80px;"></div>
-          </div>
-          <div class="navica-activity-card" style="opacity: 0.8; margin-top: 10px;">
-            <div class="skeleton-shimmer" style="height: 36px; border-radius: 8px;"></div>
-            <div>
-              <div class="skeleton-shimmer" style="height: 18px; width: 70%; margin-bottom: 8px;"></div>
-              <div class="skeleton-shimmer" style="height: 14px; width: 95%;"></div>
-            </div>
-            <div class="skeleton-shimmer" style="height: 32px; width: 80px;"></div>
-          </div>
-        `;
-      }
-
-      section.scrollIntoView({ behavior: 'smooth' });
-
-      try {
-        const payload = {
-          destination,
-          country,
-          startDate,
-          endDate,
-          pace,
-          budgetUsd,
-          interests: ['culture', 'street food', 'markets', 'history'],
-          preferredLanguage: country === 'GH' ? 'Twi' : (country === 'NG' ? 'Yoruba' : 'en'),
-          groupSize: 2
-        };
-
-        const resp = await fetch(`${API_BASE}/itinerary/generate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        if (!resp.ok) throw new Error(`HTTP error ${resp.status}`);
-        const data = await resp.json();
-        currentItineraryData = data;
-        renderItinerary(data);
-
-        if (statusBadge) {
-          statusBadge.className = 'badge green';
-          statusBadge.innerHTML = '<i class="fa-solid fa-sparkles"></i> AI Grounded (pgvector + Gemini)';
-        }
-
-      } catch (err) {
-        const fallback = {
-          destination,
-          country,
-          totalDays: 3,
-          estimatedTotalCostUsd: 75.0,
-          pace,
-          days: [
-            {
-              dayNumber: 1,
-              date: startDate,
-              theme: 'Old Accra, Ga-Mashie & Makola Corridors',
-              activities: [
-                {
-                  timeSlot: '09:00 AM',
-                  title: 'Jamestown Ga-Mashie Heritage Walk & Harbor',
-                  description: 'Walk through historic colonial Brazilian lane, fishermen landing beach, and street boxing gyms with local guide.',
-                  priceLocal: 150,
-                  localCurrency: 'GHS',
-                  location: 'Jamestown Lighthouse, Accra',
-                  dialectPhrase: 'Akwaaba (Welcome)'
-                },
-                {
-                  timeSlot: '02:00 PM',
-                  title: 'Makola Market Textile & Spice Walk',
-                  description: 'Navigate Accra open-air market for authentic Dutch wax prints and authentic street snacks.',
-                  priceLocal: 80,
-                  localCurrency: 'GHS',
-                  location: 'Makola Market, Central Accra',
-                  dialectPhrase: 'Te so kakra (Bargain: Reduce price)'
-                }
-              ]
-            },
-            {
-              dayNumber: 2,
-              date: 'Day 2',
-              theme: 'Osu Nightlife & Street Food',
-              activities: [
-                {
-                  timeSlot: '10:00 AM',
-                  title: 'W.E.B. Du Bois Center & Oxford Street Crafts',
-                  description: 'Pan-African heritage center walkthrough followed by hand-beaded crafts shopping.',
-                  priceLocal: 100,
-                  localCurrency: 'GHS',
-                  location: 'Osu, Accra',
-                  dialectPhrase: 'Medaase (Thank you)'
-                },
-                {
-                  timeSlot: '06:30 PM',
-                  title: 'Street Food Walk & Live Highlife',
-                  description: 'Sample authentic Waakye, Kelewele (fried plantains with ginger), and live acoustic music.',
-                  priceLocal: 120,
-                  localCurrency: 'GHS',
-                  location: 'Osu Food Strip',
-                  dialectPhrase: 'Eti sen? (How are you?)'
-                }
-              ]
-            }
-          ]
-        };
-        currentItineraryData = fallback;
-        renderItinerary(fallback);
-
-        if (statusBadge) {
-          statusBadge.className = 'badge gold';
-          statusBadge.innerHTML = '<i class="fa-solid fa-bolt"></i> Local Knowledge Base (Offline Cache)';
-        }
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Generate</span>';
-      }
-    }
-
-    function renderItinerary(data) {
-      document.getElementById('itineraryTitle').textContent = `${data.destination} AI Itinerary`;
-      document.getElementById('itineraryCostBadge').textContent = `~$${data.estimatedTotalCostUsd || 75} USD Total`;
-
-      const tabsContainer = document.getElementById('itineraryDayTabs');
-      tabsContainer.innerHTML = '';
-
-      const days = data.days || [];
-      days.forEach((day, index) => {
-        const tab = document.createElement('button');
-        tab.className = `day-tab ${index === 0 ? 'active' : ''}`;
-        tab.textContent = `Day ${day.dayNumber || index + 1}: ${day.theme || 'Plan'}`;
-        tab.onclick = () => {
-          document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
-          renderDayActivities(day);
-        };
-        tabsContainer.appendChild(tab);
-      });
-
-      if (days.length > 0) {
-        renderDayActivities(days[0]);
-      }
-    }
-
-    function renderDayActivities(day) {
-      const container = document.getElementById('dayActivitiesList');
-      container.innerHTML = '';
-
-      (day.activities || []).forEach(act => {
-        const card = document.createElement('div');
-        card.className = 'navica-activity-card';
-        card.innerHTML = `
-          <div class="activity-time-chip">${escapeHtml(act.timeSlot || 'Morning')}</div>
-          <div>
-            <h4 style="font-size: 15px; font-weight: 700; color: var(--text-white);">${escapeHtml(act.title)}</h4>
-            <p style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">${escapeHtml(act.description)}</p>
-            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 6px;">
-              <i class="fa-solid fa-location-dot" style="color: var(--gold);"></i> ${escapeHtml(act.location || 'Accra')}
-              ${act.dialectPhrase ? `<span style="margin-left: 10px; color: var(--gold);"><i class="fa-solid fa-comment"></i> ${escapeHtml(act.dialectPhrase)}</span>` : ''}
-            </div>
-          </div>
-          <div style="text-align: right;">
-            <div style="font-family: var(--font-mono); font-size: 16px; font-weight: 700; color: var(--text-white); margin-bottom: 6px;">
-              ${act.localCurrency || 'GHS'} ${act.priceLocal || 100}
-            </div>
-            <button class="btn btn-gold" style="padding: 6px 14px; font-size: 11.5px;" onclick="openBookingModal('${escapeHtml(act.title)}', '${act.localCurrency || 'GHS'} ${act.priceLocal || 100}', 'MTN MoMo: 0244987654')">
-              Book
-            </button>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    // User Session & Role Isolation Management
-    let currentUser = { name: 'Alex Rivera', role: 'traveler', email: 'alex.rivera@gmail.com', avatar: 'A' };
-    let currentItineraryData = null;
-
+    // Set today's date in booking datepicker
     document.addEventListener('DOMContentLoaded', () => {
-      renderCompactPhrases('GH');
-      renderDialectSoundboard();
-      loadVerifiedOperators();
-      applyUserSession(currentUser);
-
-      // Close profile dropdown on outside click
-      document.addEventListener('click', (e) => {
-        const badge = document.getElementById('navAuthBadge');
-        const menu = document.getElementById('profileDropdownMenu');
-        if (badge && menu && !badge.contains(e.target) && !menu.contains(e.target)) {
-          menu.classList.remove('open');
-        }
-      });
+      const today = new Date().toISOString().split('T')[0];
+      const dateEl = document.getElementById('bookingDate');
+      if (dateEl) dateEl.value = today;
     });
 
-    function toggleProfileDropdown() {
-      const menu = document.getElementById('profileDropdownMenu');
-      if (menu) menu.classList.toggle('open');
-    }
+    function switchView(view) {
+      const explorerView = document.getElementById('explorerView');
+      const hostView = document.getElementById('hostDashboardView');
+      const btnExplorer = document.getElementById('btnExplorerView');
+      const btnHost = document.getElementById('btnHostView');
 
-    function applyUserSession(user) {
-      currentUser = user;
-      const traveler = document.getElementById('viewTraveler');
-      const host = document.getElementById('viewHost');
-      const navBrand = document.getElementById('navBrandText');
-      const navAvatar = document.getElementById('navUserAvatar');
-      const navName = document.getElementById('navUserName');
-      const navRole = document.getElementById('navUserRole');
-      const travelerLinks = document.getElementById('travelerNavLinks');
-      const hostLinks = document.getElementById('hostNavLinks');
-      const currSelect = document.getElementById('globalCurrencySelect');
-      const dropdownName = document.getElementById('dropdownFullName');
-      const dropdownEmail = document.getElementById('dropdownEmail');
-      const dropdownSwitchLabel = document.getElementById('dropdownSwitchRoleLabel');
-      const footerBrand = document.getElementById('footerBrand');
-      const footerDesc = document.getElementById('footerDesc');
-      const footerHostBtn = document.getElementById('footerHostBtn');
-
-      const mobileTraveler = document.getElementById('mobileTravelerLinks');
-      const mobileHost = document.getElementById('mobileHostLinks');
-      const mobileSwitchLabel = document.getElementById('mobileSwitchRoleLabel');
-      const mobileNavTitle = document.getElementById('mobileNavTitle');
-
-      if (user.role === 'host') {
-        // Strict Host OS View
-        traveler.classList.add('hidden');
-        host.classList.remove('hidden');
-        if (navBrand) navBrand.textContent = 'Kwan Host OS';
-        if (navAvatar) navAvatar.textContent = 'K';
-        if (navName) navName.textContent = 'Kwame Mensah';
-        if (navRole) { navRole.textContent = 'VERIFIED HOST'; navRole.style.color = 'var(--green)'; }
-        if (travelerLinks) travelerLinks.style.display = 'none';
-        if (hostLinks) hostLinks.style.display = 'flex';
-        if (currSelect) currSelect.style.display = 'none';
-        if (dropdownName) dropdownName.textContent = 'Kwame Mensah';
-        if (dropdownEmail) dropdownEmail.textContent = 'kwame@jamestown.gh';
-        if (dropdownSwitchLabel) dropdownSwitchLabel.textContent = 'Switch to Explorer (Alex Rivera)';
-        if (footerBrand) footerBrand.textContent = 'Kwan Host OS';
-        if (footerDesc) footerDesc.textContent = 'Jamestown Ga-Mashie Heritage Walk Collective &bull; Ghana Card Verified (Tier 1)';
-        if (footerHostBtn) footerHostBtn.style.display = 'none';
-
-        if (mobileTraveler) mobileTraveler.style.display = 'none';
-        if (mobileHost) mobileHost.style.display = 'flex';
-        if (mobileSwitchLabel) mobileSwitchLabel.textContent = 'Switch to Explorer (Alex)';
-        if (mobileNavTitle) mobileNavTitle.textContent = 'Host OS Navigation';
+      if (view === 'host') {
+        if (explorerView) explorerView.style.display = 'none';
+        if (hostView) hostView.classList.add('active');
+        if (btnExplorer) btnExplorer.classList.remove('active');
+        if (btnHost) btnHost.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        // Strict Explorer / Tourist View
-        host.classList.add('hidden');
-        traveler.classList.remove('hidden');
-        if (navBrand) navBrand.textContent = 'Kwan';
-        if (navAvatar) navAvatar.textContent = 'A';
-        if (navName) navName.textContent = 'Alex Rivera';
-        if (navRole) { navRole.textContent = 'EXPLORER'; navRole.style.color = 'var(--gold)'; }
-        if (travelerLinks) travelerLinks.style.display = 'flex';
-        if (hostLinks) hostLinks.style.display = 'none';
-        if (currSelect) currSelect.style.display = 'block';
-        if (dropdownName) dropdownName.textContent = 'Alex Rivera';
-        if (dropdownEmail) dropdownEmail.textContent = 'alex.rivera@gmail.com';
-        if (dropdownSwitchLabel) dropdownSwitchLabel.textContent = 'Switch to Host OS (Kwame Mensah)';
-        if (footerBrand) footerBrand.textContent = 'Kwan';
-        if (footerDesc) footerDesc.textContent = 'Real African travel. Grassroots guides. Instant Mobile Money payouts.';
-        if (footerHostBtn) footerHostBtn.style.display = 'inline-flex';
-
-        if (mobileTraveler) mobileTraveler.style.display = 'flex';
-        if (mobileHost) mobileHost.style.display = 'none';
-        if (mobileSwitchLabel) mobileSwitchLabel.textContent = 'Switch to Host View';
-        if (mobileNavTitle) mobileNavTitle.textContent = 'Explorer Navigation';
-      }
-
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function toggleMobileMenu() {
-      const drawer = document.getElementById('mobileNavDrawer');
-      if (drawer) drawer.classList.toggle('open');
-    }
-
-    function toggleAccountRole() {
-      const menu = document.getElementById('profileDropdownMenu');
-      if (menu) menu.classList.remove('open');
-
-      if (currentUser.role === 'traveler') {
-        applyUserSession({ name: 'Kwame Mensah', role: 'host', email: 'kwame@jamestown.gh', avatar: 'K' });
-      } else {
-        applyUserSession({ name: 'Alex Rivera', role: 'traveler', email: 'alex.rivera@gmail.com', avatar: 'A' });
+        if (explorerView) explorerView.style.display = 'block';
+        if (hostView) hostView.classList.remove('active');
+        if (btnExplorer) btnExplorer.classList.add('active');
+        if (btnHost) btnHost.classList.remove('active');
       }
     }
 
-    function navigateHome() {
-      if (currentUser.role === 'host') {
-        applyUserSession({ name: 'Kwame Mensah', role: 'host', email: 'kwame@jamestown.gh', avatar: 'K' });
-      } else {
-        applyUserSession({ name: 'Alex Rivera', role: 'traveler', email: 'alex.rivera@gmail.com', avatar: 'A' });
-      }
+    function changeCurrency(currency) {
+      currentCurrency = currency;
+      const priceEls = document.querySelectorAll('.price-main');
+      priceEls.forEach(el => {
+        const usd = el.getAttribute('data-usd');
+        const ghs = el.getAttribute('data-ghs');
+        if (currency === 'USD') {
+          el.innerText = `$${usd}`;
+        } else {
+          el.innerText = `₵${ghs}`;
+        }
+      });
+      recalculatePrice();
     }
 
-    function openAuthModal() {
-      const modal = document.getElementById('authModal');
+    function openBookingModal(name, host, usd, ghs, payout) {
+      selectedTour = { name, host, priceUsd: usd, priceGhs: ghs, payoutAccount: payout };
+      const tourNameEl = document.getElementById('modalTourName');
+      if (tourNameEl) tourNameEl.innerText = `${name} · Host: ${host}`;
+
+      const stepCheckout = document.getElementById('modalStepCheckout');
+      if (stepCheckout) stepCheckout.style.display = 'block';
+
+      const stepSuccess = document.getElementById('modalStepSuccess');
+      if (stepSuccess) stepSuccess.style.display = 'none';
+
+      recalculatePrice();
+
+      const modal = document.getElementById('bookingModal');
       if (modal) modal.classList.add('open');
     }
 
-    function closeAuthModal() {
-      const modal = document.getElementById('authModal');
+    function closeBookingModal() {
+      const modal = document.getElementById('bookingModal');
       if (modal) modal.classList.remove('open');
     }
 
-    function signOut() {
-      const menu = document.getElementById('profileDropdownMenu');
-      if (menu) menu.classList.remove('open');
-      openAuthModal();
-    }
+    function recalculatePrice() {
+      const guestsEl = document.getElementById('bookingGuests');
+      const guests = parseInt((guestsEl ? guestsEl.value : '1') || '1', 10);
+      const hostRateGhs = selectedTour.priceGhs * guests;
+      const hostRateUsd = selectedTour.priceUsd * guests;
+      const payoutGhs = Math.round(hostRateGhs * 0.9);
 
-    function openHostLogin() {
-      setAuthRole('host');
-      openAuthModal();
-    }
+      const hostRateEl = document.getElementById('breakdownHostRate');
+      const hostPayoutEl = document.getElementById('breakdownHostPayout');
+      const totalEl = document.getElementById('breakdownTotal');
+      const payLabelEl = document.getElementById('btnPayLabel');
 
-    function setAuthRole(role) {
-      const tabTraveler = document.getElementById('authTabTraveler');
-      const tabHost = document.getElementById('authTabHost');
-      const emailInput = document.getElementById('authEmail');
-      const emailLabel = document.getElementById('authEmailLabel');
-      const submitBtn = document.getElementById('authSubmitBtn');
-
-      if (role === 'host') {
-        if (tabHost) tabHost.classList.add('active');
-        if (tabTraveler) tabTraveler.classList.remove('active');
-        if (emailInput) emailInput.value = 'kwame@jamestown.gh';
-        if (emailLabel) emailLabel.textContent = 'Host Partner Email';
-        if (submitBtn) submitBtn.textContent = 'Sign In as Host Partner';
+      if (currentCurrency === 'USD') {
+        if (hostRateEl) hostRateEl.innerText = `$${hostRateUsd}.00`;
+        if (hostPayoutEl) hostPayoutEl.innerText = `₵${payoutGhs}.00 (MoMo)`;
+        if (totalEl) totalEl.innerText = `$${hostRateUsd}.00`;
+        if (payLabelEl) payLabelEl.innerText = `Pay $${hostRateUsd} with Card & Lock Escrow`;
       } else {
-        if (tabTraveler) tabTraveler.classList.add('active');
-        if (tabHost) tabHost.classList.remove('active');
-        if (emailInput) emailInput.value = 'alex.rivera@gmail.com';
-        if (emailLabel) emailLabel.textContent = 'Explorer Email';
-        if (submitBtn) submitBtn.textContent = 'Sign In as Explorer';
+        if (hostRateEl) hostRateEl.innerText = `₵${hostRateGhs}.00`;
+        if (hostPayoutEl) hostPayoutEl.innerText = `₵${payoutGhs}.00 (MoMo)`;
+        if (totalEl) totalEl.innerText = `₵${hostRateGhs}.00`;
+        if (payLabelEl) payLabelEl.innerText = `Pay ₵${hostRateGhs} with Card & Lock Escrow`;
       }
     }
 
-    function performSocialLogin(provider) {
-      const isHost = document.getElementById('authTabHost').classList.contains('active');
-      if (isHost) {
-        applyUserSession({ name: 'Kwame Mensah', role: 'host', email: 'kwame@jamestown.gh', avatar: 'K' });
-      } else {
-        applyUserSession({ name: 'Alex Rivera', role: 'traveler', email: 'alex.rivera@gmail.com', avatar: 'A' });
-      }
-      closeAuthModal();
-    }
-
-    function performEmailLogin() {
-      const isHost = document.getElementById('authTabHost').classList.contains('active');
-      const email = document.getElementById('authEmail').value;
-      if (isHost) {
-        applyUserSession({ name: 'Kwame Mensah', role: 'host', email: email || 'kwame@jamestown.gh', avatar: 'K' });
-      } else {
-        applyUserSession({ name: 'Alex Rivera', role: 'traveler', email: email || 'alex.rivera@gmail.com', avatar: 'A' });
-      }
-      closeAuthModal();
-    }
-
-    function openBookingModal(title, price, momo) {
-      document.getElementById('modalListingTitle').textContent = title;
-      document.getElementById('modalPriceLabel').textContent = price;
-      document.getElementById('modalHostMoMo').textContent = momo;
-      document.getElementById('bookingModal').classList.add('open');
-    }
-
-    function closeBookingModal() { document.getElementById('bookingModal').classList.remove('open'); }
-
-    function executePaystackPayment() {
-      const name = document.getElementById('bookTouristName').value || 'Alex Rivera';
-      const email = document.getElementById('bookTouristEmail').value || 'alex@gmail.com';
-      const listing = document.getElementById('modalListingTitle').textContent;
-      const priceText = document.getElementById('modalPriceLabel').textContent;
-
-      let numericAmount = 250;
-      const match = priceText.match(/(\d+(?:\.\d+)?)/);
-      if (match) numericAmount = parseFloat(match[1]);
-
-      const btn = document.querySelector('#bookingModal .btn-gold');
+    function processMockCardPayment() {
+      const btn = document.getElementById('btnPayAction') || document.querySelector('.btn-pay');
       if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Initializing Escrow...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authorizing Card via Paystack...';
       }
 
-      const reference = 'kwan-' + Math.floor((Math.random() * 1000000000) + 1);
-      const paystackPublicKey = 'pk_test_sample_kwan_escrow_public_key';
-
-      if (typeof PaystackPop !== 'undefined' && PaystackPop.setup) {
-        try {
-          const handler = PaystackPop.setup({
-            key: paystackPublicKey,
-            email: email,
-            amount: Math.round(numericAmount * 100),
-            currency: priceText.includes('NGN') || priceText.includes('₦') ? 'NGN' : 'GHS',
-            ref: reference,
-            metadata: {
-              custom_fields: [
-                { display_name: "Tourist Name", variable_name: "tourist_name", value: name },
-                { display_name: "Experience", variable_name: "experience", value: listing },
-                { display_name: "Escrow Protection", variable_name: "escrow", value: "Locked in Kwan Escrow Vault" }
-              ]
-            },
-            callback: function(response) {
-              if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-lock"></i> Pay & Lock into Escrow';
-              }
-              closeBookingModal();
-              showPaymentSuccessModal(name, listing, priceText, response.reference || reference);
-            },
-            onClose: function() {
-              if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-credit-card"></i> Pay via Paystack & Lock into Escrow';
-              }
-              closeBookingModal();
-              showPaymentSuccessModal(name, listing, priceText, reference);
-            }
-          });
-          handler.openIframe();
-          return;
-        } catch (e) {
-          console.warn('PaystackPop inline setup fallback:', e);
-        }
-      }
-
-      // Fallback if third-party script or popup is blocked by browser sandbox
       setTimeout(() => {
+        activeEscrowPin = Math.floor(1000 + Math.random() * 9000).toString();
+
+        const genPinEl = document.getElementById('generatedPin');
+        if (genPinEl) genPinEl.innerText = activeEscrowPin;
+
+        const smsPinEl = document.getElementById('smsPin');
+        if (smsPinEl) smsPinEl.innerText = activeEscrowPin;
+
+        const smsHostEl = document.getElementById('smsHost');
+        if (smsHostEl) smsHostEl.innerText = selectedTour.host;
+
+        const stepCheckout = document.getElementById('modalStepCheckout');
+        if (stepCheckout) stepCheckout.style.display = 'none';
+
+        const stepSuccess = document.getElementById('modalStepSuccess');
+        if (stepSuccess) stepSuccess.style.display = 'block';
+
+        const pChars = activeEscrowPin.split('');
+        if (document.getElementById('p1')) document.getElementById('p1').value = pChars[0];
+        if (document.getElementById('p2')) document.getElementById('p2').value = pChars[1];
+        if (document.getElementById('p3')) document.getElementById('p3').value = pChars[2];
+        if (document.getElementById('p4')) document.getElementById('p4').value = pChars[3];
+
         if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-credit-card"></i> Pay via Paystack & Lock into Escrow';
+          btn.innerHTML = '<i class="fa-solid fa-lock"></i> <span id="btnPayLabel">Pay with Card & Lock Escrow</span>';
         }
-        closeBookingModal();
-        showPaymentSuccessModal(name, listing, priceText, reference);
-      }, 400);
+      }, 900);
     }
 
-    function executeDemoEscrowSimulation() {
-      const name = document.getElementById('bookTouristName').value || 'Alex Rivera';
-      const listing = document.getElementById('modalListingTitle').textContent;
-      const priceText = document.getElementById('modalPriceLabel').textContent;
-      const reference = 'kwan-escrow-' + Math.floor((Math.random() * 9000) + 1000);
+    function testInHostTerminal() {
       closeBookingModal();
-      showPaymentSuccessModal(name, listing, priceText, reference);
+      switchView('host');
+      const feedback = document.getElementById('pinFeedback');
+      feedback.style.color = 'var(--gold)';
+      feedback.innerText = `PIN ${activeEscrowPin} from ${selectedTour.host}'s guest is loaded. Click below to simulate host redemption!`;
     }
 
-    function showPaymentSuccessModal(guestName, experience, price, reference) {
-      const titleEl = document.getElementById('successReceiptTitle');
-      const guestEl = document.getElementById('successReceiptGuest');
-      const amountEl = document.getElementById('successReceiptAmount');
-      const refEl = document.getElementById('successReceiptRef');
-      const modal = document.getElementById('paymentSuccessModal');
-
-      if (titleEl) titleEl.textContent = experience;
-      if (guestEl) guestEl.textContent = guestName;
-      if (amountEl) amountEl.textContent = price;
-      if (refEl) refEl.textContent = reference;
-      if (modal) modal.classList.add('open');
-    }
-
-    function closePaymentSuccessModal() {
-      const modal = document.getElementById('paymentSuccessModal');
-      if (modal) modal.classList.remove('open');
-    }
-
-    function openListingModal() { document.getElementById('listingModal').classList.add('open'); }
-    function closeListingModal() { document.getElementById('listingModal').classList.remove('open'); }
-
-    function saveNewListing() {
-      const title = document.getElementById('newListingTitle').value;
-      const price = document.getElementById('newListingPrice').value;
-      const desc = document.getElementById('newListingDesc').value;
-
-      if (!title || !price) {
-        alert('Please fill out the title and price.');
-        return;
+    function focusNext(current, nextId) {
+      if (current.value.length >= 1) {
+        document.getElementById(nextId).focus();
       }
-
-      const container = document.getElementById('hostListingsContainer');
-      const item = document.createElement('div');
-      item.style.cssText = 'background: var(--bg-surface); padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;';
-      item.innerHTML = `
-        <div>
-          <h5 style="font-size: 14px; font-weight: 700; color: var(--text-white);">${escapeHtml(title)}</h5>
-          <span style="font-size: 12px; color: var(--gold); font-family: var(--font-mono);">₵${price} GHS &bull; Active</span>
-        </div>
-        <span class="badge green">LIVE</span>
-      `;
-      container.prepend(item);
-      alert(`✅ EXPERIENCE PUBLISHED!\n"${title}" is now active and vector-embedded for Kwan traveler queries.`);
-      closeListingModal();
     }
 
-    function simulatePayoutWithdrawal() {
-      alert(`✅ WITHDRAWAL SETTLED!\n\n₵3,450.00 GHS has been transferred to your MTN Mobile Money wallet (+233 24 498 7654).\nTransaction ID: MOMO-GH-9938210.`);
-    }
+    function submitHostPin() {
+      const entered = (document.getElementById('p1').value +
+                       document.getElementById('p2').value +
+                       document.getElementById('p3').value +
+                       document.getElementById('p4').value).trim();
 
-    function releaseBookingEscrow(guest, amount) {
-      alert(`✅ ESCROW RELEASED TO YOUR MOMO WALLET!\n\nTour completed for ${guest}.\n₵${amount}.00 GHS disbursed instantly with zero bank deductions.`);
-    }
+      const feedback = document.getElementById('pinFeedback');
 
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+      if (entered === activeEscrowPin) {
+        hostBalanceGhs += 342;
+        document.getElementById('hostBalance').innerText = `₵${hostBalanceGhs.toLocaleString()}.00`;
+        document.getElementById('hostEscrowPending').innerText = `₵0.00`;
+
+        feedback.style.color = 'var(--green)';
+        feedback.innerHTML = '<i class="fa-solid fa-circle-check"></i> SUCCESS! PIN Verified. ₵342.00 released to MTN MoMo (024••••654). SMS receipt sent.';
+      } else {
+        feedback.style.color = '#EF4444';
+        feedback.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Invalid PIN. Please ask traveler for the 4-digit code.';
+      }
     }
   </script>
 </body>

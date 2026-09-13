@@ -1,5 +1,11 @@
-# === INTERNAL PITCH DOCUMENTS ===
+# === INTERNAL PITCH & PRESENTATION DOCUMENTS ===
 PAAIS_2026_PITCH_SUBMISSION.md
+LEAN_CANVAS_MODEL.md
+KWAN_MVP_VALIDATION_EXPERIMENT.md
+*.pptx
+build_investor_deck.py
+update_lean_canvas_pptx.py
+*.ps1
 
 # === ENVIRONMENT & SECRETS ===
 .env
