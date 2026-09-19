@@ -4,8 +4,10 @@ LEAN_CANVAS_MODEL.md
 KWAN_MVP_VALIDATION_EXPERIMENT.md
 *.pptx
 *.pdf
+*.docx
 build_investor_deck.py
 build_pitch_deck.py
+generate_strategic_word_doc.py
 update_lean_canvas_pptx.py
 *.ps1
 docs/
@@ -13,6 +15,7 @@ pitch-files-hack-ai-thon/
 branding/
 scripts/
 scratch_video/
+scratch_charts/
 kwan_product_demo.*
 product_demo_player.html
 
