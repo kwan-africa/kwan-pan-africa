@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kwan — Authentic Africa, Paid Directly to Grassroots Hosts</title>
+  <title>Kwan — Orchestrating Africa's Tourism Experience & Financial Layer</title>
   <meta name="description" content="Book verified grassroots guides and artisans in Accra. Pay with your international card into a secure Mobile Money escrow vault.">
   
   <!-- Google Fonts: Syne (Display), Plus Jakarta Sans (Body), IBM Plex Mono (Data/Code) -->
@@ -1563,6 +1563,112 @@
       .header-actions { gap: 8px; }
       .top-bar { flex-direction: column; gap: 4px; text-align: center; }
     }
+
+    /* =========================================================================
+       VIEW 3: TOUR OPERATOR / AGENCY B2B DASHBOARD & GTA COMPLIANCE
+       ========================================================================= */
+    .agency-dashboard-view {
+      display: none;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      margin-top: 24px;
+    }
+    .agency-dashboard-view.active { display: block; }
+
+    .agency-hero-banner {
+      background: linear-gradient(90deg, rgba(56, 189, 248, 0.12) 0%, rgba(245, 166, 35, 0.12) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .agency-saas-badge {
+      background: var(--cyan);
+      color: #0B0E14;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-family: var(--font-mono);
+      white-space: nowrap;
+    }
+    .agency-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .agency-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+    }
+    .agency-card .label { font-size: 11px; font-family: var(--font-mono); color: var(--text-muted); text-transform: uppercase; }
+    .agency-card .value { font-size: 24px; font-family: var(--font-mono); font-weight: 800; color: var(--text-white); margin-top: 4px; }
+    .agency-card .value.gold { color: var(--gold); }
+    .agency-card .value.green { color: var(--green); }
+
+    /* Multi-Party Orchestration Card inside AI Modal */
+    .multi-party-box {
+      background: var(--bg-surface);
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-top: 14px;
+    }
+    .multi-party-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #C084FC;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .party-split-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+    }
+    .party-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .party-role { color: var(--text-muted); font-size: 10px; font-family: var(--font-mono); text-transform: uppercase; }
+    .party-name { font-weight: 700; color: var(--text-white); }
+    .party-payout { font-family: var(--font-mono); font-weight: 700; color: var(--green); }
+
+    .gta-compliance-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: var(--green);
+      font-weight: 700;
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-family: var(--font-mono);
+    }
+
   </style>
 </head>
 <body>
@@ -1615,7 +1721,13 @@
             <i class="fa-solid fa-wand-magic-sparkles"></i> Cultural AI
           </button>
           <button class="view-btn" id="btnHostView" onclick="switchView('host')">
-            <i class="fa-solid fa-wallet"></i> Host Terminal
+            <i class="fa-solid fa-wallet"></i> Host MoMo
+          </button>
+          <button class="view-btn" id="btnAgencyView" onclick="switchView('agency')">
+            <i class="fa-solid fa-building-user"></i> Tour Agency
+          </button>
+          <button class="view-btn" id="btnGtaView" onclick="openGtaModal()" style="color: var(--cyan);">
+            <i class="fa-solid fa-landmark"></i> GTA 1% Levy
           </button>
           <button class="view-btn econ-btn" id="btnEconomicsView" onclick="openEconomicsModal()">
             <i class="fa-solid fa-chart-pie"></i> Economics
@@ -1710,11 +1822,53 @@
           <p class="section-desc">Hand-verified community guides and master artisans across Accra.</p>
         </div>
         <span class="pilot-tag" style="align-self: center;">
-          <i class="fa-solid fa-circle-check"></i> 4 Experiences Ready to Book
+          <i class="fa-solid fa-circle-check"></i> 5 Experiences Ready to Book
         </span>
       </div>
 
       <div class="experience-grid" id="experienceGrid">
+        <!-- Card 0: Featured Cape Coast Castle Spiritual Pilgrimage -->
+        <div class="exp-card" style="border-color: rgba(245, 166, 35, 0.45); box-shadow: 0 4px 20px rgba(245, 166, 35, 0.15);">
+          <div class="exp-image-wrap">
+            <img src="assets/images/cape_coast_castle.jpg" alt="Cape Coast Castle Spiritual Pilgrimage" class="exp-image">
+            <span class="exp-badge" style="color: var(--gold); border-color: var(--border-gold); background: rgba(11, 14, 20, 0.9);">
+              <i class="fa-solid fa-star" style="color: var(--gold);"></i> Featured Pilgrimage
+            </span>
+            <span class="exp-duration"><i class="fa-regular fa-clock"></i> Full Day</span>
+          </div>
+          <div class="exp-body">
+            <div class="host-row">
+              <div class="host-avatar" style="color: var(--gold); border-color: var(--gold);">K</div>
+              <div>
+                <div class="host-name">Master Kwesi &amp; Kojo</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Cape Coast Castle Heritage Guild</div>
+              </div>
+              <div class="host-rating"><i class="fa-solid fa-star"></i> 5.0 (74)</div>
+            </div>
+            <h3 class="exp-title">Cape Coast Castle &amp; Assin Manso Spiritual Pilgrimage</h3>
+            <p class="exp-summary">Walk the Door of No Return, enter the oceanfront dungeons with licensed guild elders, and complete the sacred ancestral bath at Assin Manso Slave River.</p>
+            <div class="host-impact-tag">
+              <i class="fa-solid fa-hand-holding-dollar"></i> Host Earns: <span class="card-host-payout" data-usd="72.00" data-ghs="1080">₵1,080.00</span> (90% MoMo)
+            </div>
+            <div class="exp-payout-info">
+              <i class="fa-solid fa-wallet"></i> Payout: <span>MTN MoMo (024••••883)</span>
+            </div>
+          </div>
+          <div class="exp-footer">
+            <div class="exp-price-block">
+              <span class="price-main" data-usd="80" data-ghs="1200">₵1,200</span>
+              <span class="price-sub">per person · all fees &amp; shuttle incl.</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end;">
+              <button class="btn-book" onclick="openBookingModal('Cape Coast Castle &amp; Assin Manso Spiritual Pilgrimage', 'Master Kwesi &amp; Kojo', 80, 1200, 'MTN MoMo (024••••883)')">
+                <span>Book Now</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+              <span class="cta-micro-trust"><i class="fa-solid fa-shield-check"></i> 100% Escrow · Free Cancel</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Card 1: Jamestown (Real Authentic Photo of Jamestown Accra) -->
         <div class="exp-card">
           <div class="exp-image-wrap">
@@ -2082,6 +2236,111 @@
   </section>
 
   <!-- =========================================================================
+       VIEW 3: TOUR OPERATOR / AGENCY B2B DASHBOARD
+       ========================================================================= -->
+  <section class="section-wrap agency-dashboard-view" id="agencyDashboardView">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">Tour Operator B2B Dispatch Portal</h2>
+        <p class="section-desc"><strong>Black Star Heritage Expeditions</strong> · License: GTA-TO-2024-8819 · Enterprise SaaS Tier ($49/mo)</p>
+      </div>
+      <button class="view-btn active" onclick="switchView('explorer')">
+        <i class="fa-solid fa-arrow-left"></i> Back to Explorer View
+      </button>
+    </div>
+
+    <!-- Agency Hero Banner -->
+    <div class="agency-hero-banner">
+      <div style="font-size: 12.5px; color: var(--text-primary); max-width: 720px;">
+        <strong>B2B Grassroots Dispatch Network:</strong> Automate itinerary scheduling, assign licensed unbanked guides to international groups, and track multi-party escrow disbursements with automated 1% GTA Levy compliance.
+      </div>
+      <div class="agency-saas-badge">
+        <i class="fa-solid fa-bolt"></i> $49/MO SAAS + 5% VOLUME
+      </div>
+    </div>
+
+    <!-- Agency Metrics (4 Cards) -->
+    <div class="agency-grid">
+      <div class="agency-card">
+        <div class="label">Roster Guild Guides</div>
+        <div class="value">12 Verified</div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Cape Coast, Ga-Mashie, Makola, Aburi</div>
+      </div>
+      <div class="agency-card">
+        <div class="label">Active Escrow Volume</div>
+        <div class="value gold">₵18,450.00</div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">8 active group tours in progress</div>
+      </div>
+      <div class="agency-card">
+        <div class="label">Monthly Agency Margin</div>
+        <div class="value green">₵3,648.00</div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Retained from 48 completed bookings</div>
+      </div>
+      <div class="agency-card">
+        <div class="label">GTA 1% Levy Remitted</div>
+        <div class="value" style="color: var(--cyan);">₵364.80</div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Automated remittance to Tourism Fund</div>
+      </div>
+    </div>
+
+    <!-- Live Agency Dispatch Table -->
+    <div class="ledger-wrap">
+      <div class="ledger-title-row">
+        <div>
+          <h3 style="font-size: 16px; font-weight: 800; color: var(--text-white);">Active Multi-Party Dispatch Roster</h3>
+          <p style="font-size: 11.5px; color: var(--text-muted);">Real-time tracking of assigned guides, private transport, and customer release PIN status.</p>
+        </div>
+        <span class="pilot-tag" style="font-size: 11px; background: rgba(56, 189, 248, 0.12); color: var(--cyan); border-color: rgba(56, 189, 248, 0.3);">
+          <i class="fa-solid fa-route"></i> 4 Active Corridors
+        </span>
+      </div>
+
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Group / Client</th>
+            <th>Itinerary & Destination</th>
+            <th>Assigned Guide</th>
+            <th>Chauffeur / Van</th>
+            <th>Escrow Vault</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight: 700; color: var(--text-white);">Atlanta Heritage Pilgrimage (4 Guests)</td>
+            <td>Cape Coast Castle Spiritual Pilgrimage</td>
+            <td><span style="color: var(--gold); font-weight: 600;">Master Kwesi</span> (Castle Guild)</td>
+            <td style="font-family: var(--font-mono); font-size: 11px;">HiAce #GW-4912-21</td>
+            <td style="font-family: var(--font-mono); font-weight: 700; color: var(--gold);">₵1,200 Locked</td>
+            <td><span class="status-tag-settled" style="background: rgba(56, 189, 248, 0.15); color: var(--cyan); border-color: rgba(56, 189, 248, 0.3);"><i class="fa-solid fa-spinner fa-spin"></i> In Transit</span></td>
+            <td><button class="btn-book" style="padding: 4px 10px; font-size: 10px;" onclick="alert('Dispatch Status: Master Kwesi is en route to Cape Coast Dungeons. Escrow Vault ₵1,200 is locked in regulatory trust.')">Track PIN</button></td>
+          </tr>
+          <tr>
+            <td style="font-weight: 700; color: var(--text-white);">Marcus Thorne (USA)</td>
+            <td>Jamestown Coastal Walk & Boxing Gym</td>
+            <td><span style="color: var(--gold); font-weight: 600;">Nii Tackie</span> (Ga-Mashie)</td>
+            <td style="font-family: var(--font-mono); font-size: 11px;">Walking Escort</td>
+            <td style="font-family: var(--font-mono); font-weight: 700; color: var(--green);">₵380.00 Released</td>
+            <td><span class="status-tag-settled"><i class="fa-solid fa-circle-check"></i> Completed</span></td>
+            <td><button class="btn-book" style="padding: 4px 10px; font-size: 10px;" onclick="switchView('host')">View MoMo</button></td>
+          </tr>
+          <tr>
+            <td style="font-weight: 700; color: var(--text-white);">Sarah & Liam Jenkins (UK)</td>
+            <td>Makola Textile Sourcing Masterclass</td>
+            <td><span style="color: var(--gold); font-weight: 600;">Auntie Naa</span> (Makola Collective)</td>
+            <td style="font-family: var(--font-mono); font-size: 11px;">Walking Escort</td>
+            <td style="font-family: var(--font-mono); font-weight: 700; color: var(--gold);">₵450 Locked</td>
+            <td><span class="status-tag-settled" style="background: rgba(245, 166, 35, 0.15); color: var(--gold); border-color: rgba(245, 166, 35, 0.3);"><i class="fa-solid fa-clock"></i> Active Tour</span></td>
+            <td><button class="btn-book" style="padding: 4px 10px; font-size: 10px;" onclick="alert('Auntie Naa is currently navigating Krobo bead stalls with guests.')">Status</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- =========================================================================
        MODAL 1: ESCROW CHECKOUT & PIN GENERATION
        ========================================================================= -->
   <div class="modal-backdrop" id="bookingModal">
@@ -2230,7 +2489,10 @@
             Select your Accra cultural interest or ask a custom question:
           </label>
           <div class="ai-vibe-chips">
-            <button class="ai-chip active" id="chip-jamestown" onclick="selectAiVibe(this, 'jamestown')">
+            <button class="ai-chip active" id="chip-capecoast" onclick="selectAiVibe(this, 'cape_coast')">
+              🕊️ Ancestral Roots &amp; Cape Coast Castle
+            </button>
+            <button class="ai-chip" id="chip-jamestown" onclick="selectAiVibe(this, 'jamestown')">
               🥊 Ga-Mashie Heritage &amp; Boxing
             </button>
             <button class="ai-chip" id="chip-makola" onclick="selectAiVibe(this, 'makola')">
@@ -2245,7 +2507,7 @@
           </div>
 
           <div class="ai-custom-prompt-row">
-            <input type="text" id="aiCustomInput" class="ai-input-field" value="I want an authentic immersion in Jamestown boxing history and Ga culture with a verified local guide.">
+            <input type="text" id="aiCustomInput" class="ai-input-field" value="I want a 4-day spiritual journey into slavery roots, Cape Coast Castle, and ancestral connections.">
             <button class="btn-ai-generate" id="btnAiGenerate" onclick="generateAiPlan()">
               <span id="aiGenBtnText">Generate Itinerary</span>
               <i class="fa-solid fa-wand-magic-sparkles"></i>
@@ -2375,6 +2637,73 @@
     </div>
   </div>
 
+
+  <!-- =========================================================================
+       MODAL 3: GHANA TOURISM AUTHORITY (GTA) 1% STATUTORY LEVY INSPECTOR
+       ========================================================================= -->
+  <div class="modal-backdrop" id="gtaModal">
+    <div class="modal-window wide">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">
+            <i class="fa-solid fa-landmark" style="color: var(--cyan);"></i> GTA Statutory Tourism Levy Engine (Act 817)
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted);">
+            Automated 1% National Tourism Development Levy Deductions & Regulatory Compliance
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeGtaModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+          <div class="gta-compliance-badge">
+            <i class="fa-solid fa-shield-check"></i> ACT 817 STATUTORY COMPLIANCE VERIFIED
+          </div>
+          <div style="font-size: 11.5px; color: var(--text-muted); font-family: var(--font-mono);">
+            Consolidated Fund Account: <strong>TDF-BOG-009214</strong>
+          </div>
+        </div>
+
+        <div class="economics-grid">
+          <div class="econ-stat-card">
+            <div class="econ-stat-label">Macro Receipts (GTA 2024)</div>
+            <div class="econ-stat-val gold">$4.34B</div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">1,303,962 Arrivals</div>
+          </div>
+          <div class="econ-stat-card">
+            <div class="econ-stat-label">Off-Hotel Spend Drop</div>
+            <div class="econ-stat-val" style="color: var(--terracotta);">-11.3%</div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">$375M addressable gap</div>
+          </div>
+          <div class="econ-stat-card">
+            <div class="econ-stat-label">Kwan Levy Remitted</div>
+            <div class="econ-stat-val green">₵14,440.00</div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">100% automated collection</div>
+          </div>
+          <div class="econ-stat-card">
+            <div class="econ-stat-label">Informal Hosts Onboarded</div>
+            <div class="econ-stat-val" style="color: var(--cyan);">150+</div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Ga-Mashie & Cape Coast</div>
+          </div>
+        </div>
+
+        <div class="macro-callout-box" style="margin-top: 12px; border-left-color: var(--cyan);">
+          <div style="font-weight: 700; color: var(--text-white); margin-bottom: 4px;">
+            <i class="fa-solid fa-scale-balanced" style="color: var(--cyan);"></i> Regulatory Alignment under Ghana Tourism Act 817:
+          </div>
+          In Ghana, <strong>77% of catering is informal</strong> and <strong>92.3% of businesses lack commercial bank accounts</strong>. Traditional cash transactions leak 100% of the mandatory 1% Tourism Development Levy. 
+          <br><br>
+          Kwan automatically calculates and holds the 1% statutory levy on every completed booking and settles it in real time to the GTA Tourism Development Fund. By formalizing grassroots tourism, Kwan transforms regulatory friction into institutional support.
+        </div>
+
+        <button class="btn-pay" style="width: 100%; margin-top: 16px;" onclick="closeGtaModal()">
+          <span>Return to Explorer</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer>
     <div>
@@ -2448,29 +2777,86 @@
     function switchView(view) {
       const explorerView = document.getElementById('explorerView');
       const hostView = document.getElementById('hostDashboardView');
+      const agencyView = document.getElementById('agencyDashboardView');
       const btnExplorer = document.getElementById('btnExplorerView');
       const btnHost = document.getElementById('btnHostView');
+      const btnAgency = document.getElementById('btnAgencyView');
+
+      if (explorerView) explorerView.style.display = 'none';
+      if (hostView) hostView.classList.remove('active');
+      if (agencyView) agencyView.classList.remove('active');
+      if (btnExplorer) btnExplorer.classList.remove('active');
+      if (btnHost) btnHost.classList.remove('active');
+      if (btnAgency) btnAgency.classList.remove('active');
 
       if (view === 'host') {
-        if (explorerView) explorerView.style.display = 'none';
         if (hostView) hostView.classList.add('active');
-        if (btnExplorer) btnExplorer.classList.remove('active');
         if (btnHost) btnHost.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (view === 'agency') {
+        if (agencyView) agencyView.classList.add('active');
+        if (btnAgency) btnAgency.classList.add('active');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         if (explorerView) explorerView.style.display = 'block';
-        if (hostView) hostView.classList.remove('active');
         if (btnExplorer) btnExplorer.classList.add('active');
-        if (btnHost) btnHost.classList.remove('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
+    }
+
+    function openGtaModal() {
+      const modal = document.getElementById('gtaModal');
+      if (modal) modal.classList.add('open');
+    }
+    function closeGtaModal() {
+      const modal = document.getElementById('gtaModal');
+      if (modal) modal.classList.remove('open');
     }
 
     /* =========================================================================
        CULTURAL AI CONCIERGE ENGINE (POWERED BY GEMINI 1.5 FLASH)
        ========================================================================= */
-    let currentVibe = 'jamestown';
+    let currentVibe = 'cape_coast';
 
     const aiVibeKnowledge = {
+      cape_coast: {
+        title: 'Ancestral Roots & Cape Coast Castle Spiritual Pilgrimage',
+        badge: 'Ancestral Pilgrimage & Slavery Roots',
+        prompt: 'I want a 4-day spiritual journey into slavery roots, Cape Coast Castle, and ancestral connections.',
+        host: 'Master Kwesi & Kojo (Licensed Cape Coast Castle Guild)',
+        hostTitle: 'Cape Coast & Elmina Castle Heritage Guild',
+        hostRating: '5.0 (74 reviews)',
+        priceGhs: 1200,
+        priceUsd: 80,
+        payoutAccount: 'MTN MoMo (024••••883)',
+        tourFullName: 'Cape Coast Castle & Assin Manso Spiritual Pilgrimage',
+        stops: [
+          'Cape Coast Castle: Door of No Return & Male/Female Dungeons',
+          'Assin Manso Slave River (Donko Nsuo) Ancestral Bath & Memorial Wall',
+          'Jamestown Ga-Mashie Heritage Walk & Ancestral Reconnection with Nii Tackie',
+          'Authentic Chop Bar Lunch (Auntie Muni Waakye & Kelewele)'
+        ],
+        dialects: [
+          { lang: 'Fante/Twi', phrase: 'Akwaaba Fie', phonetic: 'ah-KWAH-bah FEE-eh', meaning: 'Welcome home to the motherland' },
+          { lang: 'Twi', phrase: 'Sankofa', phonetic: 'sahn-KOH-fah', meaning: 'Go back and fetch your roots / wisdom' },
+          { lang: 'Twi', phrase: 'Yeda Nyame ase', phonetic: 'yeh-dah nyah-meh ah-seh', meaning: 'We give thanks to the Almighty' }
+        ],
+        protocolTip: 'Remove shoes when touching the holy waters of Assin Manso. A libation ceremony is performed with elder guidance before entering sacred grounds.',
+        transit: {
+          station: 'Kaneshie VIP Station (Central Region Line)',
+          sign: 'Accra - Cape Coast Express / Coastal Shuttle',
+          fare: '₵95.00 (Est. 2.5 hrs private air-conditioned shuttle)',
+          meeting: 'Master Kwesi meets guests directly at the Castle Courtyard Cannon Gate'
+        },
+        multiPartyBreakdown: [
+          { role: 'Heritage Guide', name: 'Master Kwesi (Castle Guild)', payout: '₵450 ($30)' },
+          { role: 'Chauffeur / Van', name: 'Kofi Boateng (Private Shuttle)', payout: '₵350 ($23)' },
+          { role: 'Authentic Chop Bar', name: 'Auntie Muni Heritage Kitchen', payout: '₵180 ($12)' },
+          { role: 'Agency Dispatch', name: 'Black Star Heritage Tours', payout: '₵100 ($7)' },
+          { role: 'GTA 1% Statutory Levy', name: 'Tourism Development Fund (Act 817)', payout: '₵12 ($1)' },
+          { role: 'Kwan Platform Fee', name: 'Escrow Vault & Safety Guarantee', payout: '₵108 ($7)' }
+        ]
+      },
       jamestown: {
         title: 'Ga-Mashie Heritage & Coastal Boxing Guild',
         badge: 'Ga Heritage & Athletics',
@@ -2662,6 +3048,23 @@
         </li>
       `).join('');
 
+      const multiPartyHtml = data.multiPartyBreakdown ? `
+        <div class="multi-party-box">
+          <div class="multi-party-title">
+            <i class="fa-solid fa-network-wired"></i> Autonomous Multi-Party Orchestration (Single-Click Escrow)
+          </div>
+          <div class="party-split-grid">
+            ${data.multiPartyBreakdown.map(p => `
+              <div class="party-item">
+                <span class="party-role">${p.role}</span>
+                <span class="party-name">${p.name}</span>
+                <span class="party-payout">${p.payout}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : '';
+
       const priceDisplay = currentCurrency === 'USD' ? `$${data.priceUsd}` : `₵${data.priceGhs}`;
 
       container.innerHTML = `
@@ -2713,6 +3116,8 @@
             </ul>
           </div>
         </div>
+
+        ${multiPartyHtml}
 
         <!-- Direct Escrow Booking CTA -->
         <button class="ai-booking-trigger-btn" onclick="bookAiCuratedTour('${vibeKey}')">
