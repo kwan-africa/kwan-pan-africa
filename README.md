@@ -14,13 +14,12 @@
 
 ## 🌍 The Problem & Strategic Context
 
-Over **90% of West Africa's tourism economy operates informally** (*Ghana Statistical Service IBES 2024: 92.3% of business establishments*). The most authentic boutique eco-lodges, grassroots cultural guides, street food artisans, and trotro transit routes are not listed on global booking platforms (Airbnb, Expedia, Viator). 
-
-### The Visibility-Execution Chasm
-* **Global platforms require Western commercial bank accounts (IBAN/SWIFT):** Local grassroots guides and artisans rely solely on Mobile Money (MTN MoMo, Telecel Cash) and are completely excluded.
-* **Cash Traps & Broken ATMs:** International travelers arrive cashless or exhaust paper Cedis, suffering bank card security timeouts on street ATMs.
-* **Extortionate Middlemen:** Traditional street tour syndicates extract 30% to 50% of visitor spend, leaving hosts without digital identities, reviews, or capital formation.
-* **GTA Regulatory Modernization:** To meet international safety benchmarks, the Ghana Tourism Authority (GTA) is increasing compliance enforcement. Kwan provides the digital accreditation bridge (Ghana Card verification + GTA safety benchmarks) so grassroots operators can formalize without prohibitive costs.
+In Ghana's tourism and hospitality landscape, **informal establishments make up approximately 75% to 80% of all operating units** (GTA & GSS Data). While luxury hotels and registered travel agencies represent the visible formal tier, the vast majority of the tourism-adjacent supply chain is comprised of micro-sized, unregistered businesses:
+* **Catering Sub-Sector (77% Informal):** 77% of catering enterprises are traditional "chop bars", mobile street food artisans, and informal drinking spots (*GTA 2024 Report*). Only 23% are formal restaurants.
+* **Lodging & Homestays:** Outside Accra and Kumasi, informal accommodation units (unregistered guesthouses, rural eco-lodges, homestays) heavily outnumber formal hotels.
+* **The 80% Employment vs. 1% Levy Paradox:** Informal tourism drives roughly **80% of total sector employment**, yet escapes formal licensing and tax rails. Consequently, the statutory **1% National Tourism Levy (Act 817)** is completely uncollected across 75–80% of operating units.
+* **Global OTA Banking Wall:** Platforms like Booking.com and Airbnb strictly require commercial bank accounts (IBAN/SWIFT) and corporate registries—locking out local chop bars, guides, and homestays that rely exclusively on Mobile Money (MTN MoMo, Telecel Cash).
+* **GTA Regulatory Modernization:** The Ghana Tourism Authority is actively pushing to formalize informal chop bars and sites. Kwan provides the digital accreditation and escrow rail to formalize operators without imposing burdensome overhead.
 
 ---
 
