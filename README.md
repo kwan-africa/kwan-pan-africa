@@ -152,6 +152,10 @@ in the Appwrite console: `hosts` may be publicly readable, while
 `bookings` and `escrow_ledgers` must remain server-only.
 
 ### 4. Alternative: Spring Boot + Flutter Stack
+
+The deployed web demo uses the Node/Express + React/Appwrite path above. The
+Spring Boot + Flutter stack is retained as a separate mobile/backend
+implementation and is not part of the Vercel/Railway web deployment.
 ```bash
 # Launch PostgreSQL + pgvector
 docker-compose up postgres -d
