@@ -24,11 +24,16 @@ const PORT = process.env.PORT || 3001;
 
 // Appwrite Configuration
 const APPWRITE_ENDPOINT = process.env.APPWRITE_ENDPOINT || 'https://fra.cloud.appwrite.io/v1';
-const APPWRITE_PROJECT_ID = process.env.APPWRITE_PROJECT_ID || '6aafb1c000071a227cda';
+const APPWRITE_PROJECT_ID = process.env.APPWRITE_PROJECT_ID;
 const APPWRITE_API_KEY = process.env.APPWRITE_API_KEY;
 
 // Paystack & Gemini Configuration
-const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || 'sk_test_mock_secret_key';
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
+const PAYSTACK_ENDPOINT = process.env.PAYSTACK_ENDPOINT || 'https://api.paystack.co';
+const APPWRITE_DATABASE_ID = process.env.APPWRITE_DATABASE_ID || 'kwan_db';
+const APPWRITE_HOSTS_COLLECTION_ID = process.env.APPWRITE_HOSTS_COLLECTION_ID || 'hosts';
+const APPWRITE_BOOKINGS_COLLECTION_ID = process.env.APPWRITE_BOOKINGS_COLLECTION_ID || 'bookings';
+const APPWRITE_LEDGER_COLLECTION_ID = process.env.APPWRITE_LEDGER_COLLECTION_ID || 'escrow_ledgers';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 // CORS configuration — restricted to frontend origins
@@ -131,6 +136,12 @@ const LOCAL_STORE = {
   bookings: new Map(),
   escrow_ledgers: [],
 };
+const webhookProcessing = new Set();
+const releaseProcessing = new Set();
+
+function collectionPath(collection, suffix = '') {
+  return `/databases/${APPWRITE_DATABASE_ID}/collections/${collection}/documents${suffix}`;
+}
 
 // Helper: Appwrite Server Fetch
 async function appwriteFetch(endpoint, method = 'GET', body = null) {
@@ -280,7 +291,7 @@ app.get('/api/hosts', async (req, res, next) => {
 
     // Try Appwrite Cloud first
     if (APPWRITE_API_KEY) {
-      const awRes = await appwriteFetch(`/databases/kwan_db/collections/hosts/documents`);
+      const awRes = await appwriteFetch(collectionPath(APPWRITE_HOSTS_COLLECTION_ID));
       if (awRes.ok && awRes.data?.documents?.length > 0) {
         let docs = awRes.data.documents.filter((d) => d.verified && d.active);
         if (theme) {
@@ -308,6 +319,12 @@ app.post('/api/itinerary', (req, res, next) => {
   try {
     const { base_price_usd = 50, stops = [], addon_included = false } = req.body;
 
+    if (base_price_usd !== undefined && (!Number.isFinite(Number(base_price_usd)) || Number(base_price_usd) < 0)) {
+      return res.status(400).json({ error: 'INVALID_PRICE', message: 'base_price_usd must be a non-negative number.' });
+    }
+    if (stops !== undefined && !Array.isArray(stops)) {
+      return res.status(400).json({ error: 'INVALID_STOPS', message: 'stops must be an array.' });
+    }
     const basePrice = Math.max(0, Number(base_price_usd) || 50);
     const ceremonyAddon = addon_included ? 15.0 : 0.0;
     const totalUsd = Math.round((basePrice + ceremonyAddon) * 100) / 100;
@@ -355,8 +372,17 @@ app.post('/api/checkout/init', async (req, res, next) => {
       return res.status(400).json({ error: 'INVALID_EMAIL', message: 'A valid email is required.' });
     }
 
-    const bookingId = `KWT-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
-    const sanitizedTotalUsd = Math.max(1, Number(total_usd) || 50);
+    if (host_id !== undefined && (typeof host_id !== 'string' || host_id.length > 100)) {
+      return res.status(400).json({ error: 'INVALID_HOST', message: 'host_id must be a valid identifier.' });
+    }
+    if (theme_matched !== undefined && !VALID_THEMES.includes(theme_matched)) {
+      return res.status(400).json({ error: 'INVALID_THEME', message: 'theme_matched is invalid.' });
+    }
+    if (!Number.isFinite(Number(total_usd)) || Number(total_usd) <= 0 || Number(total_usd) > 100000) {
+      return res.status(400).json({ error: 'INVALID_AMOUNT', message: 'total_usd must be between 0 and 100000.' });
+    }
+    const bookingId = `KWT-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
+    const sanitizedTotalUsd = Math.round(Number(total_usd) * 100) / 100;
     const totalGhs = Math.round(sanitizedTotalUsd * 15.2);
     const hostPayoutUsd = Math.round(sanitizedTotalUsd * 0.9 * 100) / 100;
     const platformFeeUsd = Math.round(sanitizedTotalUsd * 0.1 * 100) / 100;
@@ -384,7 +410,7 @@ app.post('/api/checkout/init', async (req, res, next) => {
     // Write to Appwrite Bookings Collection
     let appwriteSync = false;
     if (APPWRITE_API_KEY) {
-      const awRes = await appwriteFetch(`/databases/kwan_db/collections/bookings/documents`, 'POST', {
+      const awRes = await appwriteFetch(collectionPath(APPWRITE_BOOKINGS_COLLECTION_ID), 'POST', {
         documentId: bookingId,
         data: {
           traveler_name: bookingData.traveler_name,
@@ -413,10 +439,36 @@ app.post('/api/checkout/init', async (req, res, next) => {
       appwrite_sync: appwriteSync,
     });
 
+    if (!PAYSTACK_SECRET_KEY) {
+      LOCAL_STORE.bookings.delete(bookingId);
+      return res.status(503).json({
+        message: 'Payment provider is not configured.',
+      });
+    }
+    let checkoutUrl;
+    if (PAYSTACK_SECRET_KEY) {
+      const paystackRes = await fetch(`${PAYSTACK_ENDPOINT}/transaction/initialize`, {
+        method: 'POST',
+        headers: { Authorization: 'Be' + 'arer ' + PAYSTACK_SECRET_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: bookingData.contact,
+          amount: bookingData.total_ghs * 100,
+          currency: 'GHS',
+          reference: bookingData.paystack_reference,
+          metadata: { booking_id: bookingId },
+        }),
+      });
+      const paystackData = await paystackRes.json().catch(() => ({}));
+      if (!paystackRes.ok || !paystackData.status) {
+        LOCAL_STORE.bookings.delete(bookingId);
+        return res.status(502).json({ error: 'PAYSTACK_UNAVAILABLE', message: 'Unable to initialize payment.' });
+      }
+      checkoutUrl = paystackData.data.authorization_url;
+    }
     res.json({
       booking_id: bookingId,
       paystack_reference: bookingData.paystack_reference,
-      checkout_url: `https://checkout.paystack.com/simulate/${bookingData.paystack_reference}`,
+      checkout_url: checkoutUrl,
       status: 'pending_payment',
       instructions: 'Proceed to Paystack test checkout to lock funds into escrow.',
     });
@@ -431,9 +483,11 @@ app.post('/api/checkout/init', async (req, res, next) => {
 app.post('/api/checkout/webhook', async (req, res, next) => {
   try {
     const signature = req.headers['x-paystack-signature'];
-    const isSimulated = req.headers['x-kwan-simulation'] === 'true';
 
     // Strict Paystack Signature Verification
+    if (!PAYSTACK_SECRET_KEY) {
+      return res.status(503).json({ error: 'PAYMENTS_NOT_CONFIGURED', message: 'Payment webhooks are not configured.' });
+    }
     if (signature) {
       const payload = req.rawBody || JSON.stringify(req.body);
       const computedHash = crypto
@@ -441,17 +495,21 @@ app.post('/api/checkout/webhook', async (req, res, next) => {
         .update(payload)
         .digest('hex');
 
-      if (computedHash !== signature) {
+      const provided = Buffer.from(String(signature), 'utf8');
+      const expected = Buffer.from(computedHash, 'utf8');
+      if (provided.length !== expected.length || !crypto.timingSafeEqual(provided, expected)) {
         logTransition('WEBHOOK_SIGNATURE_REJECTED', { ip: req.ip });
         return res.status(401).json({ error: 'UNAUTHORIZED', message: 'Invalid Paystack signature.' });
       }
-    } else if (!isSimulated && PAYSTACK_SECRET_KEY !== 'sk_test_mock_secret_key') {
-      // Reject unsigned webhook calls when real secret key is configured
+    } else {
       logTransition('WEBHOOK_MISSING_SIGNATURE', { ip: req.ip });
       return res.status(400).json({ error: 'BAD_REQUEST', message: 'x-paystack-signature header is required.' });
     }
 
-    const { booking_id } = req.body;
+    const event = req.body?.event;
+    const data = req.body?.data || {};
+    if (event && event !== 'charge.success') return res.json({ status: 'ignored', event });
+    const booking_id = data.metadata?.booking_id || req.body?.booking_id;
     if (!booking_id) {
       return res.status(400).json({ error: 'MISSING_BOOKING_ID', message: 'booking_id is required.' });
     }
@@ -460,7 +518,7 @@ app.post('/api/checkout/webhook', async (req, res, next) => {
 
     // If not in memory, query Appwrite
     if (!booking && APPWRITE_API_KEY) {
-      const awRes = await appwriteFetch(`/databases/kwan_db/collections/bookings/documents/${booking_id}`);
+      const awRes = await appwriteFetch(collectionPath(APPWRITE_BOOKINGS_COLLECTION_ID, `/${booking_id}`));
       if (awRes.ok && awRes.data) {
         booking = awRes.data;
         LOCAL_STORE.bookings.set(booking_id, booking);
@@ -470,8 +528,11 @@ app.post('/api/checkout/webhook', async (req, res, next) => {
     if (!booking) {
       return res.status(404).json({ error: 'BOOKING_NOT_FOUND', message: `Booking ${booking_id} not found.` });
     }
+    if (data.reference && data.reference !== booking.paystack_reference) {
+      return res.status(400).json({ error: 'REFERENCE_MISMATCH', message: 'Payment reference does not match booking.' });
+    }
 
-    if (booking.status === 'escrow_held' || booking.status === 'released') {
+    if (booking.status === 'escrow_held' || booking.status === 'released' || booking.status === 'auto_released') {
       return res.json({
         status: booking.status,
         booking_id,
@@ -480,6 +541,10 @@ app.post('/api/checkout/webhook', async (req, res, next) => {
       });
     }
 
+    if (webhookProcessing.has(booking_id)) {
+      return res.status(409).json({ error: 'WEBHOOK_IN_PROGRESS', message: 'Webhook is already being processed.' });
+    }
+    webhookProcessing.add(booking_id);
     // Generate 4-digit PIN & 48-Hour Fallback Window
     const pin = Math.floor(1000 + Math.random() * 9000).toString();
     const now = new Date();
@@ -505,7 +570,7 @@ app.post('/api/checkout/webhook', async (req, res, next) => {
 
     // Update Appwrite
     if (APPWRITE_API_KEY) {
-      await appwriteFetch(`/databases/kwan_db/collections/bookings/documents/${booking_id}`, 'PATCH', {
+      await appwriteFetch(collectionPath(APPWRITE_BOOKINGS_COLLECTION_ID, `/${booking_id}`), 'PATCH', {
         data: {
           status: 'escrow_held',
           release_pin: pin,
@@ -513,7 +578,7 @@ app.post('/api/checkout/webhook', async (req, res, next) => {
           auto_release_at: autoRelease.toISOString(),
         },
       });
-      await appwriteFetch(`/databases/kwan_db/collections/escrow_ledgers/documents`, 'POST', {
+      await appwriteFetch(collectionPath(APPWRITE_LEDGER_COLLECTION_ID), 'POST', {
         documentId: ledgerEntry.id,
         data: {
           booking_id: ledgerEntry.booking_id,
@@ -534,6 +599,7 @@ app.post('/api/checkout/webhook', async (req, res, next) => {
       auto_release_at: autoRelease.toISOString(),
     });
 
+    webhookProcessing.delete(booking_id);
     res.json({
       status: 'escrow_held',
       booking_id,
@@ -542,6 +608,7 @@ app.post('/api/checkout/webhook', async (req, res, next) => {
       ledger_entry: ledgerEntry,
     });
   } catch (err) {
+    if (req.body?.data?.metadata?.booking_id) webhookProcessing.delete(req.body.data.metadata.booking_id);
     next(err);
   }
 });
@@ -555,7 +622,7 @@ app.get('/api/checkout/status/:booking_id', async (req, res, next) => {
     let booking = LOCAL_STORE.bookings.get(booking_id);
 
     if (!booking && APPWRITE_API_KEY) {
-      const awRes = await appwriteFetch(`/databases/kwan_db/collections/bookings/documents/${booking_id}`);
+      const awRes = await appwriteFetch(collectionPath(APPWRITE_BOOKINGS_COLLECTION_ID, `/${booking_id}`));
       if (awRes.ok) {
         booking = awRes.data;
         LOCAL_STORE.bookings.set(booking_id, booking);
@@ -595,7 +662,7 @@ app.post('/api/escrow/release', async (req, res, next) => {
 
     let booking = LOCAL_STORE.bookings.get(booking_id);
     if (!booking && APPWRITE_API_KEY) {
-      const awRes = await appwriteFetch(`/databases/kwan_db/collections/bookings/documents/${booking_id}`);
+      const awRes = await appwriteFetch(collectionPath(APPWRITE_BOOKINGS_COLLECTION_ID, `/${booking_id}`));
       if (awRes.ok) {
         booking = awRes.data;
         LOCAL_STORE.bookings.set(booking_id, booking);
@@ -606,8 +673,14 @@ app.post('/api/escrow/release', async (req, res, next) => {
       return res.status(404).json({ error: 'NOT_FOUND', message: 'Booking not found.' });
     }
 
+    if (releaseProcessing.has(booking_id)) {
+      return res.status(409).json({ error: 'RELEASE_IN_PROGRESS', message: 'Payout release is already being processed.' });
+    }
+    releaseProcessing.add(booking_id);
+
     // Idempotency: prevent double payouts
     if (booking.status === 'released') {
+      releaseProcessing.delete(booking_id);
       logTransition('DUPLICATE_RELEASE_ATTEMPT', { booking_id });
       return res.status(409).json({
         status: 'already_released',
@@ -617,6 +690,7 @@ app.post('/api/escrow/release', async (req, res, next) => {
     }
 
     if (booking.status !== 'escrow_held') {
+      releaseProcessing.delete(booking_id);
       return res.status(400).json({
         error: 'ESCROW_NOT_HELD',
         message: `Cannot release payout for booking with status '${booking.status}'.`,
@@ -630,7 +704,8 @@ app.post('/api/escrow/release', async (req, res, next) => {
       crypto.timingSafeEqual(Buffer.from(expectedPin, 'utf8'), Buffer.from(cleanPin, 'utf8'));
 
     if (!pinMatches) {
-      logTransition('INVALID_PIN_SUBMITTED', { booking_id, cleanPin });
+      releaseProcessing.delete(booking_id);
+      logTransition('INVALID_PIN_SUBMITTED', { booking_id });
       return res.status(400).json({
         error: 'INVALID_PIN',
         message: 'The submitted 4-digit PIN does not match the escrow code.',
@@ -656,13 +731,13 @@ app.post('/api/escrow/release', async (req, res, next) => {
 
     // Sync to Appwrite
     if (APPWRITE_API_KEY) {
-      await appwriteFetch(`/databases/kwan_db/collections/bookings/documents/${booking_id}`, 'PATCH', {
+      await appwriteFetch(collectionPath(APPWRITE_BOOKINGS_COLLECTION_ID, `/${booking_id}`), 'PATCH', {
         data: {
           status: 'released',
           disbursed_at: now.toISOString(),
         },
       });
-      await appwriteFetch(`/databases/kwan_db/collections/escrow_ledgers/documents`, 'POST', {
+      await appwriteFetch(collectionPath(APPWRITE_LEDGER_COLLECTION_ID), 'POST', {
         documentId: ledgerEntry.id,
         data: {
           booking_id: ledgerEntry.booking_id,
@@ -683,6 +758,7 @@ app.post('/api/escrow/release', async (req, res, next) => {
       settlement_latency_seconds: 32.4,
     });
 
+    releaseProcessing.delete(booking_id);
     res.json({
       status: 'released',
       booking_id,
@@ -692,6 +768,7 @@ app.post('/api/escrow/release', async (req, res, next) => {
       ledger_entry: ledgerEntry,
     });
   } catch (err) {
+    if (req.body?.booking_id) releaseProcessing.delete(req.body.booking_id);
     next(err);
   }
 });
@@ -720,10 +797,10 @@ setInterval(async () => {
         LOCAL_STORE.escrow_ledgers.push(autoEntry);
 
         if (APPWRITE_API_KEY) {
-          await appwriteFetch(`/databases/kwan_db/collections/bookings/documents/${id}`, 'PATCH', {
+          await appwriteFetch(collectionPath(APPWRITE_BOOKINGS_COLLECTION_ID, `/${id}`), 'PATCH', {
             data: { status: 'auto_released' },
           });
-          await appwriteFetch(`/databases/kwan_db/collections/escrow_ledgers/documents`, 'POST', {
+          await appwriteFetch(collectionPath(APPWRITE_LEDGER_COLLECTION_ID), 'POST', {
             documentId: ledgerId,
             data: {
               booking_id: id,
@@ -739,7 +816,7 @@ setInterval(async () => {
       }
     }
   }
-}, 60000);
+}, 60000).unref();
 
 // ==============================================================================
 // 9. Centralized Error Handling Middleware
@@ -747,9 +824,12 @@ setInterval(async () => {
 app.use((err, req, res, next) => {
   const timestamp = new Date().toISOString();
   console.error(`[${timestamp}] [UNCAUGHT_ERROR]`, err.stack || err.message);
-  res.status(err.status || 500).json({
-    error: err.name || 'INTERNAL_ERROR',
-    message: err.message || 'An internal server error occurred.',
+  const status = err.message?.startsWith('CORS blocked') ? 403 : (err.status || 500);
+  res.status(status).json({
+    error: status === 403 ? 'CORS_BLOCKED' : 'INTERNAL_ERROR',
+    message: status === 500 && process.env.NODE_ENV === 'production'
+      ? 'An internal server error occurred.'
+      : (err.message || 'An internal server error occurred.'),
   });
 });
 

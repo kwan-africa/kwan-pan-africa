@@ -92,7 +92,7 @@ GEMINI_API_KEY=your_gemini_api_key
 PAYSTACK_PUBLIC_KEY=pk_test_...
 PAYSTACK_SECRET_KEY=sk_test_...
 APPWRITE_ENDPOINT=https://fra.cloud.appwrite.io/v1
-APPWRITE_PROJECT_ID=6aafb1c000071a227cda
+APPWRITE_PROJECT_ID=your_appwrite_project_id
 APPWRITE_API_KEY=your_scoped_api_key
 ```
 
@@ -110,6 +110,46 @@ cd kwan-web-app
 npm install
 npm run dev        # Web app live at http://localhost:5173
 ```
+
+### Verification before a demo
+
+Run the production checks from the repository root:
+
+```bash
+cd kwan-web-app
+npm run lint
+npm run build
+npm run preview
+```
+
+The Node API must be configured with real sandbox credentials before payment
+testing. The browser only talks to the API; Appwrite and Paystack secret
+credentials belong in the server environment and must never be added to
+`VITE_*` variables.
+
+For a backend smoke test:
+
+```bash
+cd server
+npm install
+npm start
+curl http://localhost:3001/health
+```
+
+Before sharing the repository, inspect both tracked history and the compiled
+frontend:
+
+```bash
+git log --all --full-history -- "*.env"
+git log -p --all | Select-String -Pattern "appwrite|paystack" -CaseSensitive:$false
+Select-String -Path kwan-web-app/dist/assets/*.js -Pattern "sk_test|sk_live"
+```
+
+The payment webhook must be exercised with a real Paystack sandbox signature.
+Unsigned requests and requests signed with a different secret are expected to
+return an error. Appwrite collection permissions should be verified directly
+in the Appwrite console: `hosts` may be publicly readable, while
+`bookings` and `escrow_ledgers` must remain server-only.
 
 ### 4. Alternative: Spring Boot + Flutter Stack
 ```bash

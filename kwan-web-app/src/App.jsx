@@ -17,51 +17,6 @@ import {
   X,
 } from 'lucide-react';
 
-const PILOT_HOSTS = [
-  {
-    id: 'host_01',
-    name: 'Nana Kwesi Mensah',
-    role: 'Ancestral roots guide and castle historian',
-    area: 'Cape Coast Castle, Central Region',
-    price: 50,
-    initials: 'NM',
-    color: 'ochre',
-    theme: 'heritage_spiritual',
-    anchorSite: 'Cape Coast Castle (Door of No Return)',
-    image: '/ghana_guide_kwesi.jpg',
-    keywords: ['spiritual', 'roots', 'ancestral', 'cape coast', 'castle', 'pilgrimage', 'door of no return', 'reconnect', 'fante', 'shrine'],
-    match: 'Your request is an exact match for an ancestral diaspora pilgrimage.',
-  },
-  {
-    id: 'host_02',
-    name: 'Joshua Clottey',
-    role: 'Boxing coach and Ga-Mashie walking host',
-    area: 'Bukom, Jamestown',
-    price: 50,
-    initials: 'JC',
-    color: 'ochre',
-    theme: 'adventure',
-    anchorSite: 'Bukom Boxing Academies',
-    image: '/ghana_guide_kwesi.jpg',
-    keywords: ['boxing', 'bukom', 'jamestown', 'ga-mashie', 'fitness', 'street', 'adventure', 'hike', 'aburi'],
-    match: 'Your request centres on Bukom boxing and active cultural exploration.',
-  },
-  {
-    id: 'host_03',
-    name: 'Naa Densua Addy',
-    role: 'Bead maker and cultural host',
-    area: 'Jamestown, Accra',
-    price: 45,
-    initials: 'NA',
-    color: 'clay',
-    theme: 'art',
-    anchorSite: 'Ga-Mashie Heritage Bead Guild',
-    image: '/kwan_logo_square_white_bg.png',
-    keywords: ['bead', 'craft', 'art', 'kenkey', 'maker', 'fashion', 'food'],
-    match: 'Your request is a close fit for a hands-on craft & cultural experience.',
-  },
-];
-
 const THEME_OPTIONS = [
   { tag: 'heritage_spiritual', label: 'Heritage / Spiritual', defaultQuery: 'a spiritual journey to reconnect with my roots' },
   { tag: 'adventure', label: 'Adventure / Boxing', defaultQuery: 'morning boxing session and walking tour in Bukom' },
@@ -78,16 +33,6 @@ const EXAMPLES = [
 
 const formatUsd = (value) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
-
-function matchGuideFallback(request) {
-  const words = (request || '').toLowerCase();
-  const scored = PILOT_HOSTS.map((host) => ({
-    host,
-    score: host.keywords.reduce((score, keyword) => score + (words.includes(keyword) ? 2 : 0), 0),
-  })).sort((a, b) => b.score - a.score);
-
-  return scored[0].score ? scored[0].host : PILOT_HOSTS[0];
-}
 
 const API_BASE = import.meta.env?.VITE_API_BASE || '/api';
 
@@ -180,7 +125,7 @@ export default function App() {
           image: h.photo_url || '/ghana_guide_kwesi.jpg',
         };
       } else {
-        matched = matchGuideFallback(trimmed);
+        throw new Error('No verified guides are currently available for that theme.');
       }
 
       setGuide(matched);
@@ -190,10 +135,11 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ base_price_usd: matched.price, addon_included: false }),
       });
-      if (itinRes.ok) {
-        const itinData = await itinRes.json();
-        setServerPricing(itinData);
+      if (!itinRes.ok) {
+        throw new Error(`Itinerary service returned status ${itinRes.status}`);
       }
+      const itinData = await itinRes.json();
+      setServerPricing(itinData);
 
       setConversation((items) => [
         ...items,
@@ -203,22 +149,14 @@ export default function App() {
         },
       ]);
     } catch (err) {
-      console.warn('Backend query notice:', err.message);
-      setErrorMessage(`Backend connection notice: ${err.message}. Using pilot fallback.`);
-      const matchedGuide = matchGuideFallback(trimmed);
-      setGuide(matchedGuide);
-      setServerPricing({
-        total_usd: matchedGuide.price,
-        total_ghs: Math.round(matchedGuide.price * 15.2),
-        platform_fee_usd: Math.round(matchedGuide.price * 0.1 * 100) / 100,
-        host_payout_usd: Math.round(matchedGuide.price * 0.9 * 100) / 100,
-        tourism_levy_usd: Math.round(matchedGuide.price * 0.01 * 100) / 100,
-      });
+      console.error('Backend query failed:', err);
+      setGuide(null);
+      setErrorMessage(`We could not complete the match: ${err.message}`);
       setConversation((items) => [
         ...items,
         {
           role: 'kwan',
-          copy: `${matchedGuide.match} I matched you with ${matchedGuide.name} (Anchor: ${matchedGuide.anchorSite}).`,
+          copy: 'I could not reach the live guide roster. Please try again when the service is available.',
         },
       ]);
     } finally {
@@ -249,16 +187,7 @@ export default function App() {
       setServerPricing(data);
     } catch (err) {
       console.error('Itinerary recalculation failed:', err);
-      setErrorMessage('Could not update price with server. Local calculation applied.');
-      setAddonIncluded(nextAddon);
-      const newTotal = guide.price + (nextAddon ? 15 : 0);
-      setServerPricing({
-        total_usd: newTotal,
-        total_ghs: Math.round(newTotal * 15.2),
-        platform_fee_usd: Math.round(newTotal * 0.1 * 100) / 100,
-        host_payout_usd: Math.round(newTotal * 0.9 * 100) / 100,
-        tourism_levy_usd: Math.round(newTotal * 0.01 * 100) / 100,
-      });
+      setErrorMessage(`Could not update the server-calculated price: ${err.message}`);
     } finally {
       setLoadingAction(null);
     }

@@ -72,7 +72,10 @@ public class PaymentService {
                 if (hex.length() == 1) hexString.append('0');
                 hexString.append(hex);
             }
-            return hexString.toString().equalsIgnoreCase(signature);
+            byte[] expected = hexString.toString().getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+            byte[] provided = signature.toLowerCase(java.util.Locale.ROOT)
+                    .getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+            return java.security.MessageDigest.isEqual(expected, provided);
         } catch (Exception e) {
             log.error("Error computing webhook HMAC-SHA512: {}", e.getMessage());
             return false;
@@ -183,6 +186,17 @@ public class PaymentService {
 
         Booking booking = bookingRepository.findByPaystackReference(reference)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found for ref: " + reference));
+        // Webhooks and browser redirects can both verify the same reference. Never
+        // initiate a second payout once settlement has been recorded.
+        if (booking.getStatus() == Booking.BookingStatus.SETTLED_TO_OPERATOR
+                || booking.getStatus() == Booking.BookingStatus.PAYMENT_CONFIRMED) {
+            return Map.of(
+                    "status", "success",
+                    "bookingId", booking.getId().toString(),
+                    "operatorSettled", booking.getStatus() == Booking.BookingStatus.SETTLED_TO_OPERATOR,
+                    "message", "Payment was already processed."
+            );
+        }
         booking.setStatus(Booking.BookingStatus.PAYMENT_CONFIRMED);
         booking.setPaidAt(java.time.LocalDateTime.now());
         bookingRepository.save(booking);
