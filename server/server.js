@@ -851,6 +851,6 @@ if (fs.existsSync(DIST_PATH)) {
 
 app.listen(PORT, () => {
   console.log(`⚡ Kwan Backend API listening on http://localhost:${PORT}`);
-  console.log(`🔒 Appwrite Status: ${APPWRITE_API_KEY ? 'Configured & Connected' : 'Mock Mode'}`);
+  console.log(`🔒 Appwrite Status: ${APPWRITE_API_KEY ? 'Configured' : 'Not configured'}`);
   console.log(`🛡️ CORS Enabled for: ${ALLOWED_ORIGINS.join(', ')}`);
 });

@@ -230,6 +230,7 @@ export default function App() {
       const data = await res.json();
       setBooking({
         reference: data.booking_id,
+        checkoutUrl: data.checkout_url,
         status: 'link-ready',
         traveler: traveler.name.trim(),
         pin: null,
@@ -242,39 +243,12 @@ export default function App() {
     }
   }
 
-  async function markPaid() {
-    if (!booking?.reference) return;
-    setLoadingAction('paying');
-    setErrorMessage(null);
-
-    try {
-      const res = await fetch(`${API_BASE}/checkout/webhook`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-kwan-simulation': 'true',
-        },
-        body: JSON.stringify({ booking_id: booking.reference }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Payment recording failed.');
-      }
-
-      const data = await res.json();
-      setBooking((current) => ({
-        ...current,
-        status: 'held',
-        pin: data.release_pin,
-      }));
-      setEnteredPin('');
-      setCheckoutStep('confirmed');
-    } catch (err) {
-      setErrorMessage(`Escrow payment error: ${err.message}`);
-    } finally {
-      setLoadingAction(null);
+  function openPaystackCheckout() {
+    if (!booking?.checkoutUrl) {
+      setErrorMessage('The payment checkout link is not available yet.');
+      return;
     }
+    window.open(booking.checkoutUrl, '_blank', 'noopener,noreferrer');
   }
 
   async function checkPaymentStatus() {
@@ -550,9 +524,9 @@ export default function App() {
             alt="Kwan"
             style={{ width: '24px', height: '24px', borderRadius: '6px', objectFit: 'cover', border: '1px solid rgba(0,0,0,0.1)' }}
           />
-          <span>Kwan pilot prototype · Built for PAAIS 2026</span>
+          <span>Kwan pilot · Built for PAAIS 2026</span>
         </div>
-        <span>Escrow simulation captures the statutory 1% Ghana Tourism Levy (Act 817).</span>
+        <span>Escrow flow includes the statutory 1% Ghana Tourism Levy (Act 817).</span>
       </footer>
 
       {checkoutOpen && guide && (
@@ -573,7 +547,7 @@ export default function App() {
           onClose={() => setCheckoutOpen(false)}
           onCreatePaymentPreview={createPaymentPreview}
           onCopyLink={copyLink}
-          onMarkPaid={markPaid}
+          onOpenPaystackCheckout={openPaystackCheckout}
           onCheckStatus={checkPaymentStatus}
           onReleasePayout={releasePayout}
         />
@@ -666,7 +640,7 @@ function CheckoutModal({
   onClose,
   onCreatePaymentPreview,
   onCopyLink,
-  onMarkPaid,
+  onOpenPaystackCheckout,
   onCheckStatus,
   onReleasePayout,
 }) {
@@ -717,12 +691,12 @@ function CheckoutModal({
             <input id="traveler-name" autoComplete="name" value={traveler.name} onChange={(event) => setTraveler({ ...traveler, name: event.target.value })} required />
             <label htmlFor="traveler-email">Email for the link</label>
             <input id="traveler-email" type="email" autoComplete="email" value={traveler.email} onChange={(event) => setTraveler({ ...traveler, email: event.target.value })} required />
-            <div className="prototype-notice"><CircleAlert size={18} aria-hidden="true" /><span>Paystack card checkout simulation: funds are held in regulated escrow.</span></div>
+            <div className="prototype-notice"><CircleAlert size={18} aria-hidden="true" /><span>Paystack sandbox checkout: funds are held in regulated escrow after payment confirmation.</span></div>
             <button className="button button-primary button-full" type="submit" disabled={loadingAction === 'checkout_init'}>
               {loadingAction === 'checkout_init' ? (
                 <><Loader2 size={16} className="spin-icon" /> Creating escrow booking...</>
               ) : (
-                <>Generate payment-link preview <ArrowUpRight size={17} aria-hidden="true" /></>
+                <>Create secure payment link <ArrowUpRight size={17} aria-hidden="true" /></>
               )}
             </button>
           </form>
@@ -733,15 +707,11 @@ function CheckoutModal({
             <p className="link-label">Unique payment link</p>
             <div className="link-box"><span>{paymentLink}</span><button type="button" onClick={onCopyLink} aria-label="Copy payment link">{copied ? <Check size={17} /> : <Copy size={17} />}</button></div>
             <p className="reference">Reference: {booking.reference}</p>
-            <div className="prototype-notice"><CircleAlert size={18} aria-hidden="true" /><span>Paystack simulated card payment: locks funds into escrow and generates a 4-digit release PIN.</span></div>
+            <div className="prototype-notice"><CircleAlert size={18} aria-hidden="true" /><span>Complete payment in Paystack. Kwan will issue the release PIN after the signed payment webhook is received.</span></div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-              <button className="button button-primary button-full" type="button" onClick={onMarkPaid} disabled={loadingAction === 'paying'}>
-                {loadingAction === 'paying' ? (
-                  <><Loader2 size={18} className="spin-icon" /> Locking funds into escrow...</>
-                ) : (
-                  <><WalletCards size={18} aria-hidden="true" /> Record test payment into escrow</>
-                )}
+              <button className="button button-primary button-full" type="button" onClick={onOpenPaystackCheckout}>
+                <WalletCards size={18} aria-hidden="true" /> Open Paystack checkout
               </button>
 
               <button
