@@ -29,7 +29,7 @@ Kwan connects international and diaspora travelers directly to verified grassroo
 
 | Feature | Detail |
 |:---|:---|
-| 🤖 **AI Cultural Concierge** | `pgvector` RAG + Gemini generates personalized multi-day itineraries tailored to traveler budget and energy styles |
+| 🤖 **AI Cultural Concierge** | Server-side classification plus a deterministic, verified cultural retrieval layer generates explainable itinerary suggestions |
 | 💳 **Paystack Escrow** | International cards (Visa/Mastercard) and Apple Pay collected upfront and held in secure escrow |
 | 📱 **Mobile Money Payouts** | 90% of booking fees settle directly into the host's MTN MoMo or Telecel Cash wallet upon 4-digit code completion |
 | 🪪 **Gov ID Verification** | 4-step Ghana Card / NIN verification wizard creating verified host digital identities |

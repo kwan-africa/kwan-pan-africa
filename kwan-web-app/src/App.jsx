@@ -41,7 +41,7 @@ export default function App() {
   const [conversation, setConversation] = useState([
     {
       role: 'kwan',
-      copy: 'Tell Kwan what you want to do in Accra or Cape Coast. We will return one verified local guide from the pilot roster - not a list, and not a generic generated itinerary.',
+      copy: 'Tell Kwan what you want to experience in Accra or Cape Coast. I will connect you with one verified local guide and help you shape the right fixed experience package.',
     },
   ]);
   const [guide, setGuide] = useState(null);
@@ -145,7 +145,7 @@ export default function App() {
         ...items,
         {
           role: 'kwan',
-          copy: `I matched you with ${matched.name} (Anchor: ${matched.anchorSite}). This is the verified guide Kwan recommends for this journey.`,
+          copy: `I matched you with ${matched.name} because your ${matched.theme} interests align with their experience at ${matched.anchorSite}. Review the fixed package, make the available edit, and continue when it feels right.`,
         },
       ]);
     } catch (err) {
@@ -258,8 +258,10 @@ export default function App() {
 
     try {
       const res = await fetch(`${API_BASE}/checkout/verify/${booking.reference}`);
-      if (!res.ok) throw new Error('Status check endpoint returned error.');
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.message || data.error || `Status check failed (${res.status}).`);
+      }
       if (data.status === 'escrow_held' || data.status === 'released') {
         setBooking((current) => ({
           ...current,
@@ -389,11 +391,11 @@ export default function App() {
           <p className="eyebrow">Grassroots cultural travel</p>
           <h1 id="page-title">One conversation.<br />One local guide.</h1>
           <p className="lede">
-            Describe the experience you want in Ghana. Kwan matches you with one local guide and prepares one card payment link.
+            Describe the experience you want in Ghana. Kwan connects you with one verified local guide, then helps you review and book their fixed experience package.
           </p>
           <div className="method-note">
             <ShieldCheck size={18} aria-hidden="true" />
-            <span>Pilot roster: each host is manually identity- and Mobile Money-wallet reviewed before a test booking.</span>
+            <span>Trust first: every pilot host is identity- and Mobile Money-wallet reviewed before they appear here.</span>
           </div>
         </section>
 
@@ -418,7 +420,7 @@ export default function App() {
                 <div className="message kwan loading">
                   <span className="message-label">Kwan</span>
                   <p style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Loader2 size={14} className="spin-icon" /> Querying pilot roster and Appwrite database...
+                    <Loader2 size={14} className="spin-icon" /> Matching you with a verified local guide...
                   </p>
                 </div>
               )}
@@ -503,8 +505,8 @@ export default function App() {
               <div className="empty-match">
                 <div className="empty-icon"><MapPin size={22} aria-hidden="true" /></div>
                 <p className="section-kicker">Your match</p>
-                <h2>One considered recommendation.</h2>
-                <p>Kwan uses the interests in your message to select one guide from the small pilot roster.</p>
+                <h2>Your guide connection is next.</h2>
+                <p>Kwan uses your interests to match one verified guide from the pilot roster, not a generic list.</p>
               </div>
             )}
           </aside>
@@ -515,8 +517,8 @@ export default function App() {
           <h2 id="flow-heading">Built to test trust in one simple flow.</h2>
           <ol>
             <li><span>01</span><p>Describe the day you want.</p></li>
-            <li><span>02</span><p>Receive one guide match and lock funds in escrow.</p></li>
-            <li><span>03</span><p>Share your 4-digit PIN after the experience to trigger the sub-60s Mobile Money payout.</p></li>
+            <li><span>02</span><p>Review the guide's fixed package and make the available edit before booking.</p></li>
+            <li><span>03</span><p>Complete the connection: funds stay held until the experience is complete, then your 4-digit PIN releases the guide's payout.</p></li>
           </ol>
         </section>
       </main>
@@ -530,7 +532,7 @@ export default function App() {
           />
           <span>Kwan pilot · Built for PAAIS 2026</span>
         </div>
-        <span>Escrow flow includes the statutory 1% Ghana Tourism Levy (Act 817).</span>
+        <span>Discovery, trust, and settlement in one guided connection.</span>
       </footer>
 
       {checkoutOpen && guide && (
@@ -661,11 +663,11 @@ function CheckoutModal({
         <button className="close-button" type="button" onClick={onClose} aria-label="Close payment flow"><X size={20} /></button>
         <div className="checkout-heading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.8rem' }}>
           <div>
-            <p className="section-kicker">Card-to-Mobile Money Escrow</p>
+            <p className="section-kicker">A protected connection from start to finish</p>
             <h2 id="checkout-title">
               {step === 'details' && 'Prepare your payment link'}
               {step === 'payment' && 'Your payment link is ready'}
-              {step === 'confirmed' && (released ? 'Test payout released' : 'Funds locked in escrow')}
+              {step === 'confirmed' && (released ? 'Connection complete — host payout released' : 'Experience confirmed — funds protected')}
             </h2>
           </div>
           <img
@@ -699,10 +701,10 @@ function CheckoutModal({
             <input id="traveler-name" autoComplete="name" value={traveler.name} onChange={(event) => setTraveler({ ...traveler, name: event.target.value })} required />
             <label htmlFor="traveler-email">Email for the link</label>
             <input id="traveler-email" type="email" autoComplete="email" value={traveler.email} onChange={(event) => setTraveler({ ...traveler, email: event.target.value })} required />
-            <div className="prototype-notice"><CircleAlert size={18} aria-hidden="true" /><span>Paystack sandbox checkout: funds are held in regulated escrow after payment confirmation.</span></div>
+            <div className="prototype-notice"><CircleAlert size={18} aria-hidden="true" /><span>Secure checkout: funds stay protected until your experience is complete.</span></div>
             <button className="button button-primary button-full" type="submit" disabled={loadingAction === 'checkout_init'}>
               {loadingAction === 'checkout_init' ? (
-                <><Loader2 size={16} className="spin-icon" /> Creating escrow booking...</>
+                <><Loader2 size={16} className="spin-icon" /> Confirming your connection...</>
               ) : (
                 <>Create secure payment link <ArrowUpRight size={17} aria-hidden="true" /></>
               )}
@@ -741,7 +743,7 @@ function CheckoutModal({
 
             {!released ? (
               <>
-                <p><strong>{formatUsd(serverPricing.total_usd)}</strong> is locked in escrow for {guide.name}.</p>
+                <p><strong>{formatUsd(serverPricing.total_usd)}</strong> is protected for your experience with {guide.name}.</p>
                 <div style={{ margin: '1rem 0', padding: '0.9rem', background: 'rgba(245, 166, 35, 0.08)', border: '1px solid #F5A623', borderRadius: '6px', textAlign: 'center' }}>
                   <span style={{ display: 'block', fontSize: '0.75rem', color: '#F5A623', textTransform: 'uppercase', fontFamily: 'monospace' }}>
                     Traveler 4-Digit Release PIN

@@ -4,21 +4,35 @@
 
 import { PILOT_CORRIDORS, VERIFIED_HOSTS, CULTURAL_LEXICON, THEMES } from '../data/culturalKnowledge';
 
+const DEFAULT_THEME_ID = 'heritage_spiritual';
+const MAX_HOSTS = 4;
+
+function normalizeQuery(query) {
+  if (typeof query !== 'string' || !query.trim()) {
+    throw new Error('A non-empty travel request is required.');
+  }
+  return query.trim().toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, ' ').replace(/\s+/g, ' ');
+}
+
+function containsAny(query, terms) {
+  return terms.some((term) => query.includes(term));
+}
+
 /**
  * Analyzes query text and extracts semantic entities (corridors, interests, duration, and theme classification).
  */
 export function analyzeQuery(query) {
-  const q = query.toLowerCase();
+  const q = normalizeQuery(query);
   
   // Theme classification mapping
-  let theme = THEMES[0]; // Default: heritage & spiritual
-  if (q.includes("spiritual") || q.includes("roots") || q.includes("ancest") || q.includes("heritage") || q.includes("pilgrim") || q.includes("cape coast") || q.includes("castle") || q.includes("door of no return")) {
+  let theme = THEMES.find((item) => item.id === DEFAULT_THEME_ID) || THEMES[0];
+  if (containsAny(q, ["spiritual", "roots", "ancest", "heritage", "pilgrim", "cape coast", "castle", "door of no return"])) {
     theme = THEMES.find(t => t.id === "heritage_spiritual") || THEMES[0];
-  } else if (q.includes("box") || q.includes("bukom") || q.includes("fight") || q.includes("adventur") || q.includes("sport") || q.includes("fitness")) {
+  } else if (containsAny(q, ["box", "bukom", "fight", "adventur", "sport", "fitness"])) {
     theme = THEMES.find(t => t.id === "adventure") || THEMES[1];
-  } else if (q.includes("food") || q.includes("waakye") || q.includes("kenkey") || q.includes("cook") || q.includes("culinary") || q.includes("shito") || q.includes("chop")) {
+  } else if (containsAny(q, ["food", "waakye", "kenkey", "cook", "culinary", "shito", "chop"])) {
     theme = THEMES.find(t => t.id === "food") || THEMES[2];
-  } else if (q.includes("art") || q.includes("carv") || q.includes("drum") || q.includes("adinkra") || q.includes("craft") || q.includes("bead")) {
+  } else if (containsAny(q, ["art", "carv", "drum", "adinkra", "craft", "bead"])) {
     theme = THEMES.find(t => t.id === "art") || THEMES[3];
   }
 
@@ -54,7 +68,7 @@ export function analyzeQuery(query) {
  */
 export function retrieveContext(query) {
   const { detectedCorridors, days, theme } = analyzeQuery(query);
-  const q = query.toLowerCase();
+  const q = normalizeQuery(query);
 
   // Score & Rank Hosts
   const scoredHosts = VERIFIED_HOSTS.map(host => {
@@ -71,19 +85,28 @@ export function retrieveContext(query) {
     if (q.includes("boxing") && host.id === "host_01") score += 15;
     if (q.includes("bead") && host.id === "host_02") score += 15;
     if (q.includes("nkrumah") && host.id === "host_03") score += 15;
-    if (q.includes("drum") || q.includes("carv") && host.id === "host_04") score += 15;
-    if (q.includes("plant") || q.includes("herbal") || q.includes("nature") && host.id === "host_05") score += 15;
-    if (q.includes("food") || q.includes("waakye") && host.id === "host_06") score += 15;
+    if (containsAny(q, ["drum", "carv"]) && host.id === "host_04") score += 15;
+    if (containsAny(q, ["plant", "herbal", "nature"]) && host.id === "host_05") score += 15;
+    if (containsAny(q, ["food", "waakye"]) && host.id === "host_06") score += 15;
 
     return { host, score };
   });
 
-  scoredHosts.sort((a, b) => b.score - a.score);
-  const matchedHosts = scoredHosts.slice(0, Math.min(days * 2, 4)).map(item => item.host);
+  scoredHosts.sort((a, b) => b.score - a.score || a.host.id.localeCompare(b.host.id));
+  const matchedHosts = scoredHosts
+    .filter(({ score }) => score > 0)
+    .slice(0, Math.min(days * 2, MAX_HOSTS))
+    .map(item => item.host);
+  if (matchedHosts.length === 0 && scoredHosts.length > 0) {
+    matchedHosts.push(scoredHosts[0].host);
+  }
 
   // Retrieve Corridors & Etiquette
   const matchedCorridors = PILOT_CORRIDORS.filter(c => detectedCorridors.includes(c.id));
-  const etiquetteTips = matchedCorridors.flatMap(c => c.etiquette);
+  if (matchedCorridors.length === 0 && PILOT_CORRIDORS.length > 0) {
+    matchedCorridors.push(PILOT_CORRIDORS[0]);
+  }
+  const etiquetteTips = [...new Set(matchedCorridors.flatMap(c => c.etiquette))];
 
   // Relevant phrases
   const phrases = CULTURAL_LEXICON.slice(0, 3);
@@ -122,8 +145,6 @@ export function buildItineraryFromContext(query, ragContext) {
       hostImage: host.image,
       corridor: host.corridorName,
       cost: host.hourlyRateUsd,
-      ghanaCard: host.ghanaCard,
-      momoNetwork: host.momoNetwork,
       description: host.bio
     };
   });
@@ -138,6 +159,7 @@ export function buildItineraryFromContext(query, ragContext) {
     hostsCount: matchedHosts.length,
     pricing: {
       totalUsd: totalCost,
+      isEstimate: true,
       hostMoMoPayoutUsd: hostMoMoPayout,
       kwanPlatformFeeUsd: kwanPlatformFee,
       tourismLevyUsd: tourismLevy,
@@ -151,6 +173,7 @@ export function buildItineraryFromContext(query, ragContext) {
  * Main RAG Execution: Coordinates retrieval, prompt assembly, and response generation.
  */
 export async function executeRAGQuery(userPrompt) {
+  normalizeQuery(userPrompt);
   const ragContext = retrieveContext(userPrompt);
   const itinerary = buildItineraryFromContext(userPrompt, ragContext);
 
@@ -165,7 +188,7 @@ export async function executeRAGQuery(userPrompt) {
   const conversationalText = `
 ${greeting} I have classified your journey under **${ragContext.theme.label}** (\`${ragContext.theme.tag}\`) anchored by **${ragContext.theme.anchorSite}**.
 
-I have matched you directly with verified masters: **${hostNames}**. Each host has undergone in-person Ghana Card biometric verification and is registered to receive their 90% booking payout instantly to their Mobile Money wallet upon completion.
+I have matched you with verified cultural hosts: **${hostNames}**. Their profiles are reviewed before they appear here, and you can adjust the experience before confirming.
 
 ### Why this corridor matters:
 ${ragContext.matchedCorridors.map(c => `• **${c.name}**: ${c.description}`).join("\n")}
@@ -173,7 +196,7 @@ ${ragContext.matchedCorridors.map(c => `• **${c.name}**: ${c.description}`).jo
 ### Key Cultural Protocols:
 ${ragContext.etiquetteTips.slice(0, 2).map(tip => `• ${tip}`).join("\n")}
 
-Review your interactive itinerary breakdown below. You can customize or remove any stop to live-recalculate pricing, then click **Book with Escrow PIN** to lock funds in regulated escrow!
+Review your interactive itinerary below. You can customize or remove any stop and request a live server-side price recalculation. The final amount is confirmed at checkout, while the connection stays protected until the experience is complete.
   `.trim();
 
   return {
@@ -182,7 +205,7 @@ Review your interactive itinerary breakdown below. You can customize or remove a
     retrievedDocs: {
       theme: ragContext.theme,
       anchorSite: ragContext.theme.anchorSite,
-      hosts: ragContext.matchedHosts.map(h => ({ name: h.name, corridor: h.corridorName, card: h.ghanaCard })),
+      hosts: ragContext.matchedHosts.map(h => ({ name: h.name, corridor: h.corridorName })),
       corridors: ragContext.matchedCorridors.map(c => c.name),
       etiquetteCount: ragContext.etiquetteTips.length
     }

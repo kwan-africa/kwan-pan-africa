@@ -397,6 +397,7 @@ app.post('/api/checkout/init', async (req, res, next) => {
     const totalGhs = Math.round(sanitizedTotalUsd * 15.2);
     const hostPayoutUsd = Math.round(sanitizedTotalUsd * 0.9 * 100) / 100;
     const platformFeeUsd = Math.round(sanitizedTotalUsd * 0.1 * 100) / 100;
+    const tourismLevyUsd = Math.round(sanitizedTotalUsd * 0.01 * 100) / 100;
 
     const bookingData = {
       id: bookingId,
@@ -408,6 +409,7 @@ app.post('/api/checkout/init', async (req, res, next) => {
       total_ghs: totalGhs,
       platform_fee_usd: platformFeeUsd,
       host_payout_usd: hostPayoutUsd,
+      tourism_levy_usd: tourismLevyUsd,
       status: 'pending_payment',
       paystack_reference: `PST-${Date.now()}-${bookingId}`,
       release_pin: null,
@@ -432,6 +434,7 @@ app.post('/api/checkout/init', async (req, res, next) => {
           total_ghs: bookingData.total_ghs,
           platform_fee_usd: bookingData.platform_fee_usd,
           host_payout_usd: bookingData.host_payout_usd,
+          tourism_levy_usd: bookingData.tourism_levy_usd,
           status: bookingData.status,
           paystack_reference: bookingData.paystack_reference,
         },
@@ -580,7 +583,7 @@ app.post('/api/checkout/webhook', async (req, res, next) => {
       event_type: 'escrow_held',
       amount_usd: booking.total_usd,
       amount_ghs: booking.total_ghs,
-      levy_amount: Math.round(booking.total_usd * 0.01 * 100) / 100,
+      levy_amount: booking.tourism_levy_usd ?? Math.round(booking.total_usd * 0.01 * 100) / 100,
       actor: 'traveler',
       timestamp: now.toISOString(),
     };
@@ -658,7 +661,15 @@ app.get('/api/checkout/verify/:booking_id', async (req, res, next) => {
     );
     const paystackData = await paystackRes.json().catch(() => ({}));
     if (!paystackRes.ok || !paystackData.status) {
-      return res.status(502).json({ error: 'PAYSTACK_UNAVAILABLE', message: 'Unable to verify payment status.' });
+      console.warn('[Paystack Verify Warning]', {
+        booking_id,
+        status: paystackRes.status,
+        message: paystackData.message || 'No response message',
+      });
+      return res.status(502).json({
+        error: 'PAYSTACK_UNAVAILABLE',
+        message: 'Paystack could not verify this transaction yet. Please complete checkout and try again.',
+      });
     }
 
     const payment = paystackData.data;
@@ -795,7 +806,7 @@ app.post('/api/escrow/release', async (req, res, next) => {
       event_type: 'payout_released',
       amount_usd: booking.host_payout_usd,
       amount_ghs: Math.round(booking.host_payout_usd * 15.2),
-      levy_amount: Math.round(booking.total_usd * 0.01 * 100) / 100,
+      levy_amount: booking.tourism_levy_usd ?? Math.round(booking.total_usd * 0.01 * 100) / 100,
       actor: 'host',
       timestamp: now.toISOString(),
     };
@@ -881,7 +892,7 @@ setInterval(async () => {
           event_type: 'auto_released',
           amount_usd: booking.host_payout_usd,
           amount_ghs: Math.round(booking.host_payout_usd * 15.2),
-          levy_amount: Math.round(booking.total_usd * 0.01 * 100) / 100,
+          levy_amount: booking.tourism_levy_usd ?? Math.round(booking.total_usd * 0.01 * 100) / 100,
           actor: 'system',
           timestamp: now.toISOString(),
         };
