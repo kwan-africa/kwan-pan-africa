@@ -16,6 +16,16 @@ services:
         sync: false
       - key: APPWRITE_API_KEY
         sync: false
+      - key: APPWRITE_DATABASE_ID
+        value: kwan_db
+      - key: APPWRITE_HOSTS_COLLECTION_ID
+        value: hosts
+      - key: APPWRITE_BOOKINGS_COLLECTION_ID
+        value: bookings
+      - key: APPWRITE_LEDGER_COLLECTION_ID
+        value: escrow_ledgers
+      - key: PAYSTACK_ENDPOINT
+        value: https://api.paystack.co
       - key: PAYSTACK_SECRET_KEY
         sync: false
       - key: PAYSTACK_PUBLIC_KEY
@@ -23,5 +33,5 @@ services:
       - key: GEMINI_API_KEY
         sync: false
       - key: CLIENT_URL
-        value: https://kwanai.me
+        sync: false
     healthCheckPath: /health

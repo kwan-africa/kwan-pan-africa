@@ -192,6 +192,16 @@ in the Appwrite console: `hosts` may be publicly readable, while
 Until those external checks are complete, the code is locally validated but
 the deployment should be treated as pre-launch rather than production-ready.
 
+### Live Render status (last checked 2026-09-20)
+
+`https://kwan-pan-africa.onrender.com/health` responds successfully, and the
+deployed classify and itinerary endpoints respond. However, the deployed host
+endpoint currently reports `source: "local"` and checkout initialization
+returns `503`. In Render, set the server-only `APPWRITE_PROJECT_ID`,
+`APPWRITE_API_KEY`, and `PAYSTACK_SECRET_KEY` values, then redeploy. Set
+`CLIENT_URL` to the exact Vercel frontend origin. Never put the Paystack secret
+or Appwrite API key in Vercel or any `VITE_*` variable.
+
 ### 4. Alternative: Spring Boot + Flutter Stack
 
 The deployed web demo uses the Node/Express + React/Appwrite path above. The
