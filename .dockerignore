@@ -1,0 +1,9 @@
+node_modules
+**/node_modules
+.git
+.env
+**/.env
+kwan-flutter
+kwan-backend
+pitch-files-hack-ai-thon
+docs
