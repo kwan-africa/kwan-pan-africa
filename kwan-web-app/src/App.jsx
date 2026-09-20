@@ -338,6 +338,31 @@ export default function App() {
     }
   }
 
+  function startNewJourney() {
+    setRequest('');
+    setConversation([{
+      role: 'kwan',
+      copy: 'Tell Kwan what you want to experience in Accra or Cape Coast. I will connect you with one verified local guide and help you shape the right fixed experience package.',
+    }]);
+    setGuide(null);
+    setAddonIncluded(false);
+    setServerPricing({
+      total_usd: 50,
+      total_ghs: 760,
+      platform_fee_usd: 5,
+      host_payout_usd: 45,
+      tourism_levy_usd: 0.5,
+    });
+    setLoadingAction(null);
+    setErrorMessage(null);
+    setCheckoutOpen(false);
+    setCheckoutStep('details');
+    setTraveler({ name: '', email: '' });
+    setBooking(null);
+    setCopied(false);
+    setEnteredPin('');
+  }
+
   return (
     <div className="site-shell">
       <header className="topbar">
@@ -367,7 +392,12 @@ export default function App() {
               Live pilot roster
             </span>
           )}
-          <p className="pilot-label">Accra &amp; Cape Coast pilot · 2026</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <button className="text-button" type="button" onClick={startNewJourney} style={{ fontSize: '0.75rem' }}>
+              New journey
+            </button>
+            <p className="pilot-label">Accra &amp; Cape Coast pilot · 2026</p>
+          </div>
         </div>
       </header>
 
@@ -412,6 +442,10 @@ export default function App() {
           <div className="method-note">
             <ShieldCheck size={18} aria-hidden="true" />
             <span>Trust first: every pilot host is identity- and Mobile Money-wallet reviewed before they appear here.</span>
+          </div>
+          <div className="prototype-notice" style={{ marginTop: '1rem' }}>
+            <CircleAlert size={18} aria-hidden="true" />
+            <span>Pilot demo: checkout uses sandbox payments. Please do not enter sensitive personal or payment information.</span>
           </div>
         </section>
 
@@ -548,7 +582,7 @@ export default function App() {
           />
           <span>Kwan pilot · Built for PAAIS 2026</span>
         </div>
-        <span>Discovery, trust, and settlement in one guided connection.</span>
+        <span>Discovery, trust, and settlement in one guided connection · <a href="mailto:hello@kwanai.me">Report a problem</a></span>
       </footer>
 
       {checkoutOpen && guide && (
