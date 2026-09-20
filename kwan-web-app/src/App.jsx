@@ -31,6 +31,63 @@ const EXAMPLES = [
   'I want hands-on bead making and local crafts in Jamestown.',
 ];
 
+const EXPERIENCE_CATALOG = [
+  {
+    id: 'cape-coast-remembrance',
+    title: 'Cape Coast Remembrance Journey',
+    theme: 'heritage_spiritual',
+    location: 'Cape Coast',
+    duration: 'Half day',
+    status: 'bookable',
+    summary: 'A guided visit focused on remembrance, history, and Fante cultural context.',
+  },
+  {
+    id: 'nkrumah-liberation-walk',
+    title: 'Liberation & Independence Walk',
+    theme: 'heritage_spiritual',
+    location: 'Accra · High Street',
+    duration: '3 hours',
+    status: 'preview',
+    summary: 'Kwame Nkrumah Memorial Park, Black Star Square, and the stories behind Ghanaian independence.',
+  },
+  {
+    id: 'adinkra-workshop',
+    title: 'Adinkra Carving Workshop',
+    theme: 'art',
+    location: 'Accra Arts Centre',
+    duration: '3 hours',
+    status: 'preview',
+    summary: 'Carve a personal Adinkra symbol and learn how visual language carries values across generations.',
+  },
+  {
+    id: 'makola-food-trail',
+    title: 'Makola Market Food Trail',
+    theme: 'food',
+    location: 'Central Accra',
+    duration: 'Half day',
+    status: 'preview',
+    summary: 'A guided tasting route through local staples, market stories, and everyday food culture.',
+  },
+  {
+    id: 'aburi-cocoa-highlands',
+    title: 'Aburi Gardens & Cocoa Highlands',
+    theme: 'adventure',
+    location: 'Akuapem Ridge',
+    duration: 'Full day',
+    status: 'coming_soon',
+    summary: 'Botanical gardens, cocoa heritage, and highland views for travelers who want a slower nature day.',
+  },
+  {
+    id: 'jamestown-street-art',
+    title: 'Jamestown Street Art & Harbour Walk',
+    theme: 'art',
+    location: 'Ga-Mashie',
+    duration: '3 hours',
+    status: 'coming_soon',
+    summary: 'Murals, harbour life, and local creative practice along Accra’s historic shoreline.',
+  },
+];
+
 const THEME_LABELS = Object.fromEntries(THEME_OPTIONS.map(({ tag, label }) => [tag, label]));
 
 function getThemeLabel(theme) {
@@ -560,6 +617,39 @@ export default function App() {
               </div>
             )}
           </aside>
+        </section>
+
+        <section className="experience-catalog" aria-labelledby="experience-catalog-heading">
+          <p className="section-kicker">More ways to experience Ghana</p>
+          <h2 id="experience-catalog-heading">Choose a direction, then make it yours.</h2>
+          <p className="catalog-intro">
+            The pilot has one fixed package ready to book today. These previews show where the verified Kwan experience library is growing next.
+          </p>
+          <div className="experience-grid">
+            {EXPERIENCE_CATALOG.map((experience) => (
+              <article className="experience-card" key={experience.id}>
+                <div className="experience-card-heading">
+                  <span className={`experience-status ${experience.status}`}>
+                    {experience.status === 'bookable' ? 'Bookable pilot' : experience.status === 'preview' ? 'Preview' : 'Coming soon'}
+                  </span>
+                  <span>{getThemeLabel(experience.theme)}</span>
+                </div>
+                <h3>{experience.title}</h3>
+                <p>{experience.summary}</p>
+                <div className="experience-meta">
+                  <span><MapPin size={14} aria-hidden="true" /> {experience.location}</span>
+                  <span><CalendarDays size={14} aria-hidden="true" /> {experience.duration}</span>
+                </div>
+                {experience.status !== 'bookable' && (
+                  <p className="experience-note">
+                    {experience.status === 'preview'
+                      ? 'Preview only while we confirm the local guide and package.'
+                      : 'We are building and verifying this route before opening checkout.'}
+                  </p>
+                )}
+              </article>
+            ))}
+          </div>
         </section>
 
         <section className="how-it-works" aria-labelledby="flow-heading">

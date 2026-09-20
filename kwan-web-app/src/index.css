@@ -90,6 +90,22 @@ textarea:focus, input:focus { border-color: #477457; outline: none; }
 .how-it-works li { display: flex; gap: 12px; padding-top: 16px; border-top: 1px solid #bdc7b9; }
 .how-it-works li span { color: #a05c1d; font: 500 11px/1.4 'DM Mono', monospace; }
 .how-it-works li p { max-width: 235px; margin: 0; color: #48574c; font-size: 14px; line-height: 1.45; }
+.experience-catalog { margin-top: 74px; padding: 36px 0 0; border-top: 1px solid #d9d9cf; }
+.experience-catalog h2 { max-width: 520px; margin-bottom: 10px; }
+.catalog-intro { max-width: 650px; margin: 0 0 25px; color: #66736a; font-size: 14px; line-height: 1.5; }
+.experience-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.experience-card { display: flex; min-height: 220px; flex-direction: column; padding: 18px; border: 1px solid #d9ddd3; border-radius: 12px; background: #fffef9; }
+.experience-card-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #6a766d; font: 400 10px/1.3 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .04em; }
+.experience-status { padding: 4px 6px; border-radius: 4px; }
+.experience-status.bookable { color: #285e3c; background: #dcebdd; }
+.experience-status.preview { color: #7a601c; background: #f3e8c8; }
+.experience-status.coming_soon { color: #665c74; background: #e9e3f0; }
+.experience-card h3 { margin: 18px 0 8px; color: #26372c; font: 500 23px/1.05 'Newsreader', serif; }
+.experience-card p { margin: 0; color: #5e6c62; font-size: 13px; line-height: 1.45; }
+.experience-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; padding-top: 18px; color: #4c5b51; font-size: 11px; }
+.experience-meta span { display: inline-flex; align-items: center; gap: 4px; }
+.experience-meta svg { color: #a05c1d; }
+.experience-note { margin-top: 12px !important; padding-top: 10px; color: #7a6b42 !important; border-top: 1px solid #e6dfc6; font-size: 11px !important; }
 footer { display: flex; width: min(1180px, calc(100% - 40px)); margin: auto auto 0; padding: 17px 0 24px; justify-content: space-between; gap: 24px; color: #69746b; border-top: 1px solid #dfddd2; font-size: 12px; line-height: 1.45; }
 footer span:last-child { max-width: 450px; text-align: right; }
 
@@ -129,6 +145,7 @@ footer span:last-child { max-width: 450px; text-align: right; }
   .match-panel { min-height: 380px; }
   .how-it-works ol { grid-template-columns: 1fr; gap: 13px; }
   .how-it-works li p { max-width: none; }
+  .experience-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 560px) {
@@ -146,4 +163,5 @@ footer span:last-child { max-width: 450px; text-align: right; }
   footer { flex-direction: column; gap: 7px; }
   footer span:last-child { text-align: left; }
   .checkout-modal { padding: 26px 20px; }
+  .experience-grid { grid-template-columns: 1fr; }
 }
