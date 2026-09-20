@@ -299,6 +299,17 @@ app.get('/api/hosts', async (req, res, next) => {
         }
         return res.json({ hosts: docs, source: 'appwrite' });
       }
+      if (process.env.NODE_ENV === 'production') {
+        return res.status(503).json({
+          error: 'HOSTS_UNAVAILABLE',
+          message: 'The verified host roster is temporarily unavailable.',
+        });
+      }
+    } else if (process.env.NODE_ENV === 'production') {
+      return res.status(503).json({
+        error: 'DATABASE_NOT_CONFIGURED',
+        message: 'The host database is not configured.',
+      });
     }
 
     // Fallback to local store
@@ -430,6 +441,14 @@ app.post('/api/checkout/init', async (req, res, next) => {
       } else {
         console.warn(`[Appwrite Sync Warning] Booking ${bookingId} saved locally, remote returned:`, awRes.data);
       }
+    }
+
+    if (process.env.NODE_ENV === 'production' && !appwriteSync) {
+      LOCAL_STORE.bookings.delete(bookingId);
+      return res.status(503).json({
+        error: 'DATABASE_UNAVAILABLE',
+        message: 'Unable to persist the booking. Please try again.',
+      });
     }
 
     logTransition('BOOKING_CREATED', {
@@ -778,6 +797,24 @@ app.post('/api/escrow/release', async (req, res, next) => {
 // ==============================================================================
 setInterval(async () => {
   const now = new Date();
+  if (APPWRITE_API_KEY) {
+    const query = encodeURIComponent(JSON.stringify({
+      method: 'equal',
+      attribute: 'status',
+      values: ['escrow_held'],
+    }));
+    const awRes = await appwriteFetch(
+      `${collectionPath(APPWRITE_BOOKINGS_COLLECTION_ID)}?queries[]=${query}&limit=100`,
+    );
+    if (awRes.ok && Array.isArray(awRes.data?.documents)) {
+      for (const document of awRes.data.documents) {
+        const bookingId = document.$id || document.id;
+        if (bookingId) LOCAL_STORE.bookings.set(bookingId, { ...document, id: bookingId });
+      }
+    } else if (!awRes.ok) {
+      console.error('[Auto-release] Unable to query Appwrite bookings:', awRes.error || awRes.data);
+    }
+  }
   for (const [id, booking] of LOCAL_STORE.bookings.entries()) {
     if (booking.status === 'escrow_held' && booking.auto_release_at) {
       if (now > new Date(booking.auto_release_at)) {

@@ -151,6 +151,47 @@ return an error. Appwrite collection permissions should be verified directly
 in the Appwrite console: `hosts` may be publicly readable, while
 `bookings` and `escrow_ledgers` must remain server-only.
 
+## Current build-checklist status
+
+### Complete in this repository
+
+- [x] Environment files are ignored and examples contain placeholders only.
+- [x] Repository history was searched for `.env`, Appwrite, and Paystack
+      references; no real credential values were found.
+- [x] Node backend scripts, dotenv loading, restricted CORS, validation,
+      centralized errors, transition logging, classify rate limiting, LLM
+      timeout/fallback, webhook HMAC verification, release idempotency, and
+      scheduled auto-release are implemented.
+- [x] Production mode refuses to use the local host roster or local-only
+      booking persistence when Appwrite is unavailable.
+- [x] Auto-release refreshes persisted `escrow_held` bookings from Appwrite
+      before processing due releases.
+- [x] Frontend loading/error states, whitespace validation, server-side
+      itinerary recalculation, four-digit PIN validation, and API-only
+      configuration are implemented.
+- [x] Frontend lint, production build, backend syntax checks, local health,
+      classify, host filtering, itinerary, invalid-input, and unsigned-webhook
+      smoke checks pass.
+
+### Still required before calling the launch complete
+
+- [ ] Configure a fresh scoped Appwrite API key and verify the three
+      collections and permissions in the Appwrite console.
+- [ ] Hand-check the seeded host documents in Appwrite.
+- [ ] Configure Paystack sandbox credentials, complete a documented test-card
+      payment, and verify a sandbox Mobile Money settlement.
+- [ ] Register and reach the Paystack webhook at the deployed Railway URL.
+- [ ] Set Railway secrets and confirm its `/health` endpoint.
+- [ ] Set Vercel `VITE_API_BASE` to the Railway API URL and test the deployed
+      frontend, not localhost.
+- [ ] Repeat the happy path, wrong-PIN path, backend-down path, and five-run
+      repeat test against the deployed services.
+- [ ] Perform responsive testing on the presentation device/network and record
+      the deployed fallback demo.
+
+Until those external checks are complete, the code is locally validated but
+the deployment should be treated as pre-launch rather than production-ready.
+
 ### 4. Alternative: Spring Boot + Flutter Stack
 
 The deployed web demo uses the Node/Express + React/Appwrite path above. The
@@ -172,17 +213,17 @@ flutter run -d chrome
 
 ---
 
-## 📡 Core API Endpoints
+## 📡 Web API Endpoints (Node/Express)
 
 | Method | Endpoint | Description |
 |:---|:---|:---|
-| `POST` | `/api/itinerary/generate` | RAG-powered cultural itinerary generation via Gemini |
-| `GET` | `/api/operators` | List verified grassroots operators & artisans |
-| `POST` | `/api/operators` | Register new operator with Ghana Card verification |
-| `POST` | `/api/operators/{id}/listings` | Add experience listing (auto-embedded into pgvector) |
-| `POST` | `/api/admin/ingest?city=Accra&country=GH` | Ingest live verified Google Places data |
-| `POST` | `/api/payments/initialize` | Initialize Paystack escrow card transaction |
-| `GET` | `/api/payments/verify` | Verify payment and disburse Mobile Money payout |
+| `POST` | `/api/classify` | Classify a traveler request into a fixed cultural theme |
+| `GET` | `/api/hosts?theme=X` | Return verified hosts for an allowed theme |
+| `POST` | `/api/itinerary` | Recalculate server-authoritative itinerary pricing |
+| `POST` | `/api/checkout/init` | Persist a booking and initialize Paystack checkout |
+| `POST` | `/api/checkout/webhook` | Verify Paystack signature and hold escrow |
+| `GET` | `/api/checkout/status/:booking_id` | Check payment status if a webhook is delayed |
+| `POST` | `/api/escrow/release` | Verify the PIN and release the payout |
 
 ---
 
