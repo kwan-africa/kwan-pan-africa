@@ -257,7 +257,7 @@ export default function App() {
     setErrorMessage(null);
 
     try {
-      const res = await fetch(`${API_BASE}/checkout/status/${booking.reference}`);
+      const res = await fetch(`${API_BASE}/checkout/verify/${booking.reference}`);
       if (!res.ok) throw new Error('Status check endpoint returned error.');
       const data = await res.json();
       if (data.status === 'escrow_held' || data.status === 'released') {
@@ -268,7 +268,11 @@ export default function App() {
         }));
         setCheckoutStep('confirmed');
       } else {
-        setErrorMessage(`Current payment status: ${data.status}. Awaiting payment confirmation.`);
+        setErrorMessage(
+          data.payment_status
+            ? `Paystack reports "${data.payment_status}". Complete payment in the Paystack window, then check again.`
+            : `Current payment status: ${data.status}. Awaiting payment confirmation.`,
+        );
       }
     } catch (err) {
       setErrorMessage(`Status check failed: ${err.message}`);
@@ -572,6 +576,10 @@ function GuideMatch({ guide, serverPricing, addonIncluded, isRecalculating, onTo
       <h2>{guide.name}</h2>
       <p className="guide-role">{guide.role}</p>
       <div className="guide-detail"><MapPin size={17} aria-hidden="true" /><span>{guide.area}</span></div>
+      <div className="reviewed-note" style={{ color: '#214734', background: 'rgba(33,71,52,0.06)' }}>
+        <CheckCircle2 size={17} aria-hidden="true" />
+        <span>Operator package: fixed experience with one optional ceremony add-on. Review and edit it before payment.</span>
+      </div>
 
       {guide.anchorSite && (
         <div className="reviewed-note" style={{ color: '#F5A623', background: 'rgba(245, 166, 35, 0.08)' }}>
@@ -686,7 +694,7 @@ function CheckoutModal({
 
         {step === 'details' && (
           <form className="checkout-form" onSubmit={onCreatePaymentPreview}>
-            <p>Enter a test traveler profile to generate a single, shareable checkout link.</p>
+            <p>Review the fixed operator package above, then enter your details to create a secure checkout link.</p>
             <label htmlFor="traveler-name">Your name</label>
             <input id="traveler-name" autoComplete="name" value={traveler.name} onChange={(event) => setTraveler({ ...traveler, name: event.target.value })} required />
             <label htmlFor="traveler-email">Email for the link</label>
@@ -721,7 +729,7 @@ function CheckoutModal({
                 disabled={loadingAction === 'polling'}
                 style={{ fontSize: '0.78rem', color: '#647067', alignSelf: 'center', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
               >
-                <RefreshCw size={13} className={loadingAction === 'polling' ? 'spin-icon' : ''} /> Check payment status fallback
+                <RefreshCw size={13} className={loadingAction === 'polling' ? 'spin-icon' : ''} /> I completed payment — check status
               </button>
             </div>
           </div>

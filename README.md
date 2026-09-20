@@ -235,7 +235,8 @@ flutter run -d chrome
 | `POST` | `/api/itinerary` | Recalculate server-authoritative itinerary pricing |
 | `POST` | `/api/checkout/init` | Persist a booking and initialize Paystack checkout |
 | `POST` | `/api/checkout/webhook` | Verify Paystack signature and hold escrow |
-| `GET` | `/api/checkout/status/:booking_id` | Check payment status if a webhook is delayed |
+| `GET` | `/api/checkout/verify/:booking_id` | Verify Paystack status and recover a delayed webhook |
+| `GET` | `/api/checkout/status/:booking_id` | Read the stored booking status |
 | `POST` | `/api/escrow/release` | Verify the PIN and release the payout |
 
 ---

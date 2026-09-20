@@ -635,6 +635,60 @@ app.post('/api/checkout/webhook', async (req, res, next) => {
 // ==============================================================================
 // 6. GET /api/checkout/status/:booking_id — Fallback status check if webhook drops
 // ==============================================================================
+app.get('/api/checkout/verify/:booking_id', async (req, res, next) => {
+  try {
+    if (!PAYSTACK_SECRET_KEY) {
+      return res.status(503).json({ error: 'PAYMENTS_NOT_CONFIGURED', message: 'Payment verification is not configured.' });
+    }
+
+    const { booking_id } = req.params;
+    let booking = LOCAL_STORE.bookings.get(booking_id);
+    if (!booking && APPWRITE_API_KEY) {
+      const awRes = await appwriteFetch(collectionPath(APPWRITE_BOOKINGS_COLLECTION_ID, `/${booking_id}`));
+      if (awRes.ok && awRes.data) {
+        booking = awRes.data;
+        LOCAL_STORE.bookings.set(booking_id, booking);
+      }
+    }
+    if (!booking) return res.status(404).json({ error: 'NOT_FOUND', message: 'Booking not found.' });
+
+    const paystackRes = await fetch(
+      `${PAYSTACK_ENDPOINT}/transaction/verify/${encodeURIComponent(booking.paystack_reference)}`,
+      { headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` } },
+    );
+    const paystackData = await paystackRes.json().catch(() => ({}));
+    if (!paystackRes.ok || !paystackData.status) {
+      return res.status(502).json({ error: 'PAYSTACK_UNAVAILABLE', message: 'Unable to verify payment status.' });
+    }
+
+    const payment = paystackData.data;
+    if (payment.status !== 'success') {
+      return res.json({ booking_id, status: booking.status, payment_status: payment.status });
+    }
+
+    const payload = JSON.stringify({
+      event: 'charge.success',
+      data: {
+        reference: payment.reference,
+        metadata: { booking_id },
+      },
+    });
+    const signature = crypto.createHmac('sha512', PAYSTACK_SECRET_KEY).update(payload).digest('hex');
+    const settleRes = await fetch(`http://127.0.0.1:${PORT}/api/checkout/webhook`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-paystack-signature': signature,
+      },
+      body: payload,
+    });
+    const settled = await settleRes.json().catch(() => ({}));
+    return res.status(settleRes.status).json(settled);
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.get('/api/checkout/status/:booking_id', async (req, res, next) => {
   try {
     const { booking_id } = req.params;
