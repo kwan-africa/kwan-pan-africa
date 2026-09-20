@@ -31,6 +31,22 @@ const EXAMPLES = [
   'I want hands-on bead making and local crafts in Jamestown.',
 ];
 
+const THEME_LABELS = Object.fromEntries(THEME_OPTIONS.map(({ tag, label }) => [tag, label]));
+
+function getThemeLabel(theme) {
+  return THEME_LABELS[theme] || theme?.replaceAll('_', ' ') || 'Cultural experience';
+}
+
+function getTripOutline(guide, addonIncluded) {
+  const outline = [
+    `Welcome and orientation with ${guide.name}`,
+    `Guided ${getThemeLabel(guide.theme).toLowerCase()} experience at ${guide.anchorSite || 'your selected cultural anchor site'}`,
+    'Local context, conversation, and time for questions',
+  ];
+  if (addonIncluded) outline.push('Optional ancestral ceremony or cultural stop');
+  return outline;
+}
+
 const formatUsd = (value) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 
@@ -145,7 +161,7 @@ export default function App() {
         ...items,
         {
           role: 'kwan',
-          copy: `I matched you with ${matched.name} because your ${matched.theme} interests align with their experience at ${matched.anchorSite}. Review the fixed package, make the available edit, and continue when it feels right.`,
+          copy: `I matched you with ${matched.name} because your ${getThemeLabel(matched.theme).toLowerCase()} interests align with their experience at ${matched.anchorSite}. Review the fixed package, make the available edit, and continue when it feels right.`,
         },
       ]);
     } catch (err) {
@@ -348,7 +364,7 @@ export default function App() {
                 border: dataSource === 'appwrite' ? '1px solid rgba(240, 44, 94, 0.4)' : '1px solid rgba(255, 255, 255, 0.1)',
               }}
             >
-              DB: {dataSource.toUpperCase()}
+              Live pilot roster
             </span>
           )}
           <p className="pilot-label">Accra &amp; Cape Coast pilot · 2026</p>
@@ -391,7 +407,7 @@ export default function App() {
           <p className="eyebrow">Grassroots cultural travel</p>
           <h1 id="page-title">One conversation.<br />One local guide.</h1>
           <p className="lede">
-            Describe the experience you want in Ghana. Kwan connects you with one verified local guide, then helps you review and book their fixed experience package.
+            Describe the experience you want in Ghana. Kwan connects you with one verified local guide and shows you exactly what the day includes before you book.
           </p>
           <div className="method-note">
             <ShieldCheck size={18} aria-hidden="true" />
@@ -570,11 +586,15 @@ function GuideMatch({ guide, serverPricing, addonIncluded, isRecalculating, onTo
           src={guide.image}
           alt={guide.name}
           style={{ width: '68px', height: '68px', borderRadius: '16px', objectFit: 'cover', marginBottom: '16px', border: '2px solid #214734' }}
+          onError={(event) => {
+            event.currentTarget.style.display = 'none';
+            event.currentTarget.nextElementSibling.style.display = 'flex';
+            event.currentTarget.nextElementSibling?.removeAttribute('aria-hidden');
+          }}
         />
-      ) : (
-        <div className={`guide-avatar ${guide.color}`} aria-hidden="true">{guide.initials}</div>
-      )}
-      <p className="section-kicker">Your guide match · {guide.theme || 'heritage'}</p>
+      ) : null}
+      <div className={`guide-avatar ${guide.color}`} style={{ display: guide.image ? 'none' : 'flex' }} aria-hidden={guide.image ? 'true' : undefined}>{guide.initials}</div>
+      <p className="section-kicker">Your guide match · {getThemeLabel(guide.theme)}</p>
       <h2>{guide.name}</h2>
       <p className="guide-role">{guide.role}</p>
       <div className="guide-detail"><MapPin size={17} aria-hidden="true" /><span>{guide.area}</span></div>
@@ -589,6 +609,16 @@ function GuideMatch({ guide, serverPricing, addonIncluded, isRecalculating, onTo
           <span>Anchor site: {guide.anchorSite}</span>
         </div>
       )}
+
+      <div style={{ margin: '0.8rem 0', padding: '0.8rem', background: 'rgba(245, 166, 35, 0.08)', borderRadius: '6px', border: '1px solid rgba(245, 166, 35, 0.2)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.4rem' }}>
+          <CalendarDays size={16} aria-hidden="true" />
+          <strong>What your day includes</strong>
+        </div>
+        <ol style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.82rem', lineHeight: 1.6 }}>
+          {getTripOutline(guide, addonIncluded).map((item) => <li key={item}>{item}</li>)}
+        </ol>
+      </div>
 
       <div style={{ margin: '0.8rem 0', padding: '0.6rem 0.8rem', background: 'rgba(33,71,52,0.05)', borderRadius: '6px', border: '1px solid rgba(33,71,52,0.12)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
@@ -615,7 +645,7 @@ function GuideMatch({ guide, serverPricing, addonIncluded, isRecalculating, onTo
           </button>
         </div>
         <span style={{ fontSize: '0.72rem', color: '#647067', display: 'block', marginTop: '0.2rem' }}>
-          {addonIncluded ? 'Customized with ancestral ceremony (live recalculated by backend).' : 'Click to customize stops and live-recalculate pricing via /api/itinerary.'}
+          {addonIncluded ? 'Customized with an ancestral ceremony; the total above reflects this addition.' : 'Add the optional ceremony to customize the fixed experience before booking.'}
         </span>
       </div>
 
@@ -686,7 +716,7 @@ function CheckoutModal({
 
         <div className="checkout-summary">
           {guide.image ? (
-            <img src={guide.image} alt={guide.name} style={{ width: '42px', height: '42px', borderRadius: '8px', objectFit: 'cover' }} />
+            <img src={guide.image} alt={guide.name} style={{ width: '42px', height: '42px', borderRadius: '8px', objectFit: 'cover' }} onError={(event) => { event.currentTarget.style.display = 'none'; }} />
           ) : (
             <div className={`guide-avatar small ${guide.color}`} aria-hidden="true">{guide.initials}</div>
           )}
@@ -717,7 +747,7 @@ function CheckoutModal({
             <p className="link-label">Unique payment link</p>
             <div className="link-box"><span>{paymentLink}</span><button type="button" onClick={onCopyLink} aria-label="Copy payment link">{copied ? <Check size={17} /> : <Copy size={17} />}</button></div>
             <p className="reference">Reference: {booking.reference}</p>
-            <div className="prototype-notice"><CircleAlert size={18} aria-hidden="true" /><span>Complete payment in Paystack. Kwan will issue the release PIN after the signed payment webhook is received.</span></div>
+            <div className="prototype-notice"><CircleAlert size={18} aria-hidden="true" /><span>Complete payment in Paystack. Your release PIN will appear as soon as payment is confirmed.</span></div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               <button className="button button-primary button-full" type="button" onClick={onOpenPaystackCheckout}>
