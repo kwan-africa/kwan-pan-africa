@@ -86,40 +86,44 @@ Kwan connects international and diaspora travelers directly to verified grassroo
 - Paystack account — [paystack.com](https://paystack.com)
 
 ### 1. Configure Environment
-Copy `.env.example` to `.env` and populate your API credentials:
+Copy `.env.example` to `.env` and populate your credentials:
 ```env
 GEMINI_API_KEY=your_gemini_api_key
 PAYSTACK_PUBLIC_KEY=pk_test_...
 PAYSTACK_SECRET_KEY=sk_test_...
-GOOGLE_PLACES_API_KEY=your_google_places_key
+APPWRITE_ENDPOINT=https://fra.cloud.appwrite.io/v1
+APPWRITE_PROJECT_ID=6aafb1c000071a227cda
+APPWRITE_API_KEY=your_scoped_api_key
 ```
 
-### 2. Launch PostgreSQL with pgvector
+### 2. Node/Express Backend & Appwrite Schema
 ```bash
+cd server
+npm install
+npm run setup:db   # Provisions Appwrite collections (hosts, bookings, escrow_ledgers) and seeds data
+npm run dev        # Backend live at http://localhost:3001
+```
+
+### 3. React Web Application (Vite)
+```bash
+cd kwan-web-app
+npm install
+npm run dev        # Web app live at http://localhost:5173
+```
+
+### 4. Alternative: Spring Boot + Flutter Stack
+```bash
+# Launch PostgreSQL + pgvector
 docker-compose up postgres -d
-```
 
-### 3. Start Spring Boot Backend
-```bash
+# Spring Boot 3 Backend
 cd kwan-backend
-./mvnw spring-boot:run
-# Server listening on http://localhost:8080
-```
+./mvnw spring-boot:run   # API live at http://localhost:8080
 
-### 4. Run Frontend Web App
-```bash
-cd kwan-flutter/web
-python -m http.server 8081
-# Open http://localhost:8081 in any modern browser
-```
-
-### 5. Run Flutter Mobile Application
-```bash
+# Flutter Cross-Platform Client
 cd kwan-flutter
 flutter pub get
 flutter run -d chrome
-# Or target Android / iOS emulator:
-# flutter run -d emulator-5554
 ```
 
 ---

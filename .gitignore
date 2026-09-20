@@ -22,8 +22,11 @@ product_demo_player.html
 
 # === ENVIRONMENT & SECRETS ===
 .env
-.env.local
-.env.production
+.env.*
+*.env
+**/.env*
+!**/.env.example
+!**/.env.*.example
 *.key
 *.pem
 
@@ -88,3 +91,9 @@ Thumbs.db
 
 # === DOCKER ===
 docker-compose.override.yml
+
+# === NODE DEPENDENCIES ===
+node_modules/
+**/node_modules/
+dist/
+**/dist/

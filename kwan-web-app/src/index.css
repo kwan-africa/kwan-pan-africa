@@ -14,6 +14,9 @@ button, input, textarea { font: inherit; }
 button { cursor: pointer; }
 button:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible { outline: 3px solid #d59335; outline-offset: 3px; }
 
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin-icon { animation: spin 1s linear infinite; }
+
 .site-shell { min-height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 .topbar { min-height: 76px; width: min(1180px, calc(100% - 40px)); margin: 0 auto; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #dfddd2; }
 .brand { display: inline-flex; align-items: center; gap: 10px; color: #1b2921; font: 600 22px/1 'Newsreader', serif; letter-spacing: -0.03em; text-decoration: none; }
@@ -129,7 +132,7 @@ footer span:last-child { max-width: 450px; text-align: right; }
 }
 
 @media (max-width: 560px) {
-  .topbar, .page, footer { width: min(100% - 28px, 1180px); }
+  .topbar, .page, footer { width: min(calc(100% - 28px), 1180px); }
   .topbar { min-height: 64px; }
   .pilot-label { font-size: 9px; }
   .page { padding: 44px 0 52px; }
