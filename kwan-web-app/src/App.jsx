@@ -31,6 +31,36 @@ const EXAMPLES = [
   'I want hands-on bead making and local crafts in Jamestown.',
 ];
 
+const QUESTION_EXAMPLES = [
+  'Tell me about the history of Cape Coast Castle.',
+  'What does an Adinkra symbol mean?',
+];
+
+const CULTURAL_ANSWERS = [
+  {
+    terms: ['cape coast', 'door of no return', 'castle'],
+    answer: 'Cape Coast Castle is a place of remembrance. Kwan’s guides can explain the transatlantic slave trade, the castle’s dungeons, and how local Fante communities hold memory and continuity today.',
+  },
+  {
+    terms: ['nkrumah', 'independence', 'black star'],
+    answer: 'Ghana’s independence story is closely tied to Kwame Nkrumah, the 1948 resistance movement, and Black Star Square. A local historian can connect the monuments to the people and political ideas behind them.',
+  },
+  {
+    terms: ['adinkra', 'symbol'],
+    answer: 'Adinkra symbols are a visual language of values and ideas. A craft host can show how symbols such as Sankofa and Gye Nyame are carved, printed, and interpreted in everyday Ghanaian life.',
+  },
+  {
+    terms: ['homowo', 'festival', 'event'],
+    answer: 'Ghana’s festivals are community-led celebrations with distinct histories, rituals, music, and food. Event dates and access vary, so Kwan marks festival routes as previews until local availability is confirmed.',
+  },
+];
+
+function answerCulturalQuestion(query) {
+  const normalized = query.toLowerCase();
+  const match = CULTURAL_ANSWERS.find(({ terms }) => terms.some((term) => normalized.includes(term)));
+  return match?.answer || 'I can help explain Ghanaian history, cultural sites, symbols, food, and festivals. Ask about a place or tradition, or describe the kind of experience you want to craft.';
+}
+
 const EXPERIENCE_CATALOG = [
   {
     id: 'cape-coast-remembrance',
@@ -154,8 +184,13 @@ export default function App() {
     const trimmed = value.trim();
     if (!trimmed || isMatching) return;
 
+    const isQuestion = /^(who|what|when|where|why|how|tell me|can you explain|is there)/i.test(trimmed);
     setConversation((items) => [...items, { role: 'traveler', copy: trimmed }]);
     setRequest('');
+    if (isQuestion) {
+      setConversation((items) => [...items, { role: 'kwan', copy: answerCulturalQuestion(trimmed) }]);
+      return;
+    }
     setGuide(null);
     setAddonIncluded(false);
     setLoadingAction('matching');
@@ -527,7 +562,7 @@ export default function App() {
                 <div className="message kwan loading">
                   <span className="message-label">Kwan</span>
                   <p style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Loader2 size={14} className="spin-icon" /> Matching you with a verified local guide...
+                    <Loader2 size={14} className="spin-icon" /> Crafting your experience from the pilot routes...
                   </p>
                 </div>
               )}
@@ -561,6 +596,23 @@ export default function App() {
                   onClick={() => sendRequest(example)}
                 >
                   {example}
+                  <ChevronRight size={15} aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+            <div className="example-list" aria-label="Cultural questions">
+              <span style={{ fontSize: '0.72rem', color: '#94A3B8', textTransform: 'uppercase', fontFamily: 'monospace' }}>
+                Ask about Ghana
+              </span>
+              {QUESTION_EXAMPLES.map((question) => (
+                <button
+                  className="text-button"
+                  type="button"
+                  key={question}
+                  disabled={isMatching}
+                  onClick={() => sendRequest(question)}
+                >
+                  {question}
                   <ChevronRight size={15} aria-hidden="true" />
                 </button>
               ))}
