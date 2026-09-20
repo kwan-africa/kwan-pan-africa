@@ -1,0 +1,89 @@
+# === INTERNAL PITCH & PRESENTATION DOCUMENTS & ARCHIVES ===
+PAAIS_2026_PITCH_SUBMISSION.md
+LEAN_CANVAS_MODEL.md
+KWAN_MVP_VALIDATION_EXPERIMENT.md
+*.pptx
+*.pdf
+*.docx
+build_investor_deck.py
+build_pitch_deck.py
+generate_strategic_word_doc.py
+update_lean_canvas_pptx.py
+*.ps1
+docs/
+pitch-files-hack-ai-thon/
+branding/
+scripts/
+scratch_video/
+scratch_charts/
+kwan_product_demo.*
+product_demo_player.html
+
+# === ENVIRONMENT & SECRETS ===
+.env
+.env.local
+.env.production
+*.key
+*.pem
+
+# === JAVA / MAVEN BACKEND ===
+kwan-backend/target/
+kwan-backend/.mvn/wrapper/maven-wrapper.jar
+*.class
+*.jar
+!**/src/main/**/lib/*.jar
+
+# === FLUTTER ===
+kwan-flutter/build/
+kwan-flutter/.dart_tool/
+kwan-flutter/.flutter-plugins
+kwan-flutter/.flutter-plugins-dependencies
+kwan-flutter/pubspec.lock
+kwan-flutter/.packages
+kwan-flutter/*.iml
+kwan-flutter/android/.gradle/
+kwan-flutter/android/local.properties
+kwan-flutter/android/app/google-services.json
+kwan-flutter/ios/.symlinks/
+kwan-flutter/ios/Flutter/App.framework/
+kwan-flutter/ios/Flutter/Flutter.framework/
+kwan-flutter/ios/Flutter/Generated.xcconfig
+kwan-flutter/ios/Flutter/flutter_export_environment.sh
+kwan-flutter/ios/Runner.xcworkspace/
+kwan-flutter/ios/Pods/
+kwan-flutter/windows/flutter/generated_plugin_registrant.cc
+kwan-flutter/windows/flutter/generated_plugin_registrant.h
+
+# === PYTHON SCRIPTS ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+
+# === COMPILED BINARIES ===
+a.out
+*.exe
+*.o
+*.so
+*.dll
+
+# === LOGS ===
+*.log
+flutter_01.log
+flutter_silent.cpp
+flutter_doctor.txt
+build_out.txt
+
+# === OS & EDITOR ===
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# === DOCKER ===
+docker-compose.override.yml
