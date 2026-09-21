@@ -275,11 +275,17 @@ flutter run -d chrome
 | `POST` | `/api/classify` | Classify a traveler request into a fixed cultural theme |
 | `GET` | `/api/hosts?theme=X` | Return verified hosts for an allowed theme |
 | `POST` | `/api/itinerary` | Recalculate server-authoritative itinerary pricing |
+| `POST` | `/api/sankofa/preview` | Validate a multi-day plan against the verified pilot roster and return server-calculated totals |
 | `POST` | `/api/checkout/init` | Persist a booking and initialize Paystack checkout |
 | `POST` | `/api/checkout/webhook` | Verify Paystack signature and hold escrow |
 | `GET` | `/api/checkout/verify/:booking_id` | Verify Paystack status and recover a delayed webhook |
 | `GET` | `/api/checkout/status/:booking_id` | Read the stored booking status |
 | `POST` | `/api/escrow/release` | Verify the PIN and release the payout |
+
+The web client exposes Sankofa Plan at `/plan` as a dedicated route. Its curated
+packages surface seasonal festivals, public cultural moments, and smaller local
+encounters as planning context; they are not treated as guaranteed bookable
+inventory. Only selected guide days are sent to `/api/sankofa/preview`.
 
 ---
 
