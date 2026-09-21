@@ -22,7 +22,7 @@ import {
   X,
 } from 'lucide-react';
 
-import { VERIFIED_HOSTS, LIVING_CORRIDOR_FACTS } from './data/culturalKnowledge';
+import { VERIFIED_HOSTS, LIVING_CORRIDOR_FACTS, SANKOFA_CURATED_PACKAGES, SANKOFA_WEEK_TEMPLATES } from './data/culturalKnowledge';
 import { matchGuideOffline, getOfflinePricing } from './services/offlineFallback';
 import RotatingFacts from './components/RotatingFacts';
 import AboutThisPlace from './components/AboutThisPlace';
@@ -1293,6 +1293,7 @@ function SankofaPlanPage({ onBack }) {
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedPackage, setSelectedPackage] = useState(null);
 
   async function confirmPlan(draft) {
     setLoading(true);
@@ -1326,8 +1327,44 @@ function SankofaPlanPage({ onBack }) {
         <h1>Sankofa Plan<span aria-hidden="true"> ✦</span></h1>
         <p className="lede">Build a considered week of Ghanaian experiences. Each selected day is checked against Kwan's verified pilot roster before a combined payment link is prepared.</p>
       </section>
+      {!plan && (
+        <section className="sankofa-packages" aria-labelledby="sankofa-packages-title">
+          <div className="section-kicker">Curated for the week</div>
+          <h2 id="sankofa-packages-title">Arrive when the culture is already in motion.</h2>
+          <p className="package-intro">Choose a seasonal starting point for your plan. Events are cultural context, not bookable inventory; your selected guide days are still validated against Kwan's pilot roster.</p>
+          <div className="package-grid">
+            {SANKOFA_CURATED_PACKAGES.map(pkg => (
+              <article className={`package-card ${selectedPackage?.id === pkg.id ? 'is-selected' : ''}`} key={pkg.id}>
+                <div className="package-card-top">
+                  <span className="package-timing">{pkg.timing}</span>
+                  <span className="package-badge">Curated</span>
+                </div>
+                <h3>{pkg.name}</h3>
+                <p>{pkg.description}</p>
+                <div className="package-events">
+                  {pkg.events.map(event => (
+                    <div className="package-event" key={event.name}>
+                      <strong>{event.name}</strong>
+                      <span>{event.scale} · {event.place}</span>
+                      <small>{event.note}</small>
+                    </div>
+                  ))}
+                </div>
+                <button type="button" className="text-button package-select" onClick={() => setSelectedPackage(pkg)}>
+                  {selectedPackage?.id === pkg.id ? 'Package selected' : 'Use this starting point'} <ArrowUpRight size={15} />
+                </button>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
       {error && <div className="prototype-notice"><CircleAlert size={18} /> <span>{error}</span></div>}
-      {!plan && <SankofaPlanner onConfirmPlan={confirmPlan} onClose={onBack} />}
+      {!plan && <SankofaPlanner
+        key={selectedPackage?.id || 'custom'}
+        initialTemplate={selectedPackage ? SANKOFA_WEEK_TEMPLATES.find(template => template.id === selectedPackage.templateId) : null}
+        onConfirmPlan={confirmPlan}
+        onClose={onBack}
+      />}
       {loading && <p className="plan-status"><Loader2 size={16} className="spin-icon" /> Validating guides and pricing with the Kwan API...</p>}
       {plan && (
         <section className="plan-result" aria-labelledby="plan-result-title">

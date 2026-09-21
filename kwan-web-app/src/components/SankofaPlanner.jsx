@@ -46,11 +46,21 @@ function dayTotal(day) {
   return host?.hourlyRateUsd || 50;
 }
 
-export default function SankofaPlanner({ onConfirmPlan, onClose }) {
-  const [days, setDays] = useState(DEFAULT_DAYS);
+function daysFromTemplate(template) {
+  if (!template) return DEFAULT_DAYS;
+  return DAY_LABELS.map((label, i) => {
+    const day = template.days.find(item => item.dayIndex === i);
+    return day
+      ? { ...day, label }
+      : { dayIndex: i, label, theme: null, hostId: null, notes: '' };
+  });
+}
+
+export default function SankofaPlanner({ onConfirmPlan, onClose, initialTemplate = null, initialStartDate = '' }) {
+  const [days, setDays] = useState(() => daysFromTemplate(initialTemplate));
   const [activeDay, setActiveDay] = useState(null);
   const [templateOpen, setTemplateOpen] = useState(false);
-  const [startDate, setStartDate] = useState('');
+  const [startDate, setStartDate] = useState(initialStartDate);
   const [confirming, setConfirming] = useState(false);
 
   const total = days.reduce((sum, d) => sum + dayTotal(d), 0);

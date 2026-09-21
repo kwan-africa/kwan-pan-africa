@@ -474,3 +474,41 @@ export const SANKOFA_WEEK_TEMPLATES = [
     ],
   },
 ];
+
+// Curated context for planning only. These are not bookable inventory; dates should
+// be confirmed with the organiser or host before a traveller commits.
+export const SANKOFA_CURATED_PACKAGES = [
+  {
+    id: "chale-wote-roots",
+    name: "Street Art & Living Heritage",
+    description: "A creative Accra week that pairs verified host sessions with the energy of Jamestown's annual street arts season.",
+    timing: "Usually August · dates vary each year",
+    templateId: "creative_week",
+    events: [
+      { name: "Chale Wote Street Art Festival", scale: "Major", place: "Jamestown", note: "Public art, performance and installations across the historic district." },
+      { name: "Jamestown lighthouse walk", scale: "Small", place: "Jamestown", note: "A host-led harbour walk and neighbourhood story session." },
+    ],
+  },
+  {
+    id: "homowo-roots",
+    name: "Ga Homowo & Community Table",
+    description: "A roots-focused week around Ga history, food and community celebrations, with space for quiet host-led encounters.",
+    timing: "Usually July–September · local calendars vary",
+    templateId: "roots_week",
+    events: [
+      { name: "Homowo season", scale: "Major", place: "Ga communities", note: "A harvest season of procession, drumming, remembrance and community gatherings." },
+      { name: "Kenkey house supper", scale: "Small", place: "Ga-Mashie", note: "A hosted meal and etiquette briefing with a local food maker." },
+    ],
+  },
+  {
+    id: "akwasi-nature",
+    name: "Green Ridge & Cocoa Stories",
+    description: "A slower Sankofa week through Aburi's gardens, cocoa heritage and the coastline, balancing guided days with open time.",
+    timing: "Best October–April · weather and access vary",
+    templateId: "nature_week",
+    events: [
+      { name: "Aburi Botanical Gardens morning", scale: "Small", place: "Aburi", note: "A quiet garden and medicinal plant walk with local context." },
+      { name: "Cocoa harvest visit", scale: "Seasonal", place: "Akuapem Ridge", note: "Farm access and harvest activities depend on the season and host availability." },
+    ],
+  },
+];

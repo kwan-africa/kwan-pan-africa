@@ -30,6 +30,23 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visib
 .plan-intro { max-width: 720px; margin: 36px 0 32px; }
 .plan-intro h1 { margin-bottom: 16px; }
 .plan-intro h1 span { color: #a05c1d; }
+.sankofa-packages { margin: 0 0 28px; }
+.sankofa-packages h2 { margin-bottom: 8px; }
+.package-intro { max-width: 720px; color: #647067; font-size: 13px; line-height: 1.5; }
+.package-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+.package-card { display: flex; flex-direction: column; gap: 9px; padding: 16px; border: 1px solid #d6ddd2; border-radius: 14px; background: #fffef9; }
+.package-card.is-selected { border-color: #a05c1d; box-shadow: 0 0 0 2px rgba(160,92,29,.12); }
+.package-card-top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.package-timing, .package-badge { color: #68746c; font: 500 10px/1.3 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .04em; }
+.package-badge { color: #3d7651; }
+.package-card h3 { margin: 0; color: #214734; font: 600 20px/1.05 'Newsreader', Georgia, serif; }
+.package-card > p { margin: 0; color: #566158; font-size: 12px; line-height: 1.45; }
+.package-events { display: grid; gap: 8px; margin-top: 3px; }
+.package-event { display: grid; gap: 2px; padding: 8px 9px; border-left: 2px solid #d59335; background: #f8f6ef; }
+.package-event strong { color: #314338; font-size: 12px; }
+.package-event span, .package-event small { color: #68746c; font-size: 11px; line-height: 1.35; }
+.package-event small { font-size: 10px; }
+.package-select { margin-top: auto; padding-top: 5px; font-weight: 600; }
 .plan-status { display: flex; align-items: center; gap: 8px; margin: 16px 0; color: #55705d; font-size: 13px; }
 .plan-result { display: grid; gap: 20px; padding: 26px; border: 1px solid #d6ddd2; border-radius: 18px; background: #fffef9; }
 .plan-result h2 { margin-bottom: 8px; }
@@ -40,6 +57,11 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visib
 .plan-day-row b { color: #203128; text-align: right; }
 .plan-trust-note { display: flex; align-items: flex-start; gap: 8px; padding: 12px; border-radius: 10px; color: #3d5845; background: #e9f0e7; font-size: 12px; line-height: 1.45; }
 .plan-trust-note svg { flex: 0 0 auto; color: #3b7651; }
+@media (max-width: 800px) {
+  .package-grid { grid-template-columns: 1fr; }
+  .plan-day-row { grid-template-columns: 58px 1fr 72px; }
+  .plan-day-row span:nth-of-type(2), .plan-day-row span:nth-of-type(3) { grid-column: 2 / -1; }
+}
 .intro { max-width: 720px; }
 .eyebrow { color: #9d5d12; margin-bottom: 20px; }
 h1, h2, p { margin-top: 0; }
