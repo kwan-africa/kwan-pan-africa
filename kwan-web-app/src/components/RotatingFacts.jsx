@@ -83,8 +83,8 @@ export default function RotatingFacts({ activeSite = null }) {
   return (
     <div
       style={{
-        margin: '0 0 1.1rem',
-        padding: '0.85rem 1rem',
+        margin: '0 0 0.75rem',
+        padding: '0.65rem 0.8rem',
         borderRadius: '10px',
         background: 'linear-gradient(135deg, rgba(33,71,52,0.06) 0%, rgba(245,166,35,0.05) 100%)',
         border: '1px solid rgba(245,166,35,0.18)',
@@ -92,7 +92,7 @@ export default function RotatingFacts({ activeSite = null }) {
         overflow: 'hidden',
         transition: 'opacity 0.35s ease',
         opacity: visible ? 1 : 0,
-        minHeight: '82px',
+        minHeight: '0',
       }}
       aria-live="polite"
       aria-label="Cultural fact from the Living Corridor"
@@ -142,7 +142,7 @@ export default function RotatingFacts({ activeSite = null }) {
         margin: 0,
         fontSize: '0.8rem',
         color: '#1F2937',
-        lineHeight: 1.5,
+        lineHeight: 1.4,
         fontStyle: 'italic',
       }}>
         "{fact?.text}"
