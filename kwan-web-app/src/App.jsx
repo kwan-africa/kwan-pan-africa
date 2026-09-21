@@ -16,6 +16,7 @@ import {
   MessageCircle,
   RefreshCw,
   ShieldCheck,
+  Sparkles,
   Smartphone,
   WalletCards,
   X,
@@ -75,6 +76,7 @@ export default function App() {
   const [copied, setCopied] = useState(false);
   const [enteredPin, setEnteredPin] = useState('');
   const requestInput = useRef(null);
+  const matchPanelRef = useRef(null);
 
   const isMatching = loadingAction === 'matching';
   const effectivePrice = serverPricing.total_usd;
@@ -85,8 +87,15 @@ export default function App() {
   );
 
   useEffect(() => {
-    if (guide) requestInput.current?.focus();
+    if (guide) {
+      matchPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }, [guide]);
+
+  function surpriseMe() {
+    const prompt = EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)];
+    sendRequest(prompt);
+  }
 
   async function sendRequest(value = request) {
     const trimmed = value.trim();
@@ -462,6 +471,9 @@ export default function App() {
 
             <div className="example-list" aria-label="Example requests">
               <span className="examples-label">Try a starting point</span>
+              <button className="surprise-button" type="button" disabled={isMatching} onClick={surpriseMe}>
+                <Sparkles size={14} aria-hidden="true" /> Surprise me
+              </button>
               {EXAMPLES.map((example) => (
                 <button
                   className="text-button"
@@ -508,7 +520,7 @@ export default function App() {
             </form>
           </div>
 
-          <aside className="match-panel" aria-live="polite">
+          <aside ref={matchPanelRef} className={`match-panel${guide ? ' match-panel-active' : ''}`} aria-live="polite">
             {guide ? (
               <GuideMatch
                 guide={guide}
@@ -620,6 +632,20 @@ function GuideMatch({ guide, matchedTheme, serverPricing, addonIncluded, isRecal
       <div className="experience-summary">
         <div><CalendarDays size={16} aria-hidden="true" /><span>{details.duration}</span></div>
         <p>{details.itinerary}</p>
+      </div>
+      <div className="guide-details" aria-label="Guide and trip details">
+        <div className="guide-detail-card">
+          <ShieldCheck size={17} aria-hidden="true" />
+          <div><strong>Why trust this match</strong><span>Identity and Mobile Money wallet reviewed for the Kwan pilot.</span></div>
+        </div>
+        <div className="guide-detail-card">
+          <MapPin size={17} aria-hidden="true" />
+          <div><strong>What you will do</strong><span>{details.itinerary} Your host meets you at {guide.anchorSite || guide.area}.</span></div>
+        </div>
+        <div className="guide-detail-card">
+          <WalletCards size={17} aria-hidden="true" />
+          <div><strong>Where your money goes</strong><span>{formatUsd(serverPricing.host_payout_usd)} is reserved for the host; Kwan's {formatUsd(serverPricing.platform_fee_usd)} fee and the {formatUsd(serverPricing.tourism_levy_usd)} levy are shown upfront.</span></div>
+        </div>
       </div>
       <div className="reviewed-note" style={{ color: '#214734', background: 'rgba(33,71,52,0.06)' }}>
         <CheckCircle2 size={17} aria-hidden="true" />

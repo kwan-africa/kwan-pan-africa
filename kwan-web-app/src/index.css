@@ -55,6 +55,8 @@ h2 { margin-bottom: 0; font-size: 27px; line-height: 1.04; }
 .text-button { min-height: 32px; }
 .text-button:hover { color: #1f4c34; text-decoration: underline; }
 .text-button svg { flex: 0 0 auto; }
+.surprise-button { display: inline-flex; align-items: center; gap: 5px; min-height: 32px; padding: 5px 10px; border: 1px solid #d6c48f; border-radius: 999px; color: #81551a; background: #fff8e6; font-size: 12px; font-weight: 600; }
+.surprise-button:hover:not(:disabled) { border-color: #a05c1d; background: #fff1c9; }
 .request-form { border-top: 1px solid #e6e4db; padding-top: 16px; }
 .request-form label, .checkout-form label { display: block; margin-bottom: 7px; color: #536158; font-size: 12px; font-weight: 600; }
 .input-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; }
@@ -70,6 +72,7 @@ textarea:focus, input:focus { border-color: #477457; outline: none; }
 .button-full { width: 100%; }
 
 .match-panel { display: flex; padding: 25px; background: #f0f0e8; }
+.match-panel-active { scroll-margin-top: 24px; }
 .empty-match { align-self: center; }
 .empty-icon { display: grid; width: 45px; height: 45px; margin-bottom: 21px; place-items: center; border-radius: 50%; color: #477457; background: #dce8db; }
 .empty-match h2 { max-width: 250px; margin-bottom: 13px; }
@@ -91,6 +94,12 @@ textarea:focus, input:focus { border-color: #477457; outline: none; }
 .experience-summary > div { display: flex; align-items: center; gap: 7px; color: #365b43; font-size: 12px; font-weight: 600; }
 .experience-summary > div svg { color: #a05c1d; }
 .experience-summary p { margin: 7px 0 0; color: #5d6b61; font-size: 12px; line-height: 1.45; }
+.guide-details { display: grid; gap: 8px; margin: 18px 0; }
+.guide-detail-card { display: flex; align-items: flex-start; gap: 9px; padding: 11px; border: 1px solid #d6dacd; border-radius: 10px; background: rgba(255, 254, 249, .72); }
+.guide-detail-card > svg { flex: 0 0 auto; margin-top: 1px; color: #3b7651; }
+.guide-detail-card strong, .guide-detail-card span { display: block; }
+.guide-detail-card strong { color: #365b43; font-size: 12px; }
+.guide-detail-card span { margin-top: 3px; color: #5d6b61; font-size: 11px; line-height: 1.45; }
 .reviewed-note { display: flex; align-items: flex-start; gap: 8px; margin: 18px 0; padding: 11px 0; color: #3c5b45; border-top: 1px solid #d6dacd; border-bottom: 1px solid #d6dacd; font-size: 12px; line-height: 1.45; }
 .reviewed-note svg { flex: 0 0 auto; color: #3b7651; }
 .price-row { display: flex; justify-content: space-between; align-items: baseline; margin: 5px 0 4px; color: #637066; font-size: 13px; }
