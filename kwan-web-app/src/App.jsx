@@ -164,12 +164,6 @@ export default function App() {
   );
 
   useEffect(() => {
-    if (guide) {
-      matchPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [guide]);
-
-  useEffect(() => {
     const handlePopState = () => setPathname(window.location.pathname);
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -183,6 +177,11 @@ export default function App() {
   function surpriseMe() {
     const prompt = EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)];
     sendRequest(prompt);
+  }
+
+  function viewGuideDetails() {
+    matchPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.setTimeout(() => matchPanelRef.current?.focus(), 350);
   }
 
   async function sendRequest(value = request) {
@@ -270,6 +269,9 @@ export default function App() {
         ...items,
         {
           role: 'kwan',
+          kind: 'guide-match',
+          guide: matched,
+          theme: theme_matched,
           copy: `I matched you with ${matched.name} because their verified roster profile covers ${EXPERIENCE_DETAILS[theme_matched]?.label || theme_matched} experiences near ${matched.anchorSite}.`,
         },
       ]);
@@ -288,6 +290,9 @@ export default function App() {
           ...items,
           {
             role: 'kwan',
+            kind: 'guide-match',
+            guide: offlineGuide,
+            theme: offlineGuide.theme,
             copy: `[Demo mode] Matched you with ${offlineGuide.name} — ${offlineGuide.role}. The live backend is offline; pricing is calculated locally from the pilot roster.`,
           },
         ]);
@@ -620,9 +625,14 @@ export default function App() {
             {/* Sankofa Planner — full week builder */}
             <div className="messages" aria-live="polite">
               {conversation.map((message, index) => (
-                <div className={`message ${message.role}`} key={`${message.role}-${index}`}>
+                <div className={`message ${message.role}${message.kind ? ` message-${message.kind}` : ''}`} key={`${message.role}-${index}`}>
                   <span className="message-label">{message.role === 'kwan' ? 'Kwan' : 'You'}</span>
                   <p>{message.copy}</p>
+                  {message.kind === 'guide-match' && (
+                    <button type="button" className="message-action" onClick={viewGuideDetails}>
+                      View guide details <ChevronRight size={15} aria-hidden="true" />
+                    </button>
+                  )}
                 </div>
               ))}
               {isMatching && (
@@ -709,7 +719,7 @@ export default function App() {
             </form>
           </div>
 
-          <aside ref={matchPanelRef} className={`match-panel${guide ? ' match-panel-active' : ''}`} aria-live="polite">
+          <aside ref={matchPanelRef} tabIndex="-1" className={`match-panel${guide ? ' match-panel-active' : ''}`} aria-live="polite">
             {guide ? (
               <GuideMatch
                 guide={guide}

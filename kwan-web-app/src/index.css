@@ -84,6 +84,10 @@ h2 { margin-bottom: 0; font-size: 27px; line-height: 1.04; }
 .message-label { display: block; margin-bottom: 6px; color: #5d7864; font-size: 10px; }
 .traveler .message-label { color: #b4cfbd; }
 .message p { margin: 0; font-size: 14px; line-height: 1.45; }
+.message-guide-match { padding-bottom: 10px; }
+.message-action { display: inline-flex; align-items: center; gap: 4px; margin-top: 10px; padding: 6px 9px; border: 1px solid rgba(33,71,52,.22); border-radius: 999px; color: #214734; background: #f8f6ef; font-size: 12px; font-weight: 700; }
+.message-action:hover { border-color: #214734; background: #fffef9; }
+.match-panel:focus { outline: 3px solid rgba(213,147,53,.45); outline-offset: 3px; }
 .loading { color: #607367; }
 .dot-dot-dot { letter-spacing: 2px; }
 .example-list { display: flex; gap: 6px; max-height: 98px; flex-wrap: wrap; overflow-y: auto; margin: 0 0 14px; padding-right: 4px; scrollbar-width: thin; }
