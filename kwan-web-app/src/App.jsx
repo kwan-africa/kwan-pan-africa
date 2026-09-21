@@ -151,8 +151,7 @@ export default function App() {
   const [booking, setBooking] = useState(null);
   const [copied, setCopied] = useState(false);
   const [enteredPin, setEnteredPin] = useState('');
-  const [sankofaOpen, setSankofaOpen] = useState(false);
-  const [sankofaPlan, setSankofaPlan] = useState(null);
+  const [pathname, setPathname] = useState(() => window.location.pathname);
   const requestInput = useRef(null);
   const matchPanelRef = useRef(null);
 
@@ -169,6 +168,17 @@ export default function App() {
       matchPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [guide]);
+
+  useEffect(() => {
+    const handlePopState = () => setPathname(window.location.pathname);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  function navigate(path) {
+    window.history.pushState({}, '', path);
+    setPathname(path);
+  }
 
   function surpriseMe() {
     const prompt = EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)];
@@ -506,6 +516,10 @@ export default function App() {
     setCheckoutStep('confirmed');
   }
 
+  if (pathname === '/plan') {
+    return <SankofaPlanPage onBack={() => navigate('/')} />;
+  }
+
   return (
     <div className="site-shell">
       <header className="topbar">
@@ -577,16 +591,16 @@ export default function App() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <button
                   type="button"
-                  onClick={() => setSankofaOpen(o => !o)}
+                  onClick={() => navigate('/plan')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.35rem',
                     padding: '0.35rem 0.7rem',
                     borderRadius: '999px',
-                    border: `1px solid ${sankofaOpen ? '#214734' : 'rgba(33,71,52,0.25)'}`,
-                    background: sankofaOpen ? '#214734' : 'transparent',
-                    color: sankofaOpen ? '#fff' : '#214734',
+                    border: '1px solid rgba(33,71,52,0.25)',
+                    background: 'transparent',
+                    color: '#214734',
                     fontSize: '0.72rem',
                     fontWeight: 700,
                     cursor: 'pointer',
@@ -595,81 +609,15 @@ export default function App() {
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
                   }}
-                  aria-expanded={sankofaOpen}
-                  aria-label={sankofaOpen ? 'Close Sankofa week planner' : 'Open Sankofa week planner'}
+                  aria-label="Open Sankofa week planner"
                 >
-                  ✦ {sankofaOpen ? 'Single experience' : 'Sankofa Plan'}
+                  ✦ Sankofa Plan
                 </button>
                 <MessageCircle size={20} aria-hidden="true" />
               </div>
             </div>
 
             {/* Sankofa Planner — full week builder */}
-            {sankofaOpen && (
-              <div style={{ marginBottom: '1rem' }}>
-                <SankofaPlanner
-                  onConfirmPlan={(plan) => {
-                    setSankofaPlan(plan);
-                    setSankofaOpen(false);
-                  }}
-                  onClose={() => setSankofaOpen(false)}
-                />
-              </div>
-            )}
-
-            {/* Sankofa plan confirmed summary */}
-            {sankofaPlan && !sankofaOpen && (
-              <div style={{
-                margin: '0 0 0.8rem',
-                padding: '0.75rem 0.9rem',
-                background: 'linear-gradient(135deg, rgba(33,71,52,0.08) 0%, rgba(245,166,35,0.06) 100%)',
-                border: '1px solid rgba(33,71,52,0.2)',
-                borderRadius: '10px',
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                  <div>
-                    <span style={{ fontSize: '0.62rem', fontFamily: 'monospace', textTransform: 'uppercase', color: '#214734', fontWeight: 700, letterSpacing: '0.06em' }}>✦ Your Sankofa Plan</span>
-                    <p style={{ margin: '0.1rem 0 0', fontSize: '0.78rem', color: '#374151' }}>
-                      Week of {sankofaPlan.startDate} · {sankofaPlan.days.length} experiences · <strong>${sankofaPlan.total}</strong>
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSankofaPlan(null)}
-                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#94A3B8' }}
-                    aria-label="Clear Sankofa plan"
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                  {sankofaPlan.days.map((day, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.77rem' }}>
-                      <span style={{ fontFamily: 'monospace', color: '#F5A623', fontWeight: 700, minWidth: '28px' }}>{day.label}</span>
-                      <span style={{ color: '#374151' }}>{day.host?.name || '—'}</span>
-                      <span style={{ color: '#94A3B8', fontSize: '0.7rem' }}>· {day.notes}</span>
-                      <span style={{ marginLeft: 'auto', fontWeight: 700, color: '#214734' }}>${day.price}</span>
-                    </div>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  style={{ marginTop: '0.6rem', fontSize: '0.72rem', color: '#214734', fontWeight: 600, background: 'transparent', border: '1px solid rgba(33,71,52,0.3)', borderRadius: '6px', padding: '0.3rem 0.6rem', cursor: 'pointer' }}
-                  onClick={() => setSankofaOpen(true)}
-                >
-                  Edit plan
-                </button>
-                <button
-                  type="button"
-                  className="button button-primary"
-                  style={{ marginTop: '0.6rem', width: '100%', minHeight: '38px', fontSize: '0.78rem' }}
-                  onClick={() => setErrorMessage('Your combined Sankofa payment link will be prepared by the pilot team after guide availability is confirmed for each selected day.')}
-                >
-                  Request combined payment link
-                </button>
-              </div>
-            )}
-
             <div className="messages" aria-live="polite">
               {conversation.map((message, index) => (
                 <div className={`message ${message.role}`} key={`${message.role}-${index}`}>
@@ -1338,6 +1286,74 @@ function CheckoutModal({
         )}
       </section>
     </div>
+  );
+}
+
+function SankofaPlanPage({ onBack }) {
+  const [plan, setPlan] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  async function confirmPlan(draft) {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_BASE}/sankofa/preview`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          start_date: draft.startDate,
+          days: draft.days.map(day => ({ day_index: day.dayIndex, theme: day.theme })),
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || 'The pilot roster could not validate this plan.');
+      setPlan(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <main className="page plan-page">
+      <button type="button" className="text-button" onClick={onBack}>
+        <ChevronRight size={15} style={{ transform: 'rotate(180deg)' }} /> Back to single experience
+      </button>
+      <section className="plan-intro">
+        <p className="eyebrow">A week with intention</p>
+        <h1>Sankofa Plan<span aria-hidden="true"> ✦</span></h1>
+        <p className="lede">Build a considered week of Ghanaian experiences. Each selected day is checked against Kwan's verified pilot roster before a combined payment link is prepared.</p>
+      </section>
+      {error && <div className="prototype-notice"><CircleAlert size={18} /> <span>{error}</span></div>}
+      {!plan && <SankofaPlanner onConfirmPlan={confirmPlan} onClose={onBack} />}
+      {loading && <p className="plan-status"><Loader2 size={16} className="spin-icon" /> Validating guides and pricing with the Kwan API...</p>}
+      {plan && (
+        <section className="plan-result" aria-labelledby="plan-result-title">
+          <div>
+            <p className="section-kicker">Verified week preview</p>
+            <h2 id="plan-result-title">Your Ghana week is ready to review.</h2>
+            <p>Week of {plan.start_date} · {plan.days.length} experiences · {formatUsd(plan.total_usd)} total</p>
+          </div>
+          <div className="plan-day-list">
+            {plan.days.map(day => (
+              <div className="plan-day-row" key={day.day_index}>
+                <strong>{day.label}</strong>
+                <span>{day.theme_label}</span>
+                <span>{day.host.name}</span>
+                <span>{day.anchor_site}</span>
+                <b>{formatUsd(day.total_usd)}</b>
+              </div>
+            ))}
+          </div>
+          <div className="plan-trust-note"><ShieldCheck size={17} /> Guide matches, totals, platform fee, host payout, and tourism levy were calculated by the server.</div>
+          <button type="button" className="button button-primary" onClick={() => setError('Combined payment link creation is the next protected checkout step; the plan preview is validated and ready.')}>
+            Request combined payment link <ArrowUpRight size={17} />
+          </button>
+        </section>
+      )}
+    </main>
   );
 }
 

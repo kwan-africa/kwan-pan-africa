@@ -383,7 +383,67 @@ app.post('/api/itinerary', (req, res, next) => {
 });
 
 // ==============================================================================
-// 4. POST /api/checkout/init — Initialize Paystack Checkout & Appwrite Booking
+// 4. POST /api/sankofa/preview — Validate a multi-day plan against the pilot roster
+// ==============================================================================
+app.post('/api/sankofa/preview', (req, res, next) => {
+  try {
+    const { start_date, days } = req.body;
+    if (!start_date || !/^\d{4}-\d{2}-\d{2}$/.test(start_date)) {
+      return res.status(400).json({ error: 'INVALID_DATE', message: 'A valid start_date is required.' });
+    }
+    if (!Array.isArray(days) || days.length < 1 || days.length > 7) {
+      return res.status(400).json({ error: 'INVALID_DAYS', message: 'Select between 1 and 7 experiences.' });
+    }
+
+    const themeLabels = {
+      heritage_spiritual: 'Heritage / Spiritual',
+      adventure: 'Adventure / Boxing',
+      art: 'Art / Crafts',
+      food: 'Culinary',
+    };
+    const validatedDays = days.map((day) => {
+      if (!Number.isInteger(day.day_index) || !VALID_THEMES.includes(day.theme)) {
+        const error = new Error('Each plan day must contain a valid day_index and theme.');
+        error.status = 400;
+        throw error;
+      }
+      const host = LOCAL_STORE.hosts.find((candidate) =>
+        candidate.active && candidate.verified && candidate.theme_tags.includes(day.theme)
+      );
+      if (!host) {
+        const error = new Error(`No verified pilot host is available for ${day.theme}.`);
+        error.status = 409;
+        throw error;
+      }
+      const totalUsd = Number(host.price_usd) || 50;
+      return {
+        day_index: day.day_index,
+        label: `Day ${day.day_index + 1}`,
+        theme: day.theme,
+        theme_label: themeLabels[day.theme],
+        host: { id: host.id, name: host.name, role: host.role },
+        anchor_site: host.anchor_site,
+        total_usd: totalUsd,
+        host_payout_usd: Math.round(totalUsd * 0.9 * 100) / 100,
+        platform_fee_usd: Math.round(totalUsd * 0.1 * 100) / 100,
+        tourism_levy_usd: Math.round(totalUsd * 0.01 * 100) / 100,
+      };
+    });
+    const totalUsd = validatedDays.reduce((sum, day) => sum + day.total_usd, 0);
+    res.json({
+      start_date,
+      days: validatedDays,
+      total_usd: Math.round(totalUsd * 100) / 100,
+      source: 'pilot_roster',
+      payment_mode: 'combined_upfront_pending_checkout',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ==============================================================================
+// 5. POST /api/checkout/init — Initialize Paystack Checkout & Appwrite Booking
 // ==============================================================================
 app.post('/api/checkout/init', async (req, res, next) => {
   try {
