@@ -635,7 +635,7 @@ export default function App() {
               )}
             </div>
 
-            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.4rem' }}>
+            <div className="theme-list" style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.4rem' }}>
               <span style={{ fontSize: '0.72rem', color: '#94A3B8', alignSelf: 'center', textTransform: 'uppercase', fontFamily: 'monospace' }}>
                 Themes:
               </span>
@@ -654,7 +654,9 @@ export default function App() {
             </div>
 
             {/* Living Corridor Layer A — rotating cultural facts */}
-            <RotatingFacts activeSite={guide?.corridorId || null} />
+            <div className="corridor-fact">
+              <RotatingFacts activeSite={guide?.corridorId || null} />
+            </div>
 
             <div className="example-list" aria-label="Example requests">
               <span className="examples-label">Try a starting point</span>

@@ -94,6 +94,10 @@ h2 { margin-bottom: 0; font-size: 27px; line-height: 1.04; }
 .surprise-button { display: inline-flex; align-items: center; gap: 5px; min-height: 32px; padding: 5px 10px; border: 1px solid #d6c48f; border-radius: 999px; color: #81551a; background: #fff8e6; font-size: 12px; font-weight: 600; }
 .surprise-button:hover:not(:disabled) { border-color: #a05c1d; background: #fff1c9; }
 .request-form { position: sticky; bottom: 0; z-index: 2; border-top: 1px solid #e6e4db; padding: 14px 0 2px; background: #fffef9; }
+.request-form { order: 1; }
+.theme-list { order: 2; }
+.corridor-fact { order: 3; }
+.example-list { order: 4; }
 .request-form label, .checkout-form label { display: block; margin-bottom: 7px; color: #536158; font-size: 12px; font-weight: 600; }
 .input-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; }
 textarea, input { width: 100%; border: 1px solid #cbd1c7; border-radius: 10px; color: #1e2c24; background: #fffef9; }
