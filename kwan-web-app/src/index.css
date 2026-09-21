@@ -130,6 +130,8 @@ footer { display: flex; width: min(1180px, calc(100% - 40px)); margin: auto auto
 .checkout-form > p, .payment-preview > p, .confirmation > p { color: #5d695f; font-size: 14px; line-height: 1.5; }
 .checkout-form label { margin-top: 15px; }
 .checkout-form input { height: 44px; padding: 0 11px; }
+.confirmation-checkbox { display: flex !important; align-items: flex-start; gap: 9px; margin: 16px 0 0 !important; color: #3d5845 !important; font-size: 12px !important; font-weight: 400 !important; line-height: 1.45; }
+.confirmation-checkbox input { width: 17px; height: 17px; flex: 0 0 auto; margin: 0; accent-color: #214734; }
 .prototype-notice { display: flex; gap: 8px; align-items: flex-start; margin: 18px 0; padding: 11px; color: #5b5d42; background: #f5f0dc; border: 1px solid #e5dcb7; border-radius: 9px; font-size: 12px; line-height: 1.45; }
 .prototype-notice svg { flex: 0 0 auto; color: #937720; }
 .link-label { margin-bottom: 8px !important; }

@@ -25,7 +25,6 @@ const THEME_OPTIONS = [
   { tag: 'heritage_spiritual', label: 'Heritage / Spiritual', defaultQuery: 'a spiritual journey to reconnect with my roots' },
   { tag: 'adventure', label: 'Adventure / Boxing', defaultQuery: 'morning boxing session and walking tour in Bukom' },
   { tag: 'art', label: 'Art / Bead Crafts', defaultQuery: 'hands-on bead making and local crafts in Jamestown' },
-  { tag: 'food', label: 'Food / Culinary', defaultQuery: 'traditional chop bars and street food tour in Accra' },
 ];
 
 const EXAMPLES = [
@@ -39,7 +38,6 @@ const EXPERIENCE_DETAILS = {
   heritage_spiritual: { label: 'Heritage / Spiritual', duration: 'Half-day experience', itinerary: 'Guided heritage walk, cultural context, and time for reflection at the anchor site.' },
   adventure: { label: 'Adventure / Boxing', duration: 'Morning experience', itinerary: 'Warm-up, coached session, and a local walking route around the host neighborhood.' },
   art: { label: 'Art / Bead Crafts', duration: 'Half-day experience', itinerary: 'Hands-on craft session, local maker stories, and a guided walk through the arts compound.' },
-  food: { label: 'Food / Culinary', duration: 'Half-day experience', itinerary: 'Guided tasting across local chop bars and street-food stops, paced around your preferences.' },
 };
 
 const formatUsd = (value) =>
@@ -71,6 +69,8 @@ export default function App() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState('details');
   const [traveler, setTraveler] = useState({ name: '', email: '' });
+  const [experienceDate, setExperienceDate] = useState('');
+  const [pilotConfirmation, setPilotConfirmation] = useState(false);
   const [booking, setBooking] = useState(null);
   const [copied, setCopied] = useState(false);
   const [enteredPin, setEnteredPin] = useState('');
@@ -210,6 +210,7 @@ export default function App() {
     setBooking(null);
     setCopied(false);
     setEnteredPin('');
+    setPilotConfirmation(false);
     setErrorMessage(null);
     setCheckoutOpen(true);
   }
@@ -232,6 +233,10 @@ export default function App() {
   async function createPaymentPreview(event) {
     event.preventDefault();
     if (!traveler.name.trim() || !traveler.email.trim()) return;
+    if (!experienceDate || !pilotConfirmation) {
+      setErrorMessage('Select an experience date and confirm that the pilot team has approved availability before creating a payment link.');
+      return;
+    }
 
     setLoadingAction('checkout_init');
     setErrorMessage(null);
@@ -246,6 +251,8 @@ export default function App() {
           host_id: guide?.id || 'host_01',
           total_usd: effectivePrice,
           theme_matched: guide?.theme || 'heritage_spiritual',
+          experience_date: experienceDate,
+          host_confirmation_acknowledged: pilotConfirmation,
         }),
       });
 
@@ -260,6 +267,7 @@ export default function App() {
         checkoutUrl: data.checkout_url,
         status: 'link-ready',
         traveler: traveler.name.trim(),
+        experienceDate,
         pin: null,
       });
       setCheckoutStep('payment');
@@ -567,6 +575,10 @@ export default function App() {
           serverPricing={serverPricing}
           traveler={traveler}
           setTraveler={setTraveler}
+          experienceDate={experienceDate}
+          setExperienceDate={setExperienceDate}
+          pilotConfirmation={pilotConfirmation}
+          setPilotConfirmation={setPilotConfirmation}
           step={checkoutStep}
           booking={booking}
           paymentLink={paymentLink}
@@ -646,7 +658,7 @@ function GuideMatch({ guide, matchedTheme, serverPricing, addonIncluded, isRecal
           </button>
         </div>
         <span style={{ fontSize: '0.72rem', color: '#647067', display: 'block', marginTop: '0.2rem' }}>
-          {addonIncluded ? 'Customized with ancestral ceremony (live recalculated by backend).' : 'Click to customize stops and live-recalculate pricing via /api/itinerary.'}
+          {addonIncluded ? 'Customized with ancestral ceremony; the server has recalculated your total.' : 'Add an optional ceremony and Kwan will recalculate the total before checkout.'}
         </span>
       </div>
 
@@ -670,6 +682,10 @@ function CheckoutModal({
   serverPricing,
   traveler,
   setTraveler,
+  experienceDate,
+  setExperienceDate,
+  pilotConfirmation,
+  setPilotConfirmation,
   step,
   booking,
   paymentLink,
@@ -728,12 +744,18 @@ function CheckoutModal({
 
         {step === 'details' && (
           <form className="checkout-form" onSubmit={onCreatePaymentPreview}>
-            <p>Review the fixed operator package above, then enter your details to create a secure checkout link.</p>
+            <p>Review the fixed operator package above, then enter your details. The pilot team must confirm the guide's availability before any payment is authorized.</p>
             <label htmlFor="traveler-name">Your name</label>
             <input id="traveler-name" autoComplete="name" value={traveler.name} onChange={(event) => setTraveler({ ...traveler, name: event.target.value })} required />
             <label htmlFor="traveler-email">Email for the link</label>
             <input id="traveler-email" type="email" autoComplete="email" value={traveler.email} onChange={(event) => setTraveler({ ...traveler, email: event.target.value })} required />
-            <div className="prototype-notice"><CircleAlert size={18} aria-hidden="true" /><span>Paystack sandbox checkout: funds are held in regulated escrow after payment confirmation.</span></div>
+            <label htmlFor="experience-date">Experience date</label>
+            <input id="experience-date" type="date" value={experienceDate} min={new Date().toISOString().slice(0, 10)} onChange={(event) => setExperienceDate(event.target.value)} required />
+            <label className="confirmation-checkbox" htmlFor="pilot-confirmation">
+              <input id="pilot-confirmation" type="checkbox" checked={pilotConfirmation} onChange={(event) => setPilotConfirmation(event.target.checked)} />
+              <span>I have received pilot-team confirmation that this guide is available for this date.</span>
+            </label>
+            <div className="prototype-notice"><CircleAlert size={18} aria-hidden="true" /><span>Paystack sandbox checkout: after the confirmed experience, the traveler shares the release PIN to trigger the host payout.</span></div>
             <button className="button button-primary button-full" type="submit" disabled={loadingAction === 'checkout_init'}>
               {loadingAction === 'checkout_init' ? (
                 <><Loader2 size={16} className="spin-icon" /> Creating escrow booking...</>
@@ -749,7 +771,7 @@ function CheckoutModal({
             <p className="link-label">Unique payment link</p>
             <div className="link-box"><span>{paymentLink}</span><button type="button" onClick={onCopyLink} aria-label="Copy payment link">{copied ? <Check size={17} /> : <Copy size={17} />}</button></div>
             <p className="reference">Reference: {booking.reference}</p>
-            <div className="prototype-notice"><CircleAlert size={18} aria-hidden="true" /><span>Complete payment in Paystack. Kwan will issue the release PIN after the signed payment webhook is received.</span></div>
+            <div className="prototype-notice"><CircleAlert size={18} aria-hidden="true" /><span>Availability was acknowledged for {booking.experienceDate}. Complete payment in Paystack; Kwan will then hold the funds and keep the release PIN with you.</span></div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               <button className="button button-primary button-full" type="button" onClick={onOpenPaystackCheckout}>
@@ -775,7 +797,7 @@ function CheckoutModal({
 
             {!released ? (
               <>
-                <p><strong>{formatUsd(serverPricing.total_usd)}</strong> is locked in escrow for {guide.name}.</p>
+                <p><strong>{formatUsd(serverPricing.total_usd)}</strong> is locked in escrow for {guide.name} on {booking.experienceDate}.</p>
                 <div style={{ margin: '1rem 0', padding: '0.9rem', background: 'rgba(245, 166, 35, 0.08)', border: '1px solid #F5A623', borderRadius: '6px', textAlign: 'center' }}>
                   <span style={{ display: 'block', fontSize: '0.75rem', color: '#F5A623', textTransform: 'uppercase', fontFamily: 'monospace' }}>
                     Traveler 4-Digit Release PIN
@@ -786,6 +808,9 @@ function CheckoutModal({
                   <span style={{ display: 'block', fontSize: '0.72rem', color: '#647067', marginTop: '0.3rem' }}>
                     Share this code with your host only after the experience is complete.
                   </span>
+                  <button type="button" className="text-button" onClick={() => navigator.clipboard.writeText(booking?.pin || '')} style={{ margin: '0.4rem auto 0', color: '#8e5c19' }}>
+                    <Copy size={13} aria-hidden="true" /> Copy PIN
+                  </button>
                 </div>
 
                 <div className="release-rule">

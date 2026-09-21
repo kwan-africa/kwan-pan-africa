@@ -387,7 +387,15 @@ app.post('/api/itinerary', (req, res, next) => {
 // ==============================================================================
 app.post('/api/checkout/init', async (req, res, next) => {
   try {
-    const { traveler_name, traveler_email, host_id, total_usd = 50, theme_matched } = req.body;
+    const {
+      traveler_name,
+      traveler_email,
+      host_id,
+      total_usd = 50,
+      theme_matched,
+      experience_date,
+      host_confirmation_acknowledged,
+    } = req.body;
 
     if (!traveler_name || typeof traveler_name !== 'string' || !traveler_name.trim()) {
       return res.status(400).json({ error: 'INVALID_NAME', message: 'Traveler name is required.' });
@@ -404,6 +412,21 @@ app.post('/api/checkout/init', async (req, res, next) => {
     if (theme_matched !== undefined && !VALID_THEMES.includes(theme_matched)) {
       return res.status(400).json({ error: 'INVALID_THEME', message: 'theme_matched is invalid.' });
     }
+    if (!experience_date || !/^\d{4}-\d{2}-\d{2}$/.test(experience_date)) {
+      return res.status(400).json({ error: 'INVALID_DATE', message: 'A valid experience_date is required.' });
+    }
+    const parsedExperienceDate = new Date(`${experience_date}T00:00:00Z`);
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    if (Number.isNaN(parsedExperienceDate.getTime()) || parsedExperienceDate < today) {
+      return res.status(400).json({ error: 'INVALID_DATE', message: 'experience_date must be today or later.' });
+    }
+    if (host_confirmation_acknowledged !== true) {
+      return res.status(400).json({
+        error: 'HOST_CONFIRMATION_REQUIRED',
+        message: 'Pilot-team availability confirmation is required before payment setup.',
+      });
+    }
     if (!Number.isFinite(Number(total_usd)) || Number(total_usd) <= 0 || Number(total_usd) > 100000) {
       return res.status(400).json({ error: 'INVALID_AMOUNT', message: 'total_usd must be between 0 and 100000.' });
     }
@@ -419,6 +442,8 @@ app.post('/api/checkout/init', async (req, res, next) => {
       contact: traveler_email.trim(),
       host_id: host_id || 'host_01',
       theme_matched: theme_matched || 'heritage_spiritual',
+      experience_date,
+      host_confirmation_status: 'pilot_confirmed',
       total_usd: sanitizedTotalUsd,
       total_ghs: totalGhs,
       platform_fee_usd: platformFeeUsd,
@@ -443,6 +468,8 @@ app.post('/api/checkout/init', async (req, res, next) => {
           contact: bookingData.contact,
           host_id: bookingData.host_id,
           theme_matched: bookingData.theme_matched,
+          experience_date: bookingData.experience_date,
+          host_confirmation_status: bookingData.host_confirmation_status,
           total_usd: bookingData.total_usd,
           total_ghs: bookingData.total_ghs,
           platform_fee_usd: bookingData.platform_fee_usd,
