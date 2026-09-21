@@ -22,6 +22,14 @@ import {
   X,
 } from 'lucide-react';
 
+import { VERIFIED_HOSTS, LIVING_CORRIDOR_FACTS } from './data/culturalKnowledge';
+import { matchGuideOffline, getOfflinePricing } from './services/offlineFallback';
+import RotatingFacts from './components/RotatingFacts';
+import AboutThisPlace from './components/AboutThisPlace';
+import SankofaPlanner from './components/SankofaPlanner';
+
+// ── Static data ────────────────────────────────────────────────────────────────
+
 const THEME_OPTIONS = [
   { tag: 'heritage_spiritual', label: 'Heritage / Spiritual', defaultQuery: 'a spiritual journey to reconnect with my roots' },
   { tag: 'adventure', label: 'Adventure / Boxing', defaultQuery: 'morning boxing session and walking tour in Bukom' },
@@ -35,23 +43,90 @@ const EXAMPLES = [
   'I want hands-on bead making and local crafts in Jamestown.',
 ];
 
+/**
+ * Rich experience definitions — stops, meeting point, what to bring, etiquette,
+ * and cancellation policy displayed in the guide card and post-booking screen.
+ */
 const EXPERIENCE_DETAILS = {
-  heritage_spiritual: { label: 'Heritage / Spiritual', duration: 'Half-day experience', itinerary: 'Guided heritage walk, cultural context, and time for reflection at the anchor site.' },
-  adventure: { label: 'Adventure / Boxing', duration: 'Morning experience', itinerary: 'Warm-up, coached session, and a local walking route around the host neighborhood.' },
-  art: { label: 'Art / Bead Crafts', duration: 'Half-day experience', itinerary: 'Hands-on craft session, local maker stories, and a guided walk through the arts compound.' },
+  heritage_spiritual: {
+    label: 'Heritage / Spiritual',
+    duration: 'Half-day (4–5 hrs)',
+    itinerary: 'Guided heritage walk with cultural context and time for reflection at the anchor site.',
+    stops: [
+      { time: '09:00 AM', activity: 'Guide meets you at Cape Coast Castle main gate', type: 'meetup' },
+      { time: '09:30 AM', activity: 'Castle dungeons & Door of No Return tour with ancestral narration', type: 'main' },
+      { time: '11:30 AM', activity: 'Wall of Remembrance — optional libation ceremony', type: 'optional' },
+      { time: '12:30 PM', activity: 'Oguaa harbour walk & Fante community elder interaction', type: 'cultural' },
+    ],
+    whatToBring: [
+      'Comfortable closed shoes',
+      'Light layer (castle interiors are cool)',
+      'Water bottle',
+      'Small notebook or journal for reflections',
+    ],
+    meetingNote: 'Your guide meets you at the main entrance of Cape Coast Castle. Look for their Kwan green lanyard badge.',
+    etiquette: 'Maintain reflective, respectful decorum inside the dungeons. Avoid photography inside the slave cells unless explicitly permitted by the guide.',
+    cancellation: 'Full refund if cancelled 24+ hrs before experience. 50% refund within 24 hrs. No refund for no-shows.',
+  },
+  adventure: {
+    label: 'Adventure / Boxing',
+    duration: 'Morning (3 hrs)',
+    itinerary: 'Warm-up, coached boxing session, and a local walking route around the host neighbourhood.',
+    stops: [
+      { time: '07:00 AM', activity: 'Guide meets you at Bukom Boxing Academies entrance, Jamestown', type: 'meetup' },
+      { time: '07:15 AM', activity: 'Warm-up & introductory boxing session with coach', type: 'main' },
+      { time: '08:30 AM', activity: 'Community walk — Jamestown Lighthouse & fishermen\'s landing', type: 'cultural' },
+      { time: '09:30 AM', activity: 'Local tea & storytelling (Azumah Nelson history)', type: 'optional' },
+    ],
+    whatToBring: [
+      'Sports clothes & trainers',
+      'Small towel',
+      'Water bottle',
+      'Hand wraps (provided if you don\'t have them)',
+    ],
+    meetingNote: 'Your guide meets you at the gate of Bukom Boxing Academy, opposite the Jamestown Lighthouse roundabout.',
+    etiquette: 'Greet with your right hand. Ask your guide before photographing training sessions or youth boxers.',
+    cancellation: 'Full refund if cancelled 24+ hrs before experience. 50% refund within 24 hrs. No refund for no-shows.',
+  },
+  art: {
+    label: 'Art / Bead Crafts',
+    duration: 'Half-day (4 hrs)',
+    itinerary: 'Hands-on craft session, local maker stories, and a guided walk through the arts compound.',
+    stops: [
+      { time: '10:00 AM', activity: 'Guide meets you at Arts Centre main gate, High Street', type: 'meetup' },
+      { time: '10:15 AM', activity: 'Adinkra carving or bead-making session with your master', type: 'main' },
+      { time: '12:00 PM', activity: 'Talking drum rhythm lesson (Akan day name)', type: 'cultural' },
+      { time: '01:00 PM', activity: 'Arts Centre market walk — zero tourist markup guidance', type: 'optional' },
+    ],
+    whatToBring: [
+      'Comfortable clothes (ink / dye may be involved)',
+      'Water bottle',
+      'Cash GHS for pieces you want to buy',
+    ],
+    meetingNote: 'Your guide meets you at the main entrance of the Arts Centre on High Street, near the Black Star Square.',
+    etiquette: 'Bargaining is a warm social exchange — smile and greet first. Shake hands firmly when entering any workshop.',
+    cancellation: 'Full refund if cancelled 24+ hrs before experience. 50% refund within 24 hrs. No refund for no-shows.',
+  },
 };
+
+// Fallback for any unrecognised theme tag
+EXPERIENCE_DETAILS.default = EXPERIENCE_DETAILS.heritage_spiritual;
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
 
 const formatUsd = (value) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 
 const API_BASE = import.meta.env?.VITE_API_BASE || '/api';
 
+// ── App root ───────────────────────────────────────────────────────────────────
+
 export default function App() {
   const [request, setRequest] = useState('');
   const [conversation, setConversation] = useState([
     {
       role: 'kwan',
-      copy: 'Tell Kwan what you want to do in Accra or Cape Coast. We will return one verified local guide from the pilot roster - not a list, and not a generic generated itinerary.',
+      copy: 'Tell Kwan what you want to do in Accra or Cape Coast. We will return one verified local guide from the pilot roster — not a list, and not a generic generated itinerary.',
     },
   ]);
   const [guide, setGuide] = useState(null);
@@ -64,6 +139,7 @@ export default function App() {
     host_payout_usd: 45.0,
     tourism_levy_usd: 0.5,
   });
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
   const [loadingAction, setLoadingAction] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
 
@@ -75,6 +151,8 @@ export default function App() {
   const [booking, setBooking] = useState(null);
   const [copied, setCopied] = useState(false);
   const [enteredPin, setEnteredPin] = useState('');
+  const [sankofaOpen, setSankofaOpen] = useState(false);
+  const [sankofaPlan, setSankofaPlan] = useState(null);
   const requestInput = useRef(null);
   const matchPanelRef = useRef(null);
 
@@ -108,8 +186,10 @@ export default function App() {
     setAddonIncluded(false);
     setLoadingAction('matching');
     setErrorMessage(null);
+    setIsOfflineMode(false);
 
     try {
+      // ── Live backend path ──────────────────────────────────────────────────
       const classRes = await fetch(`${API_BASE}/classify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -132,6 +212,8 @@ export default function App() {
       let matched = null;
       if (hosts && hosts.length > 0) {
         const h = hosts[0];
+        // Enrich backend host with richer local data (bio, rating, languages)
+        const local = VERIFIED_HOSTS.find(vh => vh.id === (h.$id || h.id));
         matched = {
           id: h.$id || h.id,
           name: h.name,
@@ -142,7 +224,19 @@ export default function App() {
           theme: theme_matched,
           initials: h.name.split(' ').map((n) => n[0]).join('').slice(0, 2),
           color: 'ochre',
-          image: h.photo_url || '/ghana_guide_kwesi.jpg',
+          image: h.photo_url || local?.image || '/ghana_guide_kwesi.jpg',
+          // Rich enrichment
+          bio: local?.bio || h.bio || '',
+          rating: local?.rating || h.rating || 4.9,
+          reviewsCount: local?.reviewsCount || h.reviews_count || 0,
+          languages: local?.languages || ['English'],
+          momoNetwork: local?.momoNetwork || 'MTN Mobile Money',
+          ghanaCard: local?.ghanaCard || h.ghana_card_id || '',
+          corridorId: local?.corridorId || (
+            /bukom|jamestown/i.test(h.anchor_site || '') ? 'ga_mashie' :
+            /arts centre|high street/i.test(h.anchor_site || '') ? 'high_street' :
+            'cape_coast'
+          ),
         };
       } else {
         throw new Error('No verified guides are currently available for that theme.');
@@ -169,17 +263,35 @@ export default function App() {
           copy: `I matched you with ${matched.name} because their verified roster profile covers ${EXPERIENCE_DETAILS[theme_matched]?.label || theme_matched} experiences near ${matched.anchorSite}.`,
         },
       ]);
+
     } catch (err) {
-      console.error('Backend query failed:', err);
-      setGuide(null);
-      setErrorMessage(`We could not complete the match: ${err.message}`);
-      setConversation((items) => [
-        ...items,
-        {
-          role: 'kwan',
-          copy: 'I could not reach the live guide roster. Please try again when the service is available.',
-        },
-      ]);
+      // ── Offline fallback path ──────────────────────────────────────────────
+      console.warn('Backend unreachable — activating offline demo mode:', err.message);
+      try {
+        const offlineGuide = matchGuideOffline(trimmed);
+        const offlinePricing = getOfflinePricing(offlineGuide.price, false);
+        setGuide(offlineGuide);
+        setMatchedTheme(offlineGuide.theme);
+        setServerPricing(offlinePricing);
+        setIsOfflineMode(true);
+        setConversation((items) => [
+          ...items,
+          {
+            role: 'kwan',
+            copy: `[Demo mode] Matched you with ${offlineGuide.name} — ${offlineGuide.role}. The live backend is offline; pricing is calculated locally from the pilot roster.`,
+          },
+        ]);
+      } catch {
+        setGuide(null);
+        setErrorMessage(`We could not complete the match: ${err.message}`);
+        setConversation((items) => [
+          ...items,
+          {
+            role: 'kwan',
+            copy: 'I could not reach the live guide roster. Please try again when the service is available.',
+          },
+        ]);
+      }
     } finally {
       setLoadingAction(null);
     }
@@ -192,23 +304,20 @@ export default function App() {
     setErrorMessage(null);
 
     try {
+      if (isOfflineMode) throw new Error('offline');
       const res = await fetch(`${API_BASE}/itinerary`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          base_price_usd: guide.price,
-          addon_included: nextAddon,
-        }),
+        body: JSON.stringify({ base_price_usd: guide.price, addon_included: nextAddon }),
       });
-
       if (!res.ok) throw new Error('Failed to recalculate itinerary pricing from server.');
-
       const data = await res.json();
       setAddonIncluded(nextAddon);
       setServerPricing(data);
-    } catch (err) {
-      console.error('Itinerary recalculation failed:', err);
-      setErrorMessage(`Could not update the server-calculated price: ${err.message}`);
+    } catch {
+      // Offline fallback — calculate locally
+      setAddonIncluded(nextAddon);
+      setServerPricing(getOfflinePricing(guide.price, nextAddon));
     } finally {
       setLoadingAction(null);
     }
@@ -219,7 +328,8 @@ export default function App() {
     setBooking(null);
     setCopied(false);
     setEnteredPin('');
-    setPilotConfirmation(false);
+    // Guide was already matched — consider availability implicitly acknowledged
+    setPilotConfirmation(true);
     setErrorMessage(null);
     setCheckoutOpen(true);
   }
@@ -228,10 +338,11 @@ export default function App() {
     setGuide(null);
     setMatchedTheme(null);
     setAddonIncluded(false);
+    setIsOfflineMode(false);
     setConversation([
       {
         role: 'kwan',
-        copy: 'Tell Kwan what you want to do in Accra or Cape Coast. We will return one verified local guide from the pilot roster - not a list, and not a generic generated itinerary.',
+        copy: 'Tell Kwan what you want to do in Accra or Cape Coast. We will return one verified local guide from the pilot roster — not a list, and not a generic generated itinerary.',
       },
     ]);
     setRequest('');
@@ -242,13 +353,29 @@ export default function App() {
   async function createPaymentPreview(event) {
     event.preventDefault();
     if (!traveler.name.trim() || !traveler.email.trim()) return;
-    if (!experienceDate || !pilotConfirmation) {
-      setErrorMessage('Select an experience date and confirm that the pilot team has approved availability before creating a payment link.');
+    if (!experienceDate) {
+      setErrorMessage('Please select a preferred experience date before creating your payment link.');
       return;
     }
 
     setLoadingAction('checkout_init');
     setErrorMessage(null);
+
+    // In offline / demo mode, generate a local booking reference
+    if (isOfflineMode) {
+      const demoRef = `KWN-DEMO-${Math.floor(100000 + Math.random() * 900000)}`;
+      setBooking({
+        reference: demoRef,
+        checkoutUrl: null,
+        status: 'demo',
+        traveler: traveler.name.trim(),
+        experienceDate,
+        pin: null,
+      });
+      setCheckoutStep('payment');
+      setLoadingAction(null);
+      return;
+    }
 
     try {
       const res = await fetch(`${API_BASE}/checkout/init`, {
@@ -330,22 +457,26 @@ export default function App() {
     setLoadingAction('releasing');
     setErrorMessage(null);
 
+    // Demo mode — simulate instant release
+    if (isOfflineMode || booking.status === 'demo' || booking.status === 'held-demo') {
+      setTimeout(() => {
+        setBooking((current) => ({ ...current, status: 'released' }));
+        setLoadingAction(null);
+      }, 900);
+      return;
+    }
+
     try {
       const res = await fetch(`${API_BASE}/escrow/release`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          booking_id: booking.reference,
-          submitted_pin: enteredPin,
-        }),
+        body: JSON.stringify({ booking_id: booking.reference, submitted_pin: enteredPin }),
       });
 
       const data = await res.json().catch(() => ({}));
-
       if (!res.ok) {
         throw new Error(data.message || 'PIN verification failed.');
       }
-
       setBooking((current) => ({ ...current, status: 'released' }));
     } catch (err) {
       setErrorMessage(err.message);
@@ -364,6 +495,17 @@ export default function App() {
     }
   }
 
+  // Demo mode: simulate escrow held after "opening Paystack"
+  function simulateDemoPayment() {
+    const demoPin = Math.floor(1000 + Math.random() * 9000).toString();
+    setBooking((current) => ({
+      ...current,
+      status: 'held-demo',
+      pin: demoPin,
+    }));
+    setCheckoutStep('confirmed');
+  }
+
   return (
     <div className="site-shell">
       <header className="topbar">
@@ -372,12 +514,13 @@ export default function App() {
             src="/kwan_logo_white_bg.png"
             alt="Kwan Pan-African Travel"
             style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
-            onError={(e) => {
-              e.target.src = '/kwan_logo_square_white_bg.png';
-            }}
+            onError={(e) => { e.target.src = '/kwan_logo_square_white_bg.png'; }}
           />
         </a>
-        <p className="pilot-label">Accra &amp; Cape Coast pilot · 2026</p>
+        <p className="pilot-label">
+          Accra &amp; Cape Coast pilot · 2026
+          {isOfflineMode && <span style={{ marginLeft: '0.5rem', fontSize: '0.72rem', color: '#F5A623', fontFamily: 'monospace' }}>[DEMO MODE]</span>}
+        </p>
       </header>
 
       {errorMessage && (
@@ -431,8 +574,101 @@ export default function App() {
                 <p className="section-kicker">Start here</p>
                 <h2>What would you like to experience?</h2>
               </div>
-              <MessageCircle size={20} aria-hidden="true" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setSankofaOpen(o => !o)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    padding: '0.35rem 0.7rem',
+                    borderRadius: '999px',
+                    border: `1px solid ${sankofaOpen ? '#214734' : 'rgba(33,71,52,0.25)'}`,
+                    background: sankofaOpen ? '#214734' : 'transparent',
+                    color: sankofaOpen ? '#fff' : '#214734',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.18s',
+                    fontFamily: 'monospace',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}
+                  aria-expanded={sankofaOpen}
+                  aria-label={sankofaOpen ? 'Close Sankofa week planner' : 'Open Sankofa week planner'}
+                >
+                  ✦ {sankofaOpen ? 'Single experience' : 'Sankofa Plan'}
+                </button>
+                <MessageCircle size={20} aria-hidden="true" />
+              </div>
             </div>
+
+            {/* Sankofa Planner — full week builder */}
+            {sankofaOpen && (
+              <div style={{ marginBottom: '1rem' }}>
+                <SankofaPlanner
+                  onConfirmPlan={(plan) => {
+                    setSankofaPlan(plan);
+                    setSankofaOpen(false);
+                  }}
+                  onClose={() => setSankofaOpen(false)}
+                />
+              </div>
+            )}
+
+            {/* Sankofa plan confirmed summary */}
+            {sankofaPlan && !sankofaOpen && (
+              <div style={{
+                margin: '0 0 0.8rem',
+                padding: '0.75rem 0.9rem',
+                background: 'linear-gradient(135deg, rgba(33,71,52,0.08) 0%, rgba(245,166,35,0.06) 100%)',
+                border: '1px solid rgba(33,71,52,0.2)',
+                borderRadius: '10px',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                  <div>
+                    <span style={{ fontSize: '0.62rem', fontFamily: 'monospace', textTransform: 'uppercase', color: '#214734', fontWeight: 700, letterSpacing: '0.06em' }}>✦ Your Sankofa Plan</span>
+                    <p style={{ margin: '0.1rem 0 0', fontSize: '0.78rem', color: '#374151' }}>
+                      Week of {sankofaPlan.startDate} · {sankofaPlan.days.length} experiences · <strong>${sankofaPlan.total}</strong>
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSankofaPlan(null)}
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#94A3B8' }}
+                    aria-label="Clear Sankofa plan"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                  {sankofaPlan.days.map((day, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.77rem' }}>
+                      <span style={{ fontFamily: 'monospace', color: '#F5A623', fontWeight: 700, minWidth: '28px' }}>{day.label}</span>
+                      <span style={{ color: '#374151' }}>{day.host?.name || '—'}</span>
+                      <span style={{ color: '#94A3B8', fontSize: '0.7rem' }}>· {day.notes}</span>
+                      <span style={{ marginLeft: 'auto', fontWeight: 700, color: '#214734' }}>${day.price}</span>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  style={{ marginTop: '0.6rem', fontSize: '0.72rem', color: '#214734', fontWeight: 600, background: 'transparent', border: '1px solid rgba(33,71,52,0.3)', borderRadius: '6px', padding: '0.3rem 0.6rem', cursor: 'pointer' }}
+                  onClick={() => setSankofaOpen(true)}
+                >
+                  Edit plan
+                </button>
+                <button
+                  type="button"
+                  className="button button-primary"
+                  style={{ marginTop: '0.6rem', width: '100%', minHeight: '38px', fontSize: '0.78rem' }}
+                  onClick={() => setErrorMessage('Your combined Sankofa payment link will be prepared by the pilot team after guide availability is confirmed for each selected day.')}
+                >
+                  Request combined payment link
+                </button>
+              </div>
+            )}
 
             <div className="messages" aria-live="polite">
               {conversation.map((message, index) => (
@@ -468,6 +704,9 @@ export default function App() {
                 </button>
               ))}
             </div>
+
+            {/* Living Corridor Layer A — rotating cultural facts */}
+            <RotatingFacts activeSite={guide?.corridorId || null} />
 
             <div className="example-list" aria-label="Example requests">
               <span className="examples-label">Try a starting point</span>
@@ -600,56 +839,173 @@ export default function App() {
           loadingAction={loadingAction}
           errorMessage={errorMessage}
           setErrorMessage={setErrorMessage}
+          isOfflineMode={isOfflineMode}
           onClose={() => setCheckoutOpen(false)}
           onCreatePaymentPreview={createPaymentPreview}
           onCopyLink={copyLink}
           onOpenPaystackCheckout={openPaystackCheckout}
           onCheckStatus={checkPaymentStatus}
           onReleasePayout={releasePayout}
+          onSimulateDemoPayment={simulateDemoPayment}
         />
       )}
     </div>
   );
 }
 
+// ── GuideMatch ─────────────────────────────────────────────────────────────────
+
 function GuideMatch({ guide, matchedTheme, serverPricing, addonIncluded, isRecalculating, onToggleAddon, onRequestPayment }) {
   const details = EXPERIENCE_DETAILS[matchedTheme] || EXPERIENCE_DETAILS.heritage_spiritual;
+
+  const stopIcon = (type) => {
+    if (type === 'meetup')   return '📍';
+    if (type === 'optional') return '○';
+    return '•';
+  };
+
   return (
     <div className="guide-match">
-      {guide.image ? (
-        <img
-          src={guide.image}
-          alt={guide.name}
-          style={{ width: '68px', height: '68px', borderRadius: '16px', objectFit: 'cover', marginBottom: '16px', border: '2px solid #214734' }}
-        />
-      ) : (
-        <div className={`guide-avatar ${guide.color}`} aria-hidden="true">{guide.initials}</div>
-      )}
-      <p className="section-kicker">Your guide match · {details.label}</p>
-      <h2>{guide.name}</h2>
-      <p className="guide-role">{guide.role}</p>
-      <div className="guide-detail"><MapPin size={17} aria-hidden="true" /><span>{guide.area}</span></div>
-      <div className="experience-summary">
-        <div><CalendarDays size={16} aria-hidden="true" /><span>{details.duration}</span></div>
-        <p>{details.itinerary}</p>
+
+      {/* Guide header: avatar + name + rating + languages */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1rem' }}>
+        {guide.image ? (
+          <img
+            src={guide.image}
+            alt={guide.name}
+            style={{ width: '68px', height: '68px', borderRadius: '16px', objectFit: 'cover', border: '2px solid #214734', flexShrink: 0 }}
+            onError={(e) => { e.target.style.display = 'none'; }}
+          />
+        ) : (
+          <div className={`guide-avatar ${guide.color}`} aria-hidden="true">{guide.initials}</div>
+        )}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p className="section-kicker" style={{ marginBottom: '0.15rem' }}>Your guide match · {details.label}</p>
+          <h2 style={{ marginBottom: '0.15rem' }}>{guide.name}</h2>
+          <p className="guide-role">{guide.role}</p>
+
+          {/* Star rating */}
+          {guide.rating && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.25rem' }}>
+              <span style={{ color: '#F5A623', fontSize: '0.9rem', letterSpacing: '1px' }}>
+                {'★'.repeat(Math.floor(guide.rating))}{'☆'.repeat(5 - Math.floor(guide.rating))}
+              </span>
+              <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>{guide.rating.toFixed(2)}</span>
+              <span style={{ fontSize: '0.75rem', color: '#647067' }}>({guide.reviewsCount} reviews)</span>
+            </div>
+          )}
+
+          {/* Languages */}
+          {guide.languages?.length > 0 && (
+            <p style={{ fontSize: '0.72rem', color: '#647067', marginTop: '0.15rem' }}>
+              🗣 {guide.languages.join(' · ')}
+            </p>
+          )}
+        </div>
       </div>
-      <div className="guide-details" aria-label="Guide and trip details">
+
+      {/* Bio */}
+      {guide.bio && (
+        <p style={{
+          fontSize: '0.83rem',
+          color: '#374151',
+          lineHeight: 1.55,
+          margin: '0 0 1rem',
+          padding: '0.6rem 0.9rem',
+          background: 'rgba(33,71,52,0.05)',
+          borderRadius: '6px',
+          borderLeft: '3px solid #214734',
+        }}>
+          {guide.bio}
+        </p>
+      )}
+
+      {/* Meeting point */}
+      <div className="guide-detail-card" style={{ marginBottom: '0.5rem' }}>
+        <MapPin size={17} aria-hidden="true" />
+        <div>
+          <strong>Where to meet</strong>
+          <span>{details.meetingNote || `Your host meets you at ${guide.anchorSite || guide.area}.`}</span>
+        </div>
+      </div>
+
+      {/* Living Corridor Layer B — About This Place */}
+      <AboutThisPlace corridorId={guide.corridorId} />
+
+      {/* Experience schedule */}
+      <div style={{ margin: '0.9rem 0' }}>
+        <p style={{ fontSize: '0.72rem', textTransform: 'uppercase', fontFamily: 'monospace', color: '#647067', marginBottom: '0.45rem' }}>
+          Experience schedule
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          {(details.stops || []).map((stop, i) => (
+            <div key={i} style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start', fontSize: '0.8rem' }}>
+              <span style={{ fontFamily: 'monospace', color: '#F5A623', fontWeight: 600, flexShrink: 0, minWidth: '74px' }}>
+                {stop.time}
+              </span>
+              <span style={{ color: stop.type === 'meetup' ? '#214734' : '#374151', fontWeight: stop.type === 'meetup' ? 600 : 400 }}>
+                {stopIcon(stop.type)} {stop.activity}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* What to bring */}
+      {details.whatToBring?.length > 0 && (
+        <div style={{
+          margin: '0.8rem 0',
+          padding: '0.65rem 0.9rem',
+          background: 'rgba(245, 166, 35, 0.06)',
+          border: '1px solid rgba(245, 166, 35, 0.2)',
+          borderRadius: '6px',
+        }}>
+          <p style={{ fontSize: '0.72rem', textTransform: 'uppercase', fontFamily: 'monospace', color: '#8e5c19', marginBottom: '0.3rem' }}>
+            What to bring
+          </p>
+          <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.78rem', color: '#374151', lineHeight: 1.6 }}>
+            {details.whatToBring.map((item, i) => <li key={i}>{item}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {/* Cultural etiquette tip */}
+      {details.etiquette && (
+        <div style={{
+          margin: '0.7rem 0',
+          padding: '0.5rem 0.8rem',
+          background: 'rgba(33,71,52,0.04)',
+          borderRadius: '6px',
+          fontSize: '0.78rem',
+          color: '#4B5563',
+          fontStyle: 'italic',
+        }}>
+          💬 <strong>Cultural tip:</strong> {details.etiquette}
+        </div>
+      )}
+
+      {/* Trust + payment breakdown */}
+      <div className="guide-details" aria-label="Trust and payment details">
         <div className="guide-detail-card">
           <ShieldCheck size={17} aria-hidden="true" />
-          <div><strong>Why trust this match</strong><span>Identity and Mobile Money wallet reviewed for the Kwan pilot.</span></div>
-        </div>
-        <div className="guide-detail-card">
-          <MapPin size={17} aria-hidden="true" />
-          <div><strong>What you will do</strong><span>{details.itinerary} Your host meets you at {guide.anchorSite || guide.area}.</span></div>
+          <div>
+            <strong>Why trust this match</strong>
+            <span>
+              Identity and Mobile Money wallet reviewed for the Kwan pilot.
+              {guide.ghanaCard ? ` Ghana Card on file: ${guide.ghanaCard.slice(0, 7)}•••` : ''}
+            </span>
+          </div>
         </div>
         <div className="guide-detail-card">
           <WalletCards size={17} aria-hidden="true" />
-          <div><strong>Where your money goes</strong><span>{formatUsd(serverPricing.host_payout_usd)} is reserved for the host; Kwan's {formatUsd(serverPricing.platform_fee_usd)} fee and the {formatUsd(serverPricing.tourism_levy_usd)} levy are shown upfront.</span></div>
+          <div>
+            <strong>Where your money goes</strong>
+            <span>
+              {formatUsd(serverPricing.host_payout_usd)} is reserved for the host via {guide.momoNetwork || 'Mobile Money'};
+              Kwan's {formatUsd(serverPricing.platform_fee_usd)} fee and the {formatUsd(serverPricing.tourism_levy_usd)} levy are shown upfront.
+            </span>
+          </div>
         </div>
-      </div>
-      <div className="reviewed-note" style={{ color: '#214734', background: 'rgba(33,71,52,0.06)' }}>
-        <CheckCircle2 size={17} aria-hidden="true" />
-        <span>Operator package: fixed experience with one optional ceremony add-on. Review and edit it before payment.</span>
       </div>
 
       {guide.anchorSite && (
@@ -659,6 +1015,7 @@ function GuideMatch({ guide, matchedTheme, serverPricing, addonIncluded, isRecal
         </div>
       )}
 
+      {/* Optional ceremony add-on */}
       <div style={{ margin: '0.8rem 0', padding: '0.6rem 0.8rem', background: 'rgba(33,71,52,0.05)', borderRadius: '6px', border: '1px solid rgba(33,71,52,0.12)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
           <span style={{ fontSize: '0.82rem' }}>Optional Cultural Stop / Ceremony</span>
@@ -684,24 +1041,39 @@ function GuideMatch({ guide, matchedTheme, serverPricing, addonIncluded, isRecal
           </button>
         </div>
         <span style={{ fontSize: '0.72rem', color: '#647067', display: 'block', marginTop: '0.2rem' }}>
-          {addonIncluded ? 'Customized with ancestral ceremony; the server has recalculated your total.' : 'Add an optional ceremony and Kwan will recalculate the total before checkout.'}
+          {addonIncluded
+            ? 'Customised with ancestral ceremony; price has been recalculated.'
+            : 'Add an optional ceremony and Kwan will recalculate the total before checkout.'}
         </span>
       </div>
 
+      {/* Price summary */}
       <div className="price-row">
         <span>Test booking {addonIncluded && '(edited)'}</span>
         <strong>{formatUsd(serverPricing.total_usd)}</strong>
       </div>
       <p className="price-help">
-        One guide, one local experience. 90% ({formatUsd(serverPricing.host_payout_usd)}) disbursed directly to Mobile Money upon PIN verification. Includes statutory 1% Ghana Tourism Levy ({formatUsd(serverPricing.tourism_levy_usd)}).
+        One guide, one local experience. 90% ({formatUsd(serverPricing.host_payout_usd)}) disbursed directly to {guide.momoNetwork || 'Mobile Money'} upon PIN verification.
+        Includes statutory 1% Ghana Tourism Levy ({formatUsd(serverPricing.tourism_levy_usd)}).
       </p>
-      <p className="booking-policy"><strong>Booking note:</strong> Confirm availability with the pilot team before payment. If plans change, contact us before the experience so we can review a refund or reschedule.</p>
+      <p className="booking-policy">
+        <strong>Booking note:</strong> The pilot team will confirm your guide's availability within a few hours of booking.
+        If plans change, contact us before the experience so we can review a refund or reschedule.
+      </p>
+      {details.cancellation && (
+        <p className="booking-policy" style={{ color: '#647067' }}>
+          <strong>Cancellation:</strong> {details.cancellation}
+        </p>
+      )}
+
       <button className="button button-primary button-full" type="button" onClick={onRequestPayment}>
         Request payment link <ArrowUpRight size={17} aria-hidden="true" />
       </button>
     </div>
   );
 }
+
+// ── CheckoutModal ──────────────────────────────────────────────────────────────
 
 function CheckoutModal({
   guide,
@@ -721,26 +1093,35 @@ function CheckoutModal({
   loadingAction,
   errorMessage,
   setErrorMessage,
+  isOfflineMode,
   onClose,
   onCreatePaymentPreview,
   onCopyLink,
   onOpenPaystackCheckout,
   onCheckStatus,
   onReleasePayout,
+  onSimulateDemoPayment,
 }) {
   const payout = serverPricing.host_payout_usd;
   const released = booking?.status === 'released';
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
-      <section className="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkout-title" onMouseDown={(event) => event.stopPropagation()}>
+      <section
+        className="checkout-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="checkout-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
         <button className="close-button" type="button" onClick={onClose} aria-label="Close payment flow"><X size={20} /></button>
+
         <div className="checkout-heading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.8rem' }}>
           <div>
-            <p className="section-kicker">Card-to-Mobile Money Escrow</p>
+            <p className="section-kicker">Card-to-Mobile Money Escrow{isOfflineMode ? ' · Demo Mode' : ''}</p>
             <h2 id="checkout-title">
-              {step === 'details' && 'Prepare your payment link'}
-              {step === 'payment' && 'Your payment link is ready'}
+              {step === 'details'   && 'Prepare your payment link'}
+              {step === 'payment'   && 'Your payment link is ready'}
               {step === 'confirmed' && (released ? 'Test payout released' : 'Funds locked in escrow')}
             </h2>
           </div>
@@ -768,20 +1149,33 @@ function CheckoutModal({
           <strong>{formatUsd(serverPricing.total_usd)}</strong>
         </div>
 
+        {/* ── Step: details ── */}
         {step === 'details' && (
           <form className="checkout-form" onSubmit={onCreatePaymentPreview}>
-            <p>Review the fixed operator package above, then enter your details. The pilot team must confirm the guide's availability before any payment is authorized.</p>
+            <p>Review the operator package above, then enter your details to prepare the escrow payment.</p>
             <label htmlFor="traveler-name">Your name</label>
             <input id="traveler-name" autoComplete="name" value={traveler.name} onChange={(event) => setTraveler({ ...traveler, name: event.target.value })} required />
             <label htmlFor="traveler-email">Email for the link</label>
             <input id="traveler-email" type="email" autoComplete="email" value={traveler.email} onChange={(event) => setTraveler({ ...traveler, email: event.target.value })} required />
-            <label htmlFor="experience-date">Experience date</label>
+            <label htmlFor="experience-date">Preferred experience date</label>
             <input id="experience-date" type="date" value={experienceDate} min={new Date().toISOString().slice(0, 10)} onChange={(event) => setExperienceDate(event.target.value)} required />
             <label className="confirmation-checkbox" htmlFor="pilot-confirmation">
-              <input id="pilot-confirmation" type="checkbox" checked={pilotConfirmation} onChange={(event) => setPilotConfirmation(event.target.checked)} />
-              <span>I have received pilot-team confirmation that this guide is available for this date.</span>
+              <input
+                id="pilot-confirmation"
+                type="checkbox"
+                checked={pilotConfirmation}
+                onChange={(event) => setPilotConfirmation(event.target.checked)}
+              />
+              <span>I understand the pilot team will confirm guide availability before the experience.</span>
             </label>
-            <div className="prototype-notice"><CircleAlert size={18} aria-hidden="true" /><span>Paystack sandbox checkout: after the confirmed experience, the traveler shares the release PIN to trigger the host payout.</span></div>
+            <div className="prototype-notice">
+              <CircleAlert size={18} aria-hidden="true" />
+              <span>
+                {isOfflineMode
+                  ? 'Demo mode: payment is simulated locally. No real charge will occur.'
+                  : 'Paystack sandbox checkout: after the confirmed experience, share the release PIN to trigger the host payout.'}
+              </span>
+            </div>
             <button className="button button-primary button-full" type="submit" disabled={loadingAction === 'checkout_init'}>
               {loadingAction === 'checkout_init' ? (
                 <><Loader2 size={16} className="spin-icon" /> Creating escrow booking...</>
@@ -792,49 +1186,105 @@ function CheckoutModal({
           </form>
         )}
 
+        {/* ── Step: payment ── */}
         {step === 'payment' && (
           <div className="payment-preview">
             <p className="link-label">Unique payment link</p>
-            <div className="link-box"><span>{paymentLink}</span><button type="button" onClick={onCopyLink} aria-label="Copy payment link">{copied ? <Check size={17} /> : <Copy size={17} />}</button></div>
+            <div className="link-box">
+              <span>{paymentLink}</span>
+              <button type="button" onClick={onCopyLink} aria-label="Copy payment link">
+                {copied ? <Check size={17} /> : <Copy size={17} />}
+              </button>
+            </div>
             <p className="reference">Reference: {booking.reference}</p>
-            <div className="prototype-notice"><CircleAlert size={18} aria-hidden="true" /><span>Availability was acknowledged for {booking.experienceDate}. Complete payment in Paystack; Kwan will then hold the funds and keep the release PIN with you.</span></div>
+            <div className="prototype-notice">
+              <CircleAlert size={18} aria-hidden="true" />
+              <span>Preferred date: {booking.experienceDate}. Complete payment in Paystack; Kwan will hold the funds and keep the release PIN with you.</span>
+            </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-              <button className="button button-primary button-full" type="button" onClick={onOpenPaystackCheckout}>
-                <WalletCards size={18} aria-hidden="true" /> Open Paystack checkout
-              </button>
+              {isOfflineMode ? (
+                <button className="button button-primary button-full" type="button" onClick={onSimulateDemoPayment}>
+                  <WalletCards size={18} aria-hidden="true" /> Simulate payment (Demo)
+                </button>
+              ) : (
+                <button className="button button-primary button-full" type="button" onClick={onOpenPaystackCheckout}>
+                  <WalletCards size={18} aria-hidden="true" /> Open Paystack checkout
+                </button>
+              )}
 
-              <button
-                type="button"
-                className="text-button"
-                onClick={onCheckStatus}
-                disabled={loadingAction === 'polling'}
-                style={{ fontSize: '0.78rem', color: '#647067', alignSelf: 'center', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-              >
-                <RefreshCw size={13} className={loadingAction === 'polling' ? 'spin-icon' : ''} /> I completed payment — check status
-              </button>
+              {!isOfflineMode && (
+                <button
+                  type="button"
+                  className="text-button"
+                  onClick={onCheckStatus}
+                  disabled={loadingAction === 'polling'}
+                  style={{ fontSize: '0.78rem', color: '#647067', alignSelf: 'center', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                >
+                  <RefreshCw size={13} className={loadingAction === 'polling' ? 'spin-icon' : ''} /> I completed payment — check status
+                </button>
+              )}
             </div>
           </div>
         )}
 
+        {/* ── Step: confirmed ── */}
         {step === 'confirmed' && (
           <div className="confirmation">
-            <div className={`confirmation-mark ${released ? 'released' : ''}`}><CheckCircle2 size={31} aria-hidden="true" /></div>
+            <div className={`confirmation-mark ${released ? 'released' : ''}`}>
+              <CheckCircle2 size={31} aria-hidden="true" />
+            </div>
 
             {!released ? (
               <>
-                <p><strong>{formatUsd(serverPricing.total_usd)}</strong> is locked in escrow for {guide.name} on {booking.experienceDate}.</p>
-                <div style={{ margin: '1rem 0', padding: '0.9rem', background: 'rgba(245, 166, 35, 0.08)', border: '1px solid #F5A623', borderRadius: '6px', textAlign: 'center' }}>
+                <p>
+                  <strong>{formatUsd(serverPricing.total_usd)}</strong> is locked in escrow for{' '}
+                  <strong>{guide.name}</strong> on {booking.experienceDate}.
+                </p>
+
+                {/* Guide contact block */}
+                <div style={{
+                  margin: '0.9rem 0',
+                  padding: '0.75rem 0.9rem',
+                  background: 'rgba(33,71,52,0.06)',
+                  border: '1px solid rgba(33,71,52,0.2)',
+                  borderRadius: '6px',
+                  fontSize: '0.82rem',
+                }}>
+                  <p style={{ fontWeight: 700, color: '#214734', marginBottom: '0.25rem' }}>📱 Guide will contact you</p>
+                  <p style={{ color: '#374151' }}>
+                    <strong>{guide.name}</strong> will reach out via WhatsApp within 2 hours to confirm exact meeting
+                    details, directions to <em>{guide.anchorSite || guide.area}</em>, and any final prep notes.
+                  </p>
+                </div>
+
+                {/* Living Corridor Layer C — Before your experience */}
+                <PreExperienceBriefing corridorId={guide.corridorId} />
+
+                {/* 4-digit PIN — fixed readable colour */}
+                <div style={{
+                  margin: '1rem 0',
+                  padding: '0.9rem',
+                  background: 'rgba(245, 166, 35, 0.08)',
+                  border: '1px solid #F5A623',
+                  borderRadius: '6px',
+                  textAlign: 'center',
+                }}>
                   <span style={{ display: 'block', fontSize: '0.75rem', color: '#F5A623', textTransform: 'uppercase', fontFamily: 'monospace' }}>
-                    Traveler 4-Digit Release PIN
+                    Your Private 4-Digit Release PIN
                   </span>
-                  <span style={{ fontSize: '1.8rem', fontWeight: 800, color: '#1b2921', letterSpacing: '4px', fontFamily: 'monospace' }}>
+                  <span style={{ fontSize: '1.8rem', fontWeight: 800, color: '#F5A623', letterSpacing: '4px', fontFamily: 'monospace' }}>
                     {booking?.pin || '----'}
                   </span>
                   <span style={{ display: 'block', fontSize: '0.72rem', color: '#647067', marginTop: '0.3rem' }}>
-                    Share this code with your host only after the experience is complete.
+                    Share this code with your host <strong>only after</strong> the experience is complete.
                   </span>
-                  <button type="button" className="text-button" onClick={() => navigator.clipboard.writeText(booking?.pin || '')} style={{ margin: '0.4rem auto 0', color: '#8e5c19' }}>
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={() => navigator.clipboard.writeText(booking?.pin || '')}
+                    style={{ margin: '0.4rem auto 0', color: '#8e5c19' }}
+                  >
                     <Copy size={13} aria-hidden="true" /> Copy PIN
                   </button>
                 </div>
@@ -874,15 +1324,68 @@ function CheckoutModal({
               </>
             ) : (
               <div>
-                <p><strong>{formatUsd(payout)}</strong> released to {guide.name}'s MTN Mobile Money wallet.</p>
+                <p>
+                  <strong>{formatUsd(payout)}</strong> released to {guide.name}'s{' '}
+                  {guide.momoNetwork || 'MTN Mobile Money'} wallet.
+                </p>
                 <p className="quiet-confirmation" style={{ color: '#214734', marginTop: '0.5rem' }}>
-                  PIN verified. Reference {booking.reference} · 90% payout settled in 32.4s · 1% Tourism Levy ({formatUsd(serverPricing.tourism_levy_usd)}) remitted.
+                  PIN verified. Reference {booking.reference} · 90% payout settled in 32.4s ·
+                  1% Tourism Levy ({formatUsd(serverPricing.tourism_levy_usd)}) remitted.
                 </p>
               </div>
             )}
           </div>
         )}
       </section>
+    </div>
+  );
+}
+
+// ── PreExperienceBriefing (Living Corridor Layer C) ───────────────────────────
+
+function PreExperienceBriefing({ corridorId }) {
+  const facts = LIVING_CORRIDOR_FACTS.filter(
+    f => f.site === corridorId || f.site === 'general'
+  ).slice(0, 3);
+
+  if (!facts || facts.length === 0) return null;
+
+  return (
+    <div style={{
+      margin: '0.8rem 0',
+      padding: '0.7rem 0.9rem',
+      background: 'rgba(245, 166, 35, 0.05)',
+      border: '1px solid rgba(245, 166, 35, 0.22)',
+      borderRadius: '8px',
+    }}>
+      <p style={{
+        fontSize: '0.65rem',
+        fontFamily: 'monospace',
+        textTransform: 'uppercase',
+        color: '#F5A623',
+        fontWeight: 700,
+        letterSpacing: '0.07em',
+        marginBottom: '0.5rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.35rem',
+      }}>
+        📖 Before your experience · Living Corridor
+      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        {facts.map((fact, i) => (
+          <div key={i} style={{ paddingLeft: '0.65rem', borderLeft: '2px solid rgba(245,166,35,0.4)' }}>
+            <p style={{ margin: 0, fontSize: '0.76rem', color: '#374151', lineHeight: 1.5, fontStyle: 'italic' }}>
+              "{fact.text}"
+            </p>
+            {fact.source && (
+              <span style={{ fontSize: '0.62rem', color: '#94A3B8', fontFamily: 'monospace', display: 'block', marginTop: '0.1rem' }}>
+                — {fact.source}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

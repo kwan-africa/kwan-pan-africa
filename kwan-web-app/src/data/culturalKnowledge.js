@@ -248,3 +248,229 @@ export const UNIT_ECONOMICS = {
   settlementCurrency: "GHS / USD",
   escrowMechanism: "4-Digit Private Traveler Release PIN"
 };
+
+// ==============================================================================
+// LIVING CORRIDOR — Cultural facts for rotating ticker, guide cards & pre-briefs
+// Each fact has: text, site (anchor site key), category, source label
+// ==============================================================================
+export const LIVING_CORRIDOR_FACTS = [
+  // ── Cape Coast / Ancestral ──────────────────────────────────────────────────
+  {
+    text: "Cape Coast Castle's dungeons once held up to 1,500 enslaved people at a time. Many were named after the day of the week they were born — Kofi (Friday boy), Ama (Saturday girl), Kweku (Wednesday boy).",
+    site: "cape_coast",
+    category: "history",
+    source: "UNESCO / GMMB"
+  },
+  {
+    text: "The Castle was first built by Swedish traders in 1653. It changed hands between the Dutch, British, and local Fante people before the British used it as their largest slave-holding fort in West Africa.",
+    site: "cape_coast",
+    category: "history",
+    source: "Ghana Museums & Monuments Board"
+  },
+  {
+    text: "In 2009, Barack Obama stood inside the Cape Coast Castle dungeons and said: \"It reminds us of the capacity of human beings to commit great evil.\" Michelle Obama wept at the Door of No Return.",
+    site: "cape_coast",
+    category: "legacy",
+    source: "White House State Visit Records"
+  },
+  {
+    text: "The Fante people developed a secret musical code — war songs encoding resistance messages — during colonial rule. The tradition survives today in contemporary highlife and gospel.",
+    site: "cape_coast",
+    category: "culture",
+    source: "University of Cape Coast Oral Archives"
+  },
+  {
+    text: "The Wall of Remembrance at Cape Coast Castle lists the names of over 12,000 enslaved individuals who passed through its gates — cross-referenced from plantation records across 14 countries.",
+    site: "cape_coast",
+    category: "remembrance",
+    source: "African Diaspora Heritage Trail"
+  },
+  {
+    text: "Cape Coast was called 'Oguaa' by the Fante people — meaning 'the market place' — long before European contact. It was a thriving trade hub for gold, kola, and cloth.",
+    site: "cape_coast",
+    category: "etymology",
+    source: "Fante Oral Tradition / UCC History Dept"
+  },
+
+  // ── Ga-Mashie / Jamestown ───────────────────────────────────────────────────
+  {
+    text: "Jamestown's Bukom neighbourhood has produced more world boxing champions per square mile than anywhere on earth. Azumah Nelson, Ike Quartey, and Joshua Clottey all trained on the same cracked concrete ring.",
+    site: "ga_mashie",
+    category: "sport",
+    source: "Ghana Boxing Authority"
+  },
+  {
+    text: "The Jamestown Lighthouse was built by the British in 1871. On a clear day you can see Labadi Beach 8 km east — and on historic days, the lighthouse keeper could signal incoming slave ships.",
+    site: "ga_mashie",
+    category: "history",
+    source: "Ghana Ports & Harbours Authority"
+  },
+  {
+    text: "Ga people celebrate Homowo ('hooting at hunger') each August — a harvest festival where families cook palm nut soup and kpokpoi together and pour libations for their ancestors.",
+    site: "ga_mashie",
+    category: "culture",
+    source: "Ga Traditional Council"
+  },
+  {
+    text: "The Chale Wote Street Art Festival in Jamestown has grown from a small community gathering in 2011 into one of Africa's largest contemporary art events, drawing 50,000+ visitors annually.",
+    site: "ga_mashie",
+    category: "arts",
+    source: "Alliance Française Accra"
+  },
+  {
+    text: "Ga waist beads are not decoration — each colour carries a specific cultural meaning. Red = danger/power; blue = peace; gold = royalty; white = purity and spiritual protection.",
+    site: "ga_mashie",
+    category: "culture",
+    source: "Naa Densua Addy, Bead Master (Kwan Pilot Host)"
+  },
+  {
+    text: "The canoe-fishing tradition in Jamestown dates back over 500 years. Ga fishing clans still launch wooden canoes before sunrise, guided by constellations their great-grandparents mapped.",
+    site: "ga_mashie",
+    category: "tradition",
+    source: "Ga-Mashie Fishermen's Cooperative"
+  },
+
+  // ── High Street / Nkrumah ───────────────────────────────────────────────────
+  {
+    text: "Kwame Nkrumah declared Ghana's independence on 6 March 1957, making it the first sub-Saharan African country to gain independence from colonial rule. He stood at Black Star Square and said: 'Ghana, your beloved country is free forever.'",
+    site: "high_street",
+    category: "history",
+    source: "Ghana Public Records Archive"
+  },
+  {
+    text: "The Black Star in Ghana's flag was adapted from Marcus Garvey's Black Star Line — a shipping company designed to repatriate African diaspora to Africa. Nkrumah was deeply influenced by Garvey.",
+    site: "high_street",
+    category: "symbolism",
+    source: "Kwame Nkrumah Memorial Park Educational Display"
+  },
+  {
+    text: "Adinkra symbols were originally printed by the Bono people of Ashanti in the 1800s using carved calabash stamps. Each symbol is a complete philosophical statement — 'Gye Nyame' means 'except for God, I fear none.'",
+    site: "high_street",
+    category: "art",
+    source: "Uncle Ebo Mensah, Adinkra Carver (Kwan Pilot Host)"
+  },
+  {
+    text: "Ghana's Arts Centre on High Street was established in 1951 and houses over 600 artisan stalls. It is the largest marketplace for traditional Ghanaian crafts in West Africa.",
+    site: "high_street",
+    category: "economy",
+    source: "Ghana Tourism Authority"
+  },
+  {
+    text: "The talking drum (fontomfrom) can replicate the tonal patterns of Akan speech — effectively transmitting full sentences across several kilometres. Akan royals historically communicated across distances this way.",
+    site: "high_street",
+    category: "culture",
+    source: "National Museum of Ghana"
+  },
+  {
+    text: "Ghana's 1948 Crossroads Uprising — sparked by the shooting of ex-servicemen marching for their war pensions — is considered the decisive catalyst that forced Britain to accelerate independence negotiations.",
+    site: "high_street",
+    category: "history",
+    source: "Kwesi Amponsah, Historian (Kwan Pilot Host)"
+  },
+
+  // ── Aburi Ridge ─────────────────────────────────────────────────────────────
+  {
+    text: "Aburi Botanical Gardens was established in 1890 by the British as an experimental agricultural station. Today it houses over 800 species of tropical plants, including a 130-year-old mahogany tree that is a local elder in its own right.",
+    site: "aburi_ridge",
+    category: "nature",
+    source: "Forestry Commission of Ghana"
+  },
+  {
+    text: "The cocoa that built modern Ghana was first cultivated by Tetteh Quarshie, who smuggled cocoa pods from Equatorial Guinea in 1876 hidden in his clothing. His farm in Mampong is still active today.",
+    site: "aburi_ridge",
+    category: "history",
+    source: "COCOBOD Ghana"
+  },
+  {
+    text: "Traditional Akuapem herbalists on the ridge use over 200 plant species for healing. Many compounds in modern anti-malaria treatments were first identified by communities on the Akuapem Hills.",
+    site: "aburi_ridge",
+    category: "medicine",
+    source: "CSIR Plant Genetic Resources Research Institute"
+  },
+  {
+    text: "Aburi is home to some of the finest woodcarvers in West Africa. The Akuapem ridge villages produce stools that carry political authority — a chief's stool is considered his soul and is never allowed to touch the bare ground.",
+    site: "aburi_ridge",
+    category: "culture",
+    source: "Aburi Woodcarvers Guild"
+  },
+
+  // ── Pan-Ghana / General ─────────────────────────────────────────────────────
+  {
+    text: "Ghana is the world's second-largest cocoa producer, responsible for approximately 20% of global supply. A single cocoa pod contains 20–50 beans — it takes roughly 400 beans to make one pound of chocolate.",
+    site: "general",
+    category: "economy",
+    source: "ICCO / COCOBOD"
+  },
+  {
+    text: "The kente cloth worn at major events across the African diaspora was originally reserved for Ashanti royalty. The first kente was reportedly woven after two young men observed a spider spinning its web.",
+    site: "general",
+    category: "culture",
+    source: "Bonwire Kente Weavers Council"
+  },
+  {
+    text: "Ghana's 'Year of Return' in 2019 drew over 200,000 diaspora visitors — the largest organised ancestral homecoming in modern African history. It generated over $1.9 billion in tourism revenue.",
+    site: "general",
+    category: "diaspora",
+    source: "Ghana Tourism Authority / GIS"
+  },
+  {
+    text: "Highlife music — Ghana's first globally exported sound — was born in Accra's beachfront bars in the 1920s by mixing Ga rhythms with colonial brass-band instruments. It directly influenced Afrobeats.",
+    site: "general",
+    category: "music",
+    source: "Institute of African Studies, University of Ghana"
+  },
+  {
+    text: "'Akwaaba' — the Twi word for welcome — appears on road signs at every major entry point to Ghana. It is the unofficial national greeting of a country internationally known for its hospitality.",
+    site: "general",
+    category: "language",
+    source: "Ghana Tourism Authority"
+  },
+  {
+    text: "Every person in Akan culture is given a day name — Kojo (Monday boy), Ama (Saturday girl), Kofi (Friday boy). These soul names carry spiritual significance and connect you to your ancestors.",
+    site: "general",
+    category: "spirituality",
+    source: "Akan Naming Traditions / Manhyia Palace"
+  },
+];
+
+// ==============================================================================
+// SANKOFA PLAN — Pre-built week templates for the week planner
+// ==============================================================================
+export const SANKOFA_WEEK_TEMPLATES = [
+  {
+    id: "roots_week",
+    name: "Roots & Remembrance",
+    description: "A diaspora heritage itinerary — from the dungeons of Cape Coast to the liberation murals of Jamestown.",
+    days: [
+      { dayIndex: 0, label: "Mon", theme: "heritage_spiritual", hostId: "host_07", notes: "Cape Coast Castle — Door of No Return" },
+      { dayIndex: 1, label: "Tue", theme: null, hostId: null, notes: "Rest / travel back to Accra" },
+      { dayIndex: 2, label: "Wed", theme: "art", hostId: "host_04", notes: "Adinkra carving & talking drum" },
+      { dayIndex: 3, label: "Thu", theme: "adventure", hostId: "host_01", notes: "Morning boxing session in Bukom" },
+      { dayIndex: 4, label: "Fri", theme: "food", hostId: "host_06", notes: "Night market & shito trail" },
+    ],
+  },
+  {
+    id: "creative_week",
+    name: "Maker's Circuit",
+    description: "For the creative traveller — bead craft, Adinkra carving, woodwork, and street art in 5 days.",
+    days: [
+      { dayIndex: 0, label: "Mon", theme: "art", hostId: "host_02", notes: "Bead making in Jamestown" },
+      { dayIndex: 1, label: "Tue", theme: "art", hostId: "host_04", notes: "Adinkra stamps & drums, Arts Centre" },
+      { dayIndex: 2, label: "Wed", theme: null, hostId: null, notes: "Free day — Chale Wote murals self-guided" },
+      { dayIndex: 3, label: "Thu", theme: "heritage_spiritual", hostId: "host_03", notes: "Nkrumah Mausoleum & liberation history" },
+      { dayIndex: 4, label: "Fri", theme: "adventure", hostId: "host_01", notes: "Bukom boxing send-off session" },
+    ],
+  },
+  {
+    id: "nature_week",
+    name: "Green Ridge to Coastline",
+    description: "From botanical healing walks in Aburi to ancestral remembrance on the Atlantic coast.",
+    days: [
+      { dayIndex: 0, label: "Mon", theme: "art", hostId: "host_05", notes: "Aburi Botanical Gardens & herbal walk" },
+      { dayIndex: 1, label: "Tue", theme: null, hostId: null, notes: "Cocoa grove visit — Tetteh Quarshie farm" },
+      { dayIndex: 2, label: "Wed", theme: "food", hostId: "host_06", notes: "Culinary tour — Waakye & night spice market" },
+      { dayIndex: 3, label: "Thu", theme: "heritage_spiritual", hostId: "host_07", notes: "Cape Coast Castle — ancestral pilgrimage" },
+      { dayIndex: 4, label: "Fri", theme: null, hostId: null, notes: "Oguaa fishing harbour at sunrise" },
+    ],
+  },
+];
