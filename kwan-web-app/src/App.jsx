@@ -126,7 +126,7 @@ export default function App() {
   const [conversation, setConversation] = useState([
     {
       role: 'kwan',
-      copy: 'Tell Kwan what you want to do in Accra or Cape Coast. We will return one verified local guide from the pilot roster — not a list, and not a generic generated itinerary.',
+      copy: 'Tell us how you would like to experience Ghana. Kwan will recommend one trusted local host, selected for your interests and grounded in our verified pilot collection.',
     },
   ]);
   const [guide, setGuide] = useState(null);
@@ -342,7 +342,7 @@ export default function App() {
     setConversation([
       {
         role: 'kwan',
-        copy: 'Tell Kwan what you want to do in Accra or Cape Coast. We will return one verified local guide from the pilot roster — not a list, and not a generic generated itinerary.',
+        copy: 'Tell us how you would like to experience Ghana. Kwan will recommend one trusted local host, selected for your interests and grounded in our verified pilot collection.',
       },
     ]);
     setRequest('');
