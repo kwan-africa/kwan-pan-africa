@@ -7,12 +7,16 @@ import {
   CheckCircle2,
   ChevronRight,
   CircleAlert,
+  Compass,
   Copy,
+  ExternalLink,
+  LockKeyhole,
   Loader2,
   MapPin,
   MessageCircle,
   RefreshCw,
   ShieldCheck,
+  Smartphone,
   WalletCards,
   X,
 } from 'lucide-react';
@@ -31,6 +35,13 @@ const EXAMPLES = [
   'I want hands-on bead making and local crafts in Jamestown.',
 ];
 
+const EXPERIENCE_DETAILS = {
+  heritage_spiritual: { label: 'Heritage / Spiritual', duration: 'Half-day experience', itinerary: 'Guided heritage walk, cultural context, and time for reflection at the anchor site.' },
+  adventure: { label: 'Adventure / Boxing', duration: 'Morning experience', itinerary: 'Warm-up, coached session, and a local walking route around the host neighborhood.' },
+  art: { label: 'Art / Bead Crafts', duration: 'Half-day experience', itinerary: 'Hands-on craft session, local maker stories, and a guided walk through the arts compound.' },
+  food: { label: 'Food / Culinary', duration: 'Half-day experience', itinerary: 'Guided tasting across local chop bars and street-food stops, paced around your preferences.' },
+};
+
 const formatUsd = (value) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 
@@ -45,6 +56,7 @@ export default function App() {
     },
   ]);
   const [guide, setGuide] = useState(null);
+  const [matchedTheme, setMatchedTheme] = useState(null);
   const [addonIncluded, setAddonIncluded] = useState(false);
   const [serverPricing, setServerPricing] = useState({
     total_usd: 50,
@@ -55,7 +67,6 @@ export default function App() {
   });
   const [loadingAction, setLoadingAction] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [dataSource, setDataSource] = useState(null);
 
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState('details');
@@ -84,6 +95,7 @@ export default function App() {
     setConversation((items) => [...items, { role: 'traveler', copy: trimmed }]);
     setRequest('');
     setGuide(null);
+    setMatchedTheme(null);
     setAddonIncluded(false);
     setLoadingAction('matching');
     setErrorMessage(null);
@@ -106,8 +118,7 @@ export default function App() {
         throw new Error(`Hosts service returned status ${hostRes.status}`);
       }
 
-      const { hosts, source } = await hostRes.json();
-      setDataSource(source);
+      const { hosts } = await hostRes.json();
 
       let matched = null;
       if (hosts && hosts.length > 0) {
@@ -119,7 +130,7 @@ export default function App() {
           area: h.guild || h.anchor_site || 'Accra, Ghana',
           price: Number(h.price_usd) || 50,
           anchorSite: h.anchor_site || anchor_site,
-          theme: Array.isArray(h.theme_tags) ? h.theme_tags[0] : theme_matched,
+          theme: theme_matched,
           initials: h.name.split(' ').map((n) => n[0]).join('').slice(0, 2),
           color: 'ochre',
           image: h.photo_url || '/ghana_guide_kwesi.jpg',
@@ -129,6 +140,7 @@ export default function App() {
       }
 
       setGuide(matched);
+      setMatchedTheme(theme_matched);
 
       const itinRes = await fetch(`${API_BASE}/itinerary`, {
         method: 'POST',
@@ -145,7 +157,7 @@ export default function App() {
         ...items,
         {
           role: 'kwan',
-          copy: `I matched you with ${matched.name} (Anchor: ${matched.anchorSite}). This is the verified guide Kwan recommends for this journey.`,
+          copy: `I matched you with ${matched.name} because their verified roster profile covers ${EXPERIENCE_DETAILS[theme_matched]?.label || theme_matched} experiences near ${matched.anchorSite}.`,
         },
       ]);
     } catch (err) {
@@ -200,6 +212,21 @@ export default function App() {
     setEnteredPin('');
     setErrorMessage(null);
     setCheckoutOpen(true);
+  }
+
+  function resetMatch() {
+    setGuide(null);
+    setMatchedTheme(null);
+    setAddonIncluded(false);
+    setConversation([
+      {
+        role: 'kwan',
+        copy: 'Tell Kwan what you want to do in Accra or Cape Coast. We will return one verified local guide from the pilot roster - not a list, and not a generic generated itinerary.',
+      },
+    ]);
+    setRequest('');
+    setErrorMessage(null);
+    requestInput.current?.focus();
   }
 
   async function createPaymentPreview(event) {
@@ -333,24 +360,7 @@ export default function App() {
             }}
           />
         </a>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-          {dataSource && (
-            <span
-              style={{
-                fontSize: '0.7rem',
-                fontFamily: 'monospace',
-                padding: '0.15rem 0.45rem',
-                borderRadius: '4px',
-                background: dataSource === 'appwrite' ? 'rgba(240, 44, 94, 0.15)' : 'rgba(255, 255, 255, 0.08)',
-                color: dataSource === 'appwrite' ? '#FD366E' : '#94A3B8',
-                border: dataSource === 'appwrite' ? '1px solid rgba(240, 44, 94, 0.4)' : '1px solid rgba(255, 255, 255, 0.1)',
-              }}
-            >
-              DB: {dataSource.toUpperCase()}
-            </span>
-          )}
-          <p className="pilot-label">Accra &amp; Cape Coast pilot · 2026</p>
-        </div>
+        <p className="pilot-label">Accra &amp; Cape Coast pilot · 2026</p>
       </header>
 
       {errorMessage && (
@@ -418,7 +428,7 @@ export default function App() {
                 <div className="message kwan loading">
                   <span className="message-label">Kwan</span>
                   <p style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Loader2 size={14} className="spin-icon" /> Querying pilot roster and Appwrite database...
+                    <Loader2 size={14} className="spin-icon" /> Checking the verified pilot roster...
                   </p>
                 </div>
               )}
@@ -432,7 +442,7 @@ export default function App() {
                 <button
                   key={theme.tag}
                   className="text-button"
-                  style={{ padding: '0.2rem 0.5rem', fontSize: '0.72rem', borderRadius: '4px', background: 'rgba(33,71,52,0.06)' }}
+                  style={{ padding: '0.35rem 0.65rem', fontSize: '0.72rem', borderRadius: '999px', background: 'rgba(33,71,52,0.06)' }}
                   type="button"
                   disabled={isMatching}
                   onClick={() => sendRequest(theme.defaultQuery)}
@@ -443,6 +453,7 @@ export default function App() {
             </div>
 
             <div className="example-list" aria-label="Example requests">
+              <span className="examples-label">Try a starting point</span>
               {EXAMPLES.map((example) => (
                 <button
                   className="text-button"
@@ -493,6 +504,7 @@ export default function App() {
             {guide ? (
               <GuideMatch
                 guide={guide}
+                matchedTheme={matchedTheme}
                 serverPricing={serverPricing}
                 addonIncluded={addonIncluded}
                 isRecalculating={loadingAction === 'recalculating'}
@@ -505,7 +517,20 @@ export default function App() {
                 <p className="section-kicker">Your match</p>
                 <h2>One considered recommendation.</h2>
                 <p>Kwan uses the interests in your message to select one guide from the small pilot roster.</p>
+                <div className="match-preview">
+                  <div className="preview-avatar"><Compass size={18} aria-hidden="true" /></div>
+                  <div>
+                    <strong>Matched to your interests</strong>
+                    <span>Verified local host · Accra or Cape Coast</span>
+                  </div>
+                </div>
+                <div className="preview-stat"><ShieldCheck size={15} aria-hidden="true" /> Identity and Mobile Money wallet reviewed</div>
               </div>
+            )}
+            {guide && (
+              <button type="button" className="reset-match" onClick={resetMatch}>
+                <RefreshCw size={13} aria-hidden="true" /> Start a new request
+              </button>
             )}
           </aside>
         </section>
@@ -514,9 +539,9 @@ export default function App() {
           <p className="section-kicker">How the pilot works</p>
           <h2 id="flow-heading">Built to test trust in one simple flow.</h2>
           <ol>
-            <li><span>01</span><p>Describe the day you want.</p></li>
-            <li><span>02</span><p>Receive one guide match and lock funds in escrow.</p></li>
-            <li><span>03</span><p>Share your 4-digit PIN after the experience to trigger the sub-60s Mobile Money payout.</p></li>
+            <li><div className="flow-icon"><Compass size={19} aria-hidden="true" /></div><div><span>01</span><p>Describe the day you want.</p></div></li>
+            <li><div className="flow-icon"><LockKeyhole size={19} aria-hidden="true" /></div><div><span>02</span><p>Receive one guide match and lock funds in escrow.</p></div></li>
+            <li><div className="flow-icon"><Smartphone size={19} aria-hidden="true" /></div><div><span>03</span><p>Share your 4-digit PIN after the experience to trigger the Mobile Money payout.</p></div></li>
           </ol>
         </section>
       </main>
@@ -530,7 +555,10 @@ export default function App() {
           />
           <span>Kwan pilot · Built for PAAIS 2026</span>
         </div>
-        <span>Escrow flow includes the statutory 1% Ghana Tourism Levy (Act 817).</span>
+        <div className="footer-links">
+          <a href="mailto:hello@kwanai.me">Contact the pilot <ExternalLink size={13} aria-hidden="true" /></a>
+          <span>Escrow flow includes the statutory 1% Ghana Tourism Levy (Act 817).</span>
+        </div>
       </footer>
 
       {checkoutOpen && guide && (
@@ -560,7 +588,8 @@ export default function App() {
   );
 }
 
-function GuideMatch({ guide, serverPricing, addonIncluded, isRecalculating, onToggleAddon, onRequestPayment }) {
+function GuideMatch({ guide, matchedTheme, serverPricing, addonIncluded, isRecalculating, onToggleAddon, onRequestPayment }) {
+  const details = EXPERIENCE_DETAILS[matchedTheme] || EXPERIENCE_DETAILS.heritage_spiritual;
   return (
     <div className="guide-match">
       {guide.image ? (
@@ -572,10 +601,14 @@ function GuideMatch({ guide, serverPricing, addonIncluded, isRecalculating, onTo
       ) : (
         <div className={`guide-avatar ${guide.color}`} aria-hidden="true">{guide.initials}</div>
       )}
-      <p className="section-kicker">Your guide match · {guide.theme || 'heritage'}</p>
+      <p className="section-kicker">Your guide match · {details.label}</p>
       <h2>{guide.name}</h2>
       <p className="guide-role">{guide.role}</p>
       <div className="guide-detail"><MapPin size={17} aria-hidden="true" /><span>{guide.area}</span></div>
+      <div className="experience-summary">
+        <div><CalendarDays size={16} aria-hidden="true" /><span>{details.duration}</span></div>
+        <p>{details.itinerary}</p>
+      </div>
       <div className="reviewed-note" style={{ color: '#214734', background: 'rgba(33,71,52,0.06)' }}>
         <CheckCircle2 size={17} aria-hidden="true" />
         <span>Operator package: fixed experience with one optional ceremony add-on. Review and edit it before payment.</span>
@@ -624,6 +657,7 @@ function GuideMatch({ guide, serverPricing, addonIncluded, isRecalculating, onTo
       <p className="price-help">
         One guide, one local experience. 90% ({formatUsd(serverPricing.host_payout_usd)}) disbursed directly to Mobile Money upon PIN verification. Includes statutory 1% Ghana Tourism Levy ({formatUsd(serverPricing.tourism_levy_usd)}).
       </p>
+      <p className="booking-policy"><strong>Booking note:</strong> Confirm availability with the pilot team before payment. If plans change, contact us before the experience so we can review a refund or reschedule.</p>
       <button className="button button-primary button-full" type="button" onClick={onRequestPayment}>
         Request payment link <ArrowUpRight size={17} aria-hidden="true" />
       </button>

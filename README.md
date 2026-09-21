@@ -29,7 +29,7 @@ Kwan connects international and diaspora travelers directly to verified grassroo
 
 | Feature | Detail |
 |:---|:---|
-| 🤖 **AI Cultural Concierge** | `pgvector` RAG + Gemini generates personalized multi-day itineraries tailored to traveler budget and energy styles |
+| 🤖 **AI Cultural Concierge** | Free-text intent classification maps a traveler to one verified cultural experience; Gemini is optional and the deterministic taxonomy keeps the pilot available |
 | 💳 **Paystack Escrow** | International cards (Visa/Mastercard) and Apple Pay collected upfront and held in secure escrow |
 | 📱 **Mobile Money Payouts** | 90% of booking fees settle directly into the host's MTN MoMo or Telecel Cash wallet upon 4-digit code completion |
 | 🪪 **Gov ID Verification** | 4-step Ghana Card / NIN verification wizard creating verified host digital identities |
@@ -48,42 +48,80 @@ Kwan connects international and diaspora travelers directly to verified grassroo
 
 ---
 
-## 🏗️ Architecture & System Design
+## 🏗️ Redefined Kwan AI Software Architecture
 
+The final MVP is a focused **web-first transaction loop**, not the earlier
+Spring Boot/Flutter-first architecture. The production path is deliberately
+small and observable:
+
+```text
+Traveler browser
+  React 19 + Vite (`kwan-web-app`)
+    └─ POST /api/classify
+       GET  /api/hosts?theme=...
+       POST /api/itinerary
+       POST /api/checkout/init
+       GET  /api/checkout/verify/:booking_id
+       GET  /api/checkout/status/:booking_id
+       POST /api/escrow/release
+                    │
+                    ▼
+Node 20 + Express (`server`)
+  ├─ Intent classifier
+  │    Gemini-assisted classification with deterministic cultural taxonomy fallback
+  ├─ Verified host matcher
+  │    Fixed themes: heritage_spiritual, adventure, food, art
+  ├─ Server-authoritative pricing
+  │    Base experience + optional ceremony add-on, 10% platform fee,
+  │    90% host payout, and 1% tourism levy calculation
+  ├─ Booking and escrow state machine
+  │    pending_payment → escrow_held → released / auto_released
+  ├─ Payment integration
+  │    Paystack checkout initialization, signed webhook verification,
+  │    delayed-payment recovery, idempotent processing, and PIN release
+  └─ Delivery layer
+       Serves `kwan-web-app/dist` in production and exposes `/health`
+                    │
+       ┌────────────┴────────────┐
+       ▼                         ▼
+Appwrite Cloud                Local fallback
+  Hosts, bookings,             In-memory pilot roster and booking cache
+  escrow_ledgers               (development/demo only; disabled in production
+  server-side API key          when Appwrite is unavailable)
+       │
+       ▼
+Paystack → card checkout → verified webhook → escrow ledger → host payout rail
 ```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                     Flutter App (Web + Android + iOS)                    │
-│   Tourist Discovery  |  Cultural Concierge  |  Host Verification Portal  │
-└────────────────────────────────────┬─────────────────────────────────────┘
-                                     │ REST / JSON
-┌────────────────────────────────────▼─────────────────────────────────────┐
-│                    Spring Boot 3 Backend (Java 21)                       │
-│                                                                          │
-│  ┌────────────────────────────────────────────────────────────────────┐  │
-│  │  RAG & Discovery Pipeline                                          │  │
-│  │  1. Prompt / Preference Query → Gemini text-embedding-004          │  │
-│  │  2. PostgreSQL + pgvector Cosine Similarity Search                 │  │
-│  │  3. Google Places API Context Enrichment                           │  │
-│  │  4. Gemini 1.5 Flash Response & Structured Itinerary Gen           │  │
-│  └────────────────────────────────────────────────────────────────────┘  │
-│                                                                          │
-│  ┌─────────────────────────┐  ┌─────────────────┐  ┌──────────────────┐  │
-│  │   PostgreSQL + pgvector │  │ Paystack Escrow │  │ Dojah / NIA KYC  │  │
-│  │    Listings & Operators │  │  Card ➔ MoMo    │  │ Ghana Card / NIN │  │
-│  └─────────────────────────┘  └─────────────────┘  └──────────────────┘  │
-└──────────────────────────────────────────────────────────────────────────┘
-```
+
+### Runtime responsibilities
+
+1. **React/Vite is the only deployed client path.** It collects intent,
+   traveler details, and the release PIN; it never receives Appwrite or
+   Paystack secrets and never decides the payable total.
+2. **Express is the system boundary.** It validates every request, applies
+   CORS and classify rate limiting, calls external providers, owns booking
+   transitions, and returns explicit errors.
+3. **Appwrite is the system of record when configured.** Hosts are filtered
+   by verification, activity, and theme; bookings and escrow ledger events
+   are persisted server-side. Production refuses local-only persistence.
+4. **Paystack is the payment boundary.** The server creates checkout sessions,
+   verifies webhook HMAC signatures, recovers delayed webhooks through status
+   verification, and only releases the host payout after the PIN flow.
+5. **The in-memory store is a controlled fallback, not production storage.**
+   It makes local demos deterministic while production requires Appwrite.
+6. **The Spring Boot + Flutter code is retained as a secondary implementation
+   track.** It is not part of the deployed Vercel/Render web MVP.
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Docker & Docker Compose
-- Java 21 + Maven 3.9+
-- Flutter 3.22+
+- Node.js 20+
 - Gemini API key — [aistudio.google.com](https://aistudio.google.com)
 - Paystack account — [paystack.com](https://paystack.com)
+- Appwrite project and scoped server API key for persistent host, booking,
+  and escrow data
 
 ### 1. Configure Environment
 Copy `.env.example` to `.env` and populate your credentials:
@@ -96,13 +134,17 @@ APPWRITE_PROJECT_ID=your_appwrite_project_id
 APPWRITE_API_KEY=your_scoped_api_key
 ```
 
-### 2. Node/Express Backend & Appwrite Schema
+### 2. Node/Express API
 ```bash
 cd server
 npm install
-npm run setup:db   # Provisions Appwrite collections (hosts, bookings, escrow_ledgers) and seeds data
-npm run dev        # Backend live at http://localhost:3001
+npm run dev        # API live at http://localhost:3001
 ```
+
+Configure the Appwrite `hosts`, `bookings`, and `escrow_ledgers` collections
+using the IDs in `server/server.js`. The optional `npm run setup:db` helper is
+for provisioning Appwrite; it is not required when running against the local
+fallback roster.
 
 ### 3. React Web Application (Vite)
 ```bash
@@ -180,9 +222,9 @@ in the Appwrite console: `hosts` may be publicly readable, while
 - [ ] Hand-check the seeded host documents in Appwrite.
 - [ ] Configure Paystack sandbox credentials, complete a documented test-card
       payment, and verify a sandbox Mobile Money settlement.
-- [ ] Register and reach the Paystack webhook at the deployed Railway URL.
-- [ ] Set Railway secrets and confirm its `/health` endpoint.
-- [ ] Set Vercel `VITE_API_BASE` to the Railway API URL and test the deployed
+- [ ] Register and reach the Paystack webhook at the deployed Render URL.
+- [ ] Set Render secrets and confirm its `/health` endpoint.
+- [ ] Set Vercel `VITE_API_BASE` to the Render API URL and test the deployed
       frontend, not localhost.
 - [ ] Repeat the happy path, wrong-PIN path, backend-down path, and five-run
       repeat test against the deployed services.
@@ -205,11 +247,11 @@ completion, webhook delivery from Paystack, Mobile Money settlement, and a
 full deployed frontend flow. Never put the Paystack secret or Appwrite API key
 in Vercel or any `VITE_*` variable.
 
-### 4. Alternative: Spring Boot + Flutter Stack
+### 4. Secondary implementation: Spring Boot + Flutter
 
 The deployed web demo uses the Node/Express + React/Appwrite path above. The
 Spring Boot + Flutter stack is retained as a separate mobile/backend
-implementation and is not part of the Vercel/Railway web deployment.
+implementation and is not part of the Vercel/Render web deployment.
 ```bash
 # Launch PostgreSQL + pgvector
 docker-compose up postgres -d
@@ -245,10 +287,20 @@ flutter run -d chrome
 
 ```
 kwan-ai/
-├── kwan-backend/                   # Spring Boot 3 + Java 21 Microservice
+├── server/                         # Deployed Node 20 + Express API
+│   ├── server.js                   # API routes, providers, escrow state machine
+│   └── package.json                # start/dev/build/setup:db scripts
+├── kwan-web-app/                   # Deployed React 19 + Vite client
+│   ├── src/App.jsx                 # Traveler match, checkout, PIN release flow
+│   ├── src/components/             # UI surfaces for matching and payment
+│   └── src/services/               # Client-side supporting services
+├── render.yaml                     # Render API deployment definition
+├── vercel.json                     # Vercel static frontend deployment
+├── package.json                    # Root build/start forwarding scripts
+├── kwan-backend/                   # Secondary Spring Boot 3 + Java 21 track
 │   ├── src/main/java/com/kwan/
 │   │   ├── controller/             # REST Endpoints (Itinerary, Operator, Payment)
-│   │   ├── service/                # RAG, Vector Embedding, Paystack Escrow
+│   │   ├── service/                # Secondary discovery and payment services
 │   │   ├── repository/             # Spring Data JPA + pgvector queries
 │   │   └── model/                  # Domain Entities (Operator, Listing, Booking)
 │   └── src/main/resources/         # application.yml, schema.sql, init.sql
@@ -257,7 +309,7 @@ kwan-ai/
 │   │   ├── core/                   # Theme, Router, HTTP Services, Models
 │   │   └── features/               # Discover, Booking, Escrow, Dialect AI, Transit
 │   └── web/                        # Web client application with interactive escrow UI
-└── docker-compose.yml              # PostgreSQL 16 + pgvector container configuration
+└── docker-compose.yml              # Secondary PostgreSQL + pgvector configuration
 ```
 
 ---

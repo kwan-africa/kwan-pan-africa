@@ -122,10 +122,25 @@ const LOCAL_STORE = {
       name: 'Naa Densua Addy',
       role: 'Master Bead Maker & Cultural Host',
       guild: 'Ga-Mashie Heritage Bead Guild',
-      theme_tags: ['art', 'food'],
+      theme_tags: ['art'],
       anchor_site: 'Jamestown Arts Compound',
       momo_number: '020 *** 4410',
       momo_network: 'telecel',
+      verified: true,
+      price_usd: 45.0,
+      price_ghs: 684.0,
+      photo_url: '/kwan_logo_square_white_bg.png',
+      active: true,
+    },
+    {
+      id: 'host_04',
+      name: 'Abena Ofori',
+      role: 'Local Food Guide & Chop Bar Host',
+      guild: 'Accra Street Food Collective',
+      theme_tags: ['food'],
+      anchor_site: 'Traditional Chop Bars & Night Markets',
+      momo_number: '055 *** 2084',
+      momo_network: 'mtn',
       verified: true,
       price_usd: 45.0,
       price_ghs: 684.0,
@@ -932,7 +947,7 @@ const DIST_PATH = path.resolve(__dirname, '../kwan-web-app/dist');
 if (fs.existsSync(DIST_PATH)) {
   app.use(express.static(DIST_PATH));
   // SPA fallback — all non-API routes return index.html
-  app.get('*', (req, res) => {
+  app.get(/.*/, (req, res) => {
     res.sendFile(path.join(DIST_PATH, 'index.html'));
   });
   console.log(`🌍 Serving frontend from ${DIST_PATH}`);
