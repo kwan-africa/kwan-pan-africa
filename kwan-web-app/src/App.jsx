@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
+  ArrowLeft,
+  ArrowRight,
   ArrowUpRight,
+  BookOpen,
   CalendarDays,
   Check,
   CheckCircle2,
@@ -10,14 +13,18 @@ import {
   Compass,
   Copy,
   ExternalLink,
+  Info,
+  Languages,
   LockKeyhole,
   Loader2,
   MapPin,
   MessageCircle,
+  Plus,
   RefreshCw,
   ShieldCheck,
   Sparkles,
   Smartphone,
+  Star,
   WalletCards,
   X,
 } from 'lucide-react';
@@ -126,7 +133,7 @@ export default function App() {
   const [conversation, setConversation] = useState([
     {
       role: 'kwan',
-      copy: 'Tell us how you would like to experience Ghana. Kwan will recommend one trusted local host, selected for your interests and grounded in our verified pilot collection.',
+      copy: 'Tell us how you would like to experience Ghana. Kwan recommends a verified local host, selected for your interests and protected by our pilot escrow system.',
     },
   ]);
   const [guide, setGuide] = useState(null);
@@ -276,6 +283,11 @@ export default function App() {
         },
       ]);
 
+      // Redirect smoothly to the dedicated guide dossier page
+      window.setTimeout(() => {
+        navigate('/guide');
+      }, 750);
+
     } catch (err) {
       // ── Offline fallback path ──────────────────────────────────────────────
       console.warn('Backend unreachable — activating offline demo mode:', err.message);
@@ -296,6 +308,10 @@ export default function App() {
             copy: `[Demo mode] Matched you with ${offlineGuide.name} — ${offlineGuide.role}. The live backend is offline; pricing is calculated locally from the pilot roster.`,
           },
         ]);
+
+        window.setTimeout(() => {
+          navigate('/guide');
+        }, 750);
       } catch {
         setGuide(null);
         setErrorMessage(`We could not complete the match: ${err.message}`);
@@ -357,12 +373,15 @@ export default function App() {
     setConversation([
       {
         role: 'kwan',
-        copy: 'Tell us how you would like to experience Ghana. Kwan will recommend one trusted local host, selected for your interests and grounded in our verified pilot collection.',
+        copy: 'Tell us how you would like to experience Ghana. Kwan recommends a verified local host, selected for your interests and protected by our pilot escrow system.',
       },
     ]);
     setRequest('');
     setErrorMessage(null);
-    requestInput.current?.focus();
+    if (window.location.pathname !== '/') {
+      navigate('/');
+    }
+    window.setTimeout(() => requestInput.current?.focus(), 150);
   }
 
   async function createPaymentPreview(event) {
@@ -467,6 +486,38 @@ export default function App() {
     }
   }
 
+  async function simulateEscrowLock() {
+    if (!booking?.reference) return;
+    setLoadingAction('simulating_escrow');
+    setErrorMessage(null);
+
+    if (isOfflineMode || booking.status === 'demo') {
+      simulateDemoPayment();
+      setLoadingAction(null);
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/checkout/simulate-escrow`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ booking_id: booking.reference }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || 'Simulation failed.');
+      setBooking((current) => ({
+        ...current,
+        status: 'held',
+        pin: data.release_pin,
+      }));
+      setCheckoutStep('confirmed');
+    } catch (err) {
+      setErrorMessage(`Escrow lock simulation error: ${err.message}`);
+    } finally {
+      setLoadingAction(null);
+    }
+  }
+
   async function releasePayout() {
     if (!booking?.reference || enteredPin.length !== 4) return;
     setLoadingAction('releasing');
@@ -525,10 +576,120 @@ export default function App() {
     return <SankofaPlanPage onBack={() => navigate('/')} />;
   }
 
+  if (pathname === '/guide') {
+    return (
+      <div className="site-shell">
+        <header className="topbar">
+          <a className="brand" href="/" onClick={(e) => { e.preventDefault(); navigate('/'); }} aria-label="Kwan home" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <img
+              src="/kwan_logo_white_bg.png"
+              alt="Kwan Pan-African Travel"
+              style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
+              onError={(e) => { e.target.src = '/kwan_logo_square_white_bg.png'; }}
+            />
+          </a>
+          <p className="pilot-label">
+            Accra &amp; Cape Coast · Trusted local experiences
+            {isOfflineMode && <span style={{ marginLeft: '0.5rem', fontSize: '0.72rem', color: '#F5A623', fontFamily: 'monospace' }}>[LOCAL FALLBACK]</span>}
+          </p>
+        </header>
+
+        {errorMessage && (
+          <div
+            style={{
+              maxWidth: '1200px',
+              margin: '0.8rem auto 0',
+              padding: '0.7rem 1rem',
+              background: 'rgba(239, 68, 68, 0.12)',
+              border: '1px solid #EF4444',
+              borderRadius: '8px',
+              color: '#EF4444',
+              fontSize: '0.85rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '0.6rem',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <AlertCircle size={17} color="#EF4444" />
+              <span>{errorMessage}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setErrorMessage(null)}
+              style={{ background: 'transparent', border: 'none', color: '#EF4444', cursor: 'pointer' }}
+            >
+              <X size={15} />
+            </button>
+          </div>
+        )}
+
+        <GuideProfilePage
+          guide={guide}
+          matchedTheme={matchedTheme}
+          serverPricing={serverPricing}
+          addonIncluded={addonIncluded}
+          isRecalculating={loadingAction === 'recalculating'}
+          onToggleAddon={handleToggleAddon}
+          onRequestPayment={openCheckout}
+          onReset={resetMatch}
+          onBackToChat={() => navigate('/')}
+        />
+
+        <footer>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <img
+              src="/kwan_logo_square.jpg"
+              alt="Kwan"
+              style={{ width: '24px', height: '24px', borderRadius: '6px', objectFit: 'cover', border: '1px solid rgba(0,0,0,0.1)' }}
+            />
+            <span>Kwan · The path to meaningful travel</span>
+          </div>
+          <div className="footer-links">
+            <a href="mailto:hello@kwanai.me">Contact Kwan <ExternalLink size={13} aria-hidden="true" /></a>
+            <span>Escrow flow includes the statutory 1% Ghana Tourism Levy (Act 817).</span>
+          </div>
+        </footer>
+
+        {checkoutOpen && guide && (
+          <CheckoutModal
+            guide={guide}
+            serverPricing={serverPricing}
+            traveler={traveler}
+            setTraveler={setTraveler}
+            experienceDate={experienceDate}
+            setExperienceDate={setExperienceDate}
+            pilotConfirmation={pilotConfirmation}
+            setPilotConfirmation={setPilotConfirmation}
+            step={checkoutStep}
+            booking={booking}
+            paymentLink={paymentLink}
+            copied={copied}
+            enteredPin={enteredPin}
+            setEnteredPin={setEnteredPin}
+            loadingAction={loadingAction}
+            errorMessage={errorMessage}
+            setErrorMessage={setErrorMessage}
+            isOfflineMode={isOfflineMode}
+            onClose={() => setCheckoutOpen(false)}
+            onCreatePaymentPreview={createPaymentPreview}
+            onCopyLink={copyLink}
+            onOpenPaystackCheckout={openPaystackCheckout}
+            onCheckStatus={checkPaymentStatus}
+            onSimulateEscrowLock={simulateEscrowLock}
+            onReleasePayout={releasePayout}
+            onSimulateDemoPayment={simulateDemoPayment}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="site-shell">
       <header className="topbar">
-        <a className="brand" href="#top" aria-label="Kwan home" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <a className="brand" href="/" onClick={(e) => { e.preventDefault(); navigate('/'); }} aria-label="Kwan home" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img
             src="/kwan_logo_white_bg.png"
             alt="Kwan Pan-African Travel"
@@ -573,7 +734,7 @@ export default function App() {
         </div>
       )}
 
-      <main id="top" className="page">
+      <main id="top" className="page chat-page">
         <section className="intro hero-intro" aria-labelledby="page-title">
           <div className="hero-content">
             <p className="eyebrow">Grassroots cultural travel</p>
@@ -588,22 +749,22 @@ export default function App() {
           </div>
           <div className="hero-features" aria-label="Pilot trust highlights">
             <div className="hero-feature-item">
-              <div className="hero-feature-icon"><LockKeyhole size={15} aria-hidden="true" /></div>
-              <div>
+              <div className="hero-feature-icon"><LockKeyhole size={18} aria-hidden="true" /></div>
+              <div className="hero-feature-text">
                 <strong>Escrow Protected</strong>
                 <span>Funds released only upon traveler 4-digit PIN verification</span>
               </div>
             </div>
             <div className="hero-feature-item">
-              <div className="hero-feature-icon"><MapPin size={15} aria-hidden="true" /></div>
-              <div>
+              <div className="hero-feature-icon"><MapPin size={18} aria-hidden="true" /></div>
+              <div className="hero-feature-text">
                 <strong>Verified Local Hosts</strong>
                 <span>Cape Coast historians, Ga Mashie elders, High Street artisans</span>
               </div>
             </div>
             <div className="hero-feature-item">
-              <div className="hero-feature-icon"><Smartphone size={15} aria-hidden="true" /></div>
-              <div>
+              <div className="hero-feature-icon"><Smartphone size={18} aria-hidden="true" /></div>
+              <div className="hero-feature-text">
                 <strong>Direct Mobile Money</strong>
                 <span>90% goes straight to your host's MTN or Telecel wallet</span>
               </div>
@@ -611,8 +772,8 @@ export default function App() {
           </div>
         </section>
 
-        <section className={`booking-layout${guide ? ' has-match' : ''}`} aria-label="Conversation and guide match">
-          <div className="conversation-panel">
+        <section className="chat-container-section" aria-label="Conversation and guide match">
+          <div className="chat-container-panel">
             <div className="panel-heading">
               <div>
                 <p className="section-kicker">Start here</p>
@@ -622,41 +783,58 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => navigate('/plan')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                    padding: '0.35rem 0.7rem',
-                    borderRadius: '999px',
-                    border: '1px solid rgba(33,71,52,0.25)',
-                    background: 'transparent',
-                    color: '#214734',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    transition: 'all 0.18s',
-                    fontFamily: 'monospace',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                  }}
+                  className="sankofa-pill-btn"
                   aria-label="Open Sankofa week planner"
                 >
-                  ✦ Sankofa Plan
+                  <Sparkles size={12} aria-hidden="true" />
+                  <span>Sankofa Plan</span>
                 </button>
                 <MessageCircle size={20} aria-hidden="true" />
               </div>
             </div>
 
-            {/* Sankofa Planner — full week builder */}
+            {/* Conversation Messages */}
             <div className="messages" aria-live="polite">
               {conversation.map((message, index) => (
                 <div className={`message ${message.role}${message.kind ? ` message-${message.kind}` : ''}`} key={`${message.role}-${index}`}>
                   <span className="message-label">{message.role === 'kwan' ? 'Kwan' : 'You'}</span>
                   <p>{message.copy}</p>
-                  {message.kind === 'guide-match' && (
-                    <button type="button" className="message-action" onClick={viewGuideDetails}>
-                      View guide details <ChevronRight size={15} aria-hidden="true" />
-                    </button>
+                  {message.kind === 'guide-match' && (message.guide || guide) && (
+                    <div className="chat-match-card">
+                      <div className="chat-match-card-top">
+                        {(message.guide?.image || guide?.image) ? (
+                          <img
+                            src={message.guide?.image || guide?.image}
+                            alt={message.guide?.name || guide?.name}
+                            className="chat-match-thumb"
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                          />
+                        ) : (
+                          <div className={`guide-avatar small ${(message.guide?.color || guide?.color || 'ochre')}`}>
+                            {(message.guide?.initials || guide?.initials || 'NK')}
+                          </div>
+                        )}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1, minWidth: 0 }}>
+                          <div className="chat-match-name-row">
+                            <strong>{message.guide?.name || guide?.name}</strong>
+                            <span className="chat-verified-badge"><CheckCircle2 size={11} aria-hidden="true" /> Verified</span>
+                          </div>
+                          <span className="chat-match-role">{message.guide?.role || guide?.role}</span>
+                          <span className="chat-match-site"><MapPin size={11} aria-hidden="true" /> {message.guide?.anchorSite || guide?.anchorSite}</span>
+                        </div>
+                        <div className="chat-match-price">
+                          <strong>{formatUsd(message.guide?.price || guide?.price || 50)}</strong>
+                          <span>/ experience</span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className="chat-view-dossier-btn"
+                        onClick={() => navigate('/guide')}
+                      >
+                        View Full Guide Profile &amp; Dossier <ArrowRight size={15} aria-hidden="true" />
+                      </button>
+                    </div>
                   )}
                 </div>
               ))}
@@ -668,48 +846,6 @@ export default function App() {
                   </p>
                 </div>
               )}
-            </div>
-
-            <div className="theme-list" style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.4rem' }}>
-              <span style={{ fontSize: '0.72rem', color: '#94A3B8', alignSelf: 'center', textTransform: 'uppercase', fontFamily: 'monospace' }}>
-                Themes:
-              </span>
-              {THEME_OPTIONS.map((theme) => (
-                <button
-                  key={theme.tag}
-                  className="text-button"
-                  style={{ padding: '0.35rem 0.65rem', fontSize: '0.72rem', borderRadius: '999px', background: 'rgba(33,71,52,0.06)' }}
-                  type="button"
-                  disabled={isMatching}
-                  onClick={() => sendRequest(theme.defaultQuery)}
-                >
-                  {theme.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Living Corridor Layer A — rotating cultural facts */}
-            <div className="corridor-fact">
-              <RotatingFacts activeSite={guide?.corridorId || null} />
-            </div>
-
-            <div className="example-list" aria-label="Example requests">
-              <span className="examples-label">Try a starting point</span>
-              <button className="surprise-button" type="button" disabled={isMatching} onClick={surpriseMe}>
-                <Sparkles size={14} aria-hidden="true" /> Surprise me
-              </button>
-              {EXAMPLES.map((example) => (
-                <button
-                  className="text-button"
-                  type="button"
-                  key={example}
-                  disabled={isMatching}
-                  onClick={() => sendRequest(example)}
-                >
-                  {example}
-                  <ChevronRight size={15} aria-hidden="true" />
-                </button>
-              ))}
             </div>
 
             <form
@@ -742,37 +878,48 @@ export default function App() {
                 </button>
               </div>
             </form>
-          </div>
 
-          <aside ref={matchPanelRef} tabIndex="-1" className={`match-panel${guide ? ' match-panel-active' : ''}`} aria-live="polite">
-            {guide ? (
-              <GuideMatch
-                guide={guide}
-                matchedTheme={matchedTheme}
-                serverPricing={serverPricing}
-                addonIncluded={addonIncluded}
-                isRecalculating={loadingAction === 'recalculating'}
-                onToggleAddon={handleToggleAddon}
-                onRequestPayment={openCheckout}
-                onReset={resetMatch}
-              />
-            ) : (
-              <div className="empty-match">
-                <div className="empty-icon"><MapPin size={22} aria-hidden="true" /></div>
-                <p className="section-kicker">Your match</p>
-                <h2>One considered recommendation.</h2>
-                <p>Kwan uses the interests in your message to select one guide from the small pilot roster.</p>
-                <div className="match-preview">
-                  <div className="preview-avatar"><Compass size={18} aria-hidden="true" /></div>
-                  <div>
-                    <strong>Matched to your interests</strong>
-                    <span>Verified local host · Accra or Cape Coast</span>
-                  </div>
-                </div>
-                <div className="preview-stat"><ShieldCheck size={15} aria-hidden="true" /> Identity and Mobile Money wallet reviewed</div>
-              </div>
-            )}
-          </aside>
+            <div className="theme-list" style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.4rem' }}>
+              <span style={{ fontSize: '0.72rem', color: '#94A3B8', alignSelf: 'center', textTransform: 'uppercase', fontFamily: 'monospace' }}>
+                Themes:
+              </span>
+              {THEME_OPTIONS.map((theme) => (
+                <button
+                  key={theme.tag}
+                  className="text-button"
+                  style={{ padding: '0.35rem 0.65rem', fontSize: '0.72rem', borderRadius: '999px', background: 'rgba(33,71,52,0.06)' }}
+                  type="button"
+                  disabled={isMatching}
+                  onClick={() => sendRequest(theme.defaultQuery)}
+                >
+                  {theme.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="corridor-fact">
+              <RotatingFacts activeSite={guide?.corridorId || null} />
+            </div>
+
+            <div className="example-list" aria-label="Example requests">
+              <span className="examples-label">Try a starting point</span>
+              <button className="surprise-button" type="button" disabled={isMatching} onClick={surpriseMe}>
+                <Sparkles size={14} aria-hidden="true" /> Surprise me
+              </button>
+              {EXAMPLES.map((example) => (
+                <button
+                  className="text-button"
+                  type="button"
+                  key={example}
+                  disabled={isMatching}
+                  onClick={() => sendRequest(example)}
+                >
+                  {example}
+                  <ChevronRight size={15} aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+          </div>
         </section>
 
         <section className="how-it-works" aria-labelledby="flow-heading">
@@ -826,6 +973,7 @@ export default function App() {
           onCopyLink={copyLink}
           onOpenPaystackCheckout={openPaystackCheckout}
           onCheckStatus={checkPaymentStatus}
+          onSimulateEscrowLock={simulateEscrowLock}
           onReleasePayout={releasePayout}
           onSimulateDemoPayment={simulateDemoPayment}
         />
@@ -834,15 +982,97 @@ export default function App() {
   );
 }
 
+// ── GuideProfilePage (Dedicated /guide route) ──────────────────────────────────
+
+function GuideProfilePage({
+  guide,
+  matchedTheme,
+  serverPricing,
+  addonIncluded,
+  isRecalculating,
+  onToggleAddon,
+  onRequestPayment,
+  onReset,
+  onBackToChat,
+}) {
+  if (!guide) {
+    return (
+      <main className="page guide-page-shell">
+        <div className="empty-guide-page">
+          <div className="empty-icon"><Compass size={28} aria-hidden="true" /></div>
+          <h2>No Guide Recommendation Selected Yet</h2>
+          <p>Describe what you would like to experience in Ghana, and Kwan will match you with a verified local host.</p>
+          <button type="button" className="button button-primary" onClick={onBackToChat}>
+            <ArrowLeft size={16} aria-hidden="true" /> Return to Chat
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="page guide-page-shell">
+      <div className="guide-page-nav">
+        <button type="button" className="guide-nav-btn back-btn" onClick={onBackToChat}>
+          <ArrowLeft size={16} aria-hidden="true" />
+          <span>Back to Chat</span>
+        </button>
+        <div className="guide-nav-status">
+          <ShieldCheck size={14} aria-hidden="true" />
+          <span>Verified Host Dossier · Pilot Program</span>
+        </div>
+        <button type="button" className="guide-nav-btn new-btn" onClick={onReset}>
+          <Plus size={16} aria-hidden="true" />
+          <span>New Request</span>
+        </button>
+      </div>
+
+      <GuideMatch
+        guide={guide}
+        matchedTheme={matchedTheme}
+        serverPricing={serverPricing}
+        addonIncluded={addonIncluded}
+        isRecalculating={isRecalculating}
+        onToggleAddon={onToggleAddon}
+        onRequestPayment={onRequestPayment}
+        onReset={onReset}
+      />
+    </main>
+  );
+}
+
 // ── GuideMatch ─────────────────────────────────────────────────────────────────
 
 function GuideMatch({ guide, matchedTheme, serverPricing, addonIncluded, isRecalculating, onToggleAddon, onRequestPayment, onReset }) {
   const details = EXPERIENCE_DETAILS[matchedTheme] || EXPERIENCE_DETAILS.heritage_spiritual;
 
-  const stopIcon = (type) => {
-    if (type === 'meetup') return '📍';
-    if (type === 'optional') return '○';
-    return '•';
+  const renderStopIcon = (type) => {
+    if (type === 'meetup') {
+      return (
+        <span className="schedule-timeline-icon meetup" title="Meetup Point">
+          <MapPin size={13} aria-hidden="true" />
+        </span>
+      );
+    }
+    if (type === 'cultural') {
+      return (
+        <span className="schedule-timeline-icon cultural" title="Cultural Interaction">
+          <Sparkles size={13} aria-hidden="true" />
+        </span>
+      );
+    }
+    if (type === 'optional') {
+      return (
+        <span className="schedule-timeline-icon optional" title="Optional Activity">
+          <CheckCircle2 size={13} aria-hidden="true" />
+        </span>
+      );
+    }
+    return (
+      <span className="schedule-timeline-icon main" title="Main Experience">
+        <Compass size={13} aria-hidden="true" />
+      </span>
+    );
   };
 
   return (
@@ -879,14 +1109,15 @@ function GuideMatch({ guide, matchedTheme, serverPricing, addonIncluded, isRecal
           <div className="guide-meta-row">
             {guide.rating && (
               <div className="guide-rating-pill">
-                <span className="stars">★</span>
+                <Star size={13} fill="#F5A623" color="#F5A623" aria-hidden="true" />
                 <strong>{guide.rating.toFixed(2)}</strong>
                 <span>({guide.reviewsCount} reviews)</span>
               </div>
             )}
             {guide.languages?.length > 0 && (
               <span className="guide-lang-pill">
-                🗣 {guide.languages.join(' · ')}
+                <Languages size={13} aria-hidden="true" />
+                <span>{guide.languages.join(' · ')}</span>
               </span>
             )}
           </div>
@@ -922,7 +1153,8 @@ function GuideMatch({ guide, matchedTheme, serverPricing, addonIncluded, isRecal
                 <div key={i} className={`schedule-item ${stop.type === 'meetup' ? 'meetup' : ''}`}>
                   <span className="schedule-time">{stop.time}</span>
                   <span className="schedule-activity">
-                    <span className="schedule-icon">{stopIcon(stop.type)}</span> {stop.activity}
+                    <span className="schedule-icon">{renderStopIcon(stop.type)}</span>
+                    <span>{stop.activity}</span>
                   </span>
                 </div>
               ))}
@@ -942,9 +1174,17 @@ function GuideMatch({ guide, matchedTheme, serverPricing, addonIncluded, isRecal
           {/* Cultural etiquette tip */}
           {details.etiquette && (
             <div className="cultural-tip-box">
-              💬 <strong>Cultural tip:</strong> {details.etiquette}
+              <Info size={15} aria-hidden="true" />
+              <div>
+                <strong>Cultural tip:</strong> {details.etiquette}
+              </div>
             </div>
           )}
+
+          {/* Living Corridor Layer A — rotating cultural facts */}
+          <div className="corridor-fact" style={{ marginTop: '0.4rem' }}>
+            <RotatingFacts activeSite={guide?.corridorId || null} />
+          </div>
         </div>
 
         {/* Right Sub-Column: Trust, Escrow & Checkout */}
@@ -1020,7 +1260,7 @@ function GuideMatch({ guide, matchedTheme, serverPricing, addonIncluded, isRecal
 
             {onReset && (
               <button type="button" className="reset-match" onClick={onReset}>
-                <RefreshCw size={13} aria-hidden="true" /> Start a new request
+                <Plus size={14} aria-hidden="true" /> Start a new request
               </button>
             )}
           </div>
@@ -1056,6 +1296,7 @@ function CheckoutModal({
   onCopyLink,
   onOpenPaystackCheckout,
   onCheckStatus,
+  onSimulateEscrowLock,
   onReleasePayout,
   onSimulateDemoPayment,
 }) {
@@ -1159,27 +1400,54 @@ function CheckoutModal({
               <span>Preferred date: {booking.experienceDate}. Complete payment in Paystack; Kwan will hold the funds and keep the release PIN with you.</span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
               {isOfflineMode ? (
                 <button className="button button-primary button-full" type="button" onClick={onSimulateDemoPayment}>
-                  <WalletCards size={18} aria-hidden="true" /> Simulate payment (Demo)
+                  <WalletCards size={18} aria-hidden="true" /> Simulate payment & Escrow Lock (Demo)
                 </button>
               ) : (
-                <button className="button button-primary button-full" type="button" onClick={onOpenPaystackCheckout}>
-                  <WalletCards size={18} aria-hidden="true" /> Open Paystack checkout
-                </button>
-              )}
+                <>
+                  <button className="button button-primary button-full" type="button" onClick={onOpenPaystackCheckout}>
+                    <WalletCards size={18} aria-hidden="true" /> Open Paystack checkout ↗
+                  </button>
 
-              {!isOfflineMode && (
-                <button
-                  type="button"
-                  className="text-button"
-                  onClick={onCheckStatus}
-                  disabled={loadingAction === 'polling'}
-                  style={{ fontSize: '0.78rem', color: '#647067', alignSelf: 'center', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                >
-                  <RefreshCw size={13} className={loadingAction === 'polling' ? 'spin-icon' : ''} /> I completed payment — check status
-                </button>
+                  <button
+                    className="button button-full"
+                    type="button"
+                    onClick={onSimulateEscrowLock}
+                    disabled={loadingAction === 'simulating_escrow'}
+                    style={{
+                      background: 'rgba(33, 71, 52, 0.08)',
+                      color: '#214734',
+                      border: '1px solid rgba(33, 71, 52, 0.25)',
+                      fontWeight: 600,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.4rem',
+                      padding: '0.65rem 1rem',
+                      fontSize: '0.85rem',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {loadingAction === 'simulating_escrow' ? (
+                      <><Loader2 size={16} className="spin-icon" /> Locking escrow funds...</>
+                    ) : (
+                      <><LockKeyhole size={14} aria-hidden="true" /> Simulate Escrow Lock (Instant Sandbox Test)</>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={onCheckStatus}
+                    disabled={loadingAction === 'polling'}
+                    style={{ fontSize: '0.78rem', color: '#647067', alignSelf: 'center', display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.2rem' }}
+                  >
+                    <RefreshCw size={13} className={loadingAction === 'polling' ? 'spin-icon' : ''} /> I completed payment on Paystack — check status
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -1208,7 +1476,10 @@ function CheckoutModal({
                   borderRadius: '6px',
                   fontSize: '0.82rem',
                 }}>
-                  <p style={{ fontWeight: 700, color: '#214734', marginBottom: '0.25rem' }}>📱 Guide will contact you</p>
+                  <p style={{ fontWeight: 700, color: '#214734', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <Smartphone size={14} aria-hidden="true" />
+                    <span>Guide will contact you</span>
+                  </p>
                   <p style={{ color: '#374151' }}>
                     <strong>{guide.name}</strong> will reach out via WhatsApp within 2 hours to confirm exact meeting
                     details, directions to <em>{guide.anchorSite || guide.area}</em>, and any final prep notes.
@@ -1333,7 +1604,7 @@ function SankofaPlanPage({ onBack }) {
       </button>
       <section className="plan-intro">
         <p className="eyebrow">A week with intention</p>
-        <h1>Sankofa Plan<span aria-hidden="true"> ✦</span></h1>
+        <h1>Sankofa Plan</h1>
         <p className="lede">Build a considered week of Ghanaian experiences. Each selected day is checked against Kwan's verified pilot roster before a combined payment link is prepared.</p>
       </section>
       {!plan && (
@@ -1432,7 +1703,8 @@ function PreExperienceBriefing({ corridorId }) {
         alignItems: 'center',
         gap: '0.35rem',
       }}>
-        📖 Before your experience · Living Corridor
+        <BookOpen size={13} aria-hidden="true" />
+        <span>Before your experience · Living Corridor</span>
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {facts.map((fact, i) => (

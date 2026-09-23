@@ -528,8 +528,6 @@ app.post('/api/checkout/init', async (req, res, next) => {
           contact: bookingData.contact,
           host_id: bookingData.host_id,
           theme_matched: bookingData.theme_matched,
-          experience_date: bookingData.experience_date,
-          host_confirmation_status: bookingData.host_confirmation_status,
           total_usd: bookingData.total_usd,
           total_ghs: bookingData.total_ghs,
           platform_fee_usd: bookingData.platform_fee_usd,
@@ -592,6 +590,102 @@ app.post('/api/checkout/init', async (req, res, next) => {
       checkout_url: checkoutUrl,
       status: 'pending_payment',
       instructions: 'Proceed to Paystack test checkout to lock funds into escrow.',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ==============================================================================
+// 5a. POST /api/checkout/simulate-escrow — Test / Sandbox Escrow Lock
+// ==============================================================================
+app.post('/api/checkout/simulate-escrow', async (req, res, next) => {
+  try {
+    const { booking_id } = req.body;
+    if (!booking_id) {
+      return res.status(400).json({ error: 'MISSING_BOOKING_ID', message: 'booking_id is required.' });
+    }
+
+    let booking = LOCAL_STORE.bookings.get(booking_id);
+    if (!booking && APPWRITE_API_KEY) {
+      const awRes = await appwriteFetch(collectionPath(APPWRITE_BOOKINGS_COLLECTION_ID, `/${booking_id}`));
+      if (awRes.ok && awRes.data) {
+        booking = awRes.data;
+        LOCAL_STORE.bookings.set(booking_id, booking);
+      }
+    }
+
+    if (!booking) {
+      return res.status(404).json({ error: 'BOOKING_NOT_FOUND', message: `Booking ${booking_id} not found.` });
+    }
+
+    if (booking.status === 'escrow_held' || booking.status === 'released') {
+      return res.json({
+        status: booking.status,
+        booking_id,
+        release_pin: booking.release_pin,
+        auto_release_at: booking.auto_release_at,
+      });
+    }
+
+    const pin = Math.floor(1000 + Math.random() * 9000).toString();
+    const now = new Date();
+    const autoRelease = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+
+    booking.status = 'escrow_held';
+    booking.release_pin = pin;
+    booking.pin_generated_at = now.toISOString();
+    booking.auto_release_at = autoRelease.toISOString();
+
+    const ledgerEntry = {
+      id: `LED-${Date.now()}`,
+      booking_id,
+      event_type: 'escrow_held',
+      amount_usd: booking.total_usd,
+      amount_ghs: booking.total_ghs,
+      levy_amount: Math.round(booking.total_usd * 0.01 * 100) / 100,
+      actor: 'traveler_sandbox',
+      timestamp: now.toISOString(),
+    };
+
+    LOCAL_STORE.escrow_ledgers.push(ledgerEntry);
+
+    if (APPWRITE_API_KEY) {
+      await appwriteFetch(collectionPath(APPWRITE_BOOKINGS_COLLECTION_ID, `/${booking_id}`), 'PATCH', {
+        data: {
+          status: 'escrow_held',
+          release_pin: pin,
+          pin_generated_at: now.toISOString(),
+          auto_release_at: autoRelease.toISOString(),
+        },
+      });
+      await appwriteFetch(collectionPath(APPWRITE_LEDGER_COLLECTION_ID), 'POST', {
+        documentId: ledgerEntry.id,
+        data: {
+          booking_id: ledgerEntry.booking_id,
+          event_type: ledgerEntry.event_type,
+          amount_usd: ledgerEntry.amount_usd,
+          amount_ghs: ledgerEntry.amount_ghs,
+          levy_amount: ledgerEntry.levy_amount,
+          actor: ledgerEntry.actor,
+          timestamp: ledgerEntry.timestamp,
+        },
+      });
+    }
+
+    logTransition('ESCROW_LOCKED_SIMULATED', {
+      booking_id,
+      pin,
+      total_usd: booking.total_usd,
+      auto_release_at: autoRelease.toISOString(),
+    });
+
+    res.json({
+      status: 'escrow_held',
+      booking_id,
+      release_pin: pin,
+      auto_release_at: autoRelease.toISOString(),
+      ledger_entry: ledgerEntry,
     });
   } catch (err) {
     next(err);

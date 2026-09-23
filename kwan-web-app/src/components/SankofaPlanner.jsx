@@ -19,10 +19,10 @@ import { VERIFIED_HOSTS, SANKOFA_WEEK_TEMPLATES } from '../data/culturalKnowledg
 import { matchGuideOffline } from '../services/offlineFallback';
 
 const THEME_LABELS = {
-  heritage_spiritual: { label: 'Heritage / Spiritual',  color: '#E06D3B', emoji: '🏛️' },
-  adventure:          { label: 'Adventure / Boxing',    color: '#10B981', emoji: '🥊' },
-  art:                { label: 'Art / Crafts',           color: '#C084FC', emoji: '🎨' },
-  food:               { label: 'Culinary',               color: '#F5A623', emoji: '🍲' },
+  heritage_spiritual: { label: 'Heritage / Spiritual',  color: '#E06D3B', tag: 'HS' },
+  adventure:          { label: 'Adventure / Boxing',    color: '#10B981', tag: 'ADV' },
+  art:                { label: 'Art / Crafts',           color: '#7C3AED', tag: 'ART' },
+  food:               { label: 'Culinary',               color: '#D97706', tag: 'CUL' },
 };
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -283,7 +283,7 @@ export default function SankofaPlanner({ onConfirmPlan, onClose, initialTemplate
                     fontWeight: 700,
                     fontFamily: 'monospace',
                   }}>
-                    {theme ? theme.emoji : day.label[0]}
+                    {theme ? theme.tag : day.label[0]}
                   </div>
 
                   <div style={{ flex: 1, minWidth: 0 }}>
