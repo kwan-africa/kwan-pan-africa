@@ -1,10 +1,17 @@
 # === INTERNAL PITCH & PRESENTATION DOCUMENTS & ARCHIVES ===
+# These files must NEVER be committed — run `git rm --cached <file>` if already tracked.
 PAAIS_2026_PITCH_SUBMISSION.md
 LEAN_CANVAS_MODEL.md
 KWAN_MVP_VALIDATION_EXPERIMENT.md
+KWAN_MASTER_INFORMATION_HUB.md
+KWAN_LEAN_CANVAS_2026.md
+OFFICIAL_PORTAL_SUBMISSION_BLOCKS.md
+PITCH_DAY_ACTION_PLAN.md
+kwanai_critical_review.md
 *.pptx
 *.pdf
 *.docx
+*.ppt
 build_investor_deck.py
 build_pitch_deck.py
 build_lean_canvas.py
@@ -17,8 +24,18 @@ branding/
 scripts/
 scratch_video/
 scratch_charts/
+outputs/
+tmp/
+slide_images/
+audio/
 kwan_product_demo.*
 product_demo_player.html
+
+# === LARGE MEDIA FILES ===
+*.mp4
+*.webm
+*.gif
+*.webp
 
 # === ENVIRONMENT & SECRETS ===
 .env
