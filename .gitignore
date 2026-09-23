@@ -1,5 +1,8 @@
 # === INTERNAL PITCH & PRESENTATION DOCUMENTS & ARCHIVES ===
 # These files must NEVER be committed — run `git rm --cached <file>` if already tracked.
+# Explicit pitch deck files
+KWAN_Elevator_Pitch_Deck.*
+KWAN_Investor_Partner_Pitch_Deck.*
 PAAIS_2026_PITCH_SUBMISSION.md
 LEAN_CANVAS_MODEL.md
 KWAN_MVP_VALIDATION_EXPERIMENT.md
@@ -18,16 +21,16 @@ build_lean_canvas.py
 generate_strategic_word_doc.py
 update_lean_canvas_pptx.py
 *.ps1
-docs/
-pitch-files-hack-ai-thon/
-branding/
-scripts/
-scratch_video/
-scratch_charts/
-outputs/
-tmp/
-slide_images/
-audio/
+/docs/
+/pitch-files-hack-ai-thon/
+/branding/
+/scripts/
+/scratch_video/
+/scratch_charts/
+/outputs/
+/tmp/
+/slide_images/
+/audio/
 kwan_product_demo.*
 product_demo_player.html
 
@@ -102,6 +105,8 @@ build_out.txt
 Thumbs.db
 .vscode/settings.json
 .idea/
+.settings/
+*.prefs
 *.swp
 *.swo
 *~
