@@ -3,7 +3,6 @@
 
 > **Digitizing the invisible 90% of West Africa's informal tourism economy through AI-powered itinerary composition and Mobile Money escrow settlement.**
 
-[![PAAIS 2026](https://img.shields.io/badge/PAAIS%202026-Pitch%20Competitor-F2A93B?style=flat-square)](https://panafricanaisummit.com)
 [![Track](https://img.shields.io/badge/Track-FinTech%20%26%20Inclusive%20Finance-159873?style=flat-square)]()
 [![Flutter](https://img.shields.io/badge/Flutter-3.44-54C5F8?style=flat-square&logo=flutter)]()
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-6DB33F?style=flat-square&logo=spring)]()
@@ -320,7 +319,7 @@ kwan-ai/
 
 ---
 
-## 🎯 PAAIS 2026 Hackathon Presentation Flow
+## 🎯 Product Walkthrough
 
 1. **Hook (30s):** 50M diaspora travelers. Zero trusted, banked way to experience grassroots culture.
 2. **Problem (45s):** 92.3% of cultural guides and artisans are informal and excluded from global booking platforms.
@@ -329,10 +328,10 @@ kwan-ai/
 5. **Traction (30s):** 4 verified pilot experiences, 150+ mapped grassroots artisans, live functional Escrow MVP.
 6. **Business Model (45s):** 10% platform take rate, 60% gross contribution margin, zero buyer surcharge.
 7. **Team (30s):** Lead architect & technical founder with grassroots community depth.
-8. **Ask (30s):** Top 5 finalist selection, pilot guild formalization, and mentorship access.
+8. **Ask (30s):** Introductions to cultural institutions, travel partners, and early host communities to expand the verified network.
 
 ---
 
 ## 📋 License
 
-Distributed under the MIT License. Built for PAAIS 2026 Hack-AI-Thon & West African Grassroots Tourism Development.
+Distributed under the MIT License. Built for trusted, inclusive cultural travel across Africa.

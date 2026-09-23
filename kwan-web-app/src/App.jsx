@@ -537,8 +537,8 @@ export default function App() {
           />
         </a>
         <p className="pilot-label">
-          Accra &amp; Cape Coast pilot · 2026
-          {isOfflineMode && <span style={{ marginLeft: '0.5rem', fontSize: '0.72rem', color: '#F5A623', fontFamily: 'monospace' }}>[DEMO MODE]</span>}
+          Accra &amp; Cape Coast · Trusted local experiences
+          {isOfflineMode && <span style={{ marginLeft: '0.5rem', fontSize: '0.72rem', color: '#F5A623', fontFamily: 'monospace' }}>[LOCAL FALLBACK]</span>}
         </p>
       </header>
 
@@ -574,15 +574,15 @@ export default function App() {
       )}
 
       <main id="top" className="page">
-        <section className="intro" aria-labelledby="page-title">
+        <section className="intro hero-intro" aria-labelledby="page-title">
           <p className="eyebrow">Grassroots cultural travel</p>
           <h1 id="page-title">One conversation.<br />One local guide.</h1>
           <p className="lede">
-            Describe the experience you want in Ghana. Kwan matches you with one local guide and prepares one card payment link.
+            Describe the experience you want in Ghana. Kwan connects you with one trusted local host and makes the next step simple.
           </p>
           <div className="method-note">
             <ShieldCheck size={18} aria-hidden="true" />
-            <span>Pilot roster: each host is manually identity- and Mobile Money-wallet reviewed before a test booking.</span>
+            <span>Every host is identity- and Mobile Money-wallet reviewed before they welcome a traveler.</span>
           </div>
         </section>
 
@@ -755,8 +755,8 @@ export default function App() {
         </section>
 
         <section className="how-it-works" aria-labelledby="flow-heading">
-          <p className="section-kicker">How the pilot works</p>
-          <h2 id="flow-heading">Built to test trust in one simple flow.</h2>
+          <p className="section-kicker">How Kwan works</p>
+          <h2 id="flow-heading">Trust, from discovery to settlement.</h2>
           <ol>
             <li><div className="flow-icon"><Compass size={19} aria-hidden="true" /></div><div><span>01</span><p>Describe the day you want.</p></div></li>
             <li><div className="flow-icon"><LockKeyhole size={19} aria-hidden="true" /></div><div><span>02</span><p>Receive one guide match and lock funds in escrow.</p></div></li>
@@ -772,10 +772,10 @@ export default function App() {
             alt="Kwan"
             style={{ width: '24px', height: '24px', borderRadius: '6px', objectFit: 'cover', border: '1px solid rgba(0,0,0,0.1)' }}
           />
-          <span>Kwan pilot · Built for PAAIS 2026</span>
+          <span>Kwan · The path to meaningful travel</span>
         </div>
         <div className="footer-links">
-          <a href="mailto:hello@kwanai.me">Contact the pilot <ExternalLink size={13} aria-hidden="true" /></a>
+          <a href="mailto:hello@kwanai.me">Contact Kwan <ExternalLink size={13} aria-hidden="true" /></a>
           <span>Escrow flow includes the statutory 1% Ghana Tourism Levy (Act 817).</span>
         </div>
       </footer>
