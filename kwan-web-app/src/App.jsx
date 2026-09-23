@@ -575,18 +575,43 @@ export default function App() {
 
       <main id="top" className="page">
         <section className="intro hero-intro" aria-labelledby="page-title">
-          <p className="eyebrow">Grassroots cultural travel</p>
-          <h1 id="page-title">One conversation.<br />One local guide.</h1>
-          <p className="lede">
-            Describe the experience you want in Ghana. Kwan connects you with one trusted local host and makes the next step simple.
-          </p>
-          <div className="method-note">
-            <ShieldCheck size={18} aria-hidden="true" />
-            <span>Every host is identity- and Mobile Money-wallet reviewed before they welcome a traveler.</span>
+          <div className="hero-content">
+            <p className="eyebrow">Grassroots cultural travel</p>
+            <h1 id="page-title">One conversation.<br />One local guide.</h1>
+            <p className="lede">
+              Describe the experience you want in Ghana. Kwan connects you with one trusted local host and makes the next step simple.
+            </p>
+            <div className="method-note">
+              <ShieldCheck size={18} aria-hidden="true" />
+              <span>Every host is identity- and Mobile Money-wallet reviewed before they welcome a traveler.</span>
+            </div>
+          </div>
+          <div className="hero-features" aria-label="Pilot trust highlights">
+            <div className="hero-feature-item">
+              <div className="hero-feature-icon"><LockKeyhole size={15} aria-hidden="true" /></div>
+              <div>
+                <strong>Escrow Protected</strong>
+                <span>Funds released only upon traveler 4-digit PIN verification</span>
+              </div>
+            </div>
+            <div className="hero-feature-item">
+              <div className="hero-feature-icon"><MapPin size={15} aria-hidden="true" /></div>
+              <div>
+                <strong>Verified Local Hosts</strong>
+                <span>Cape Coast historians, Ga Mashie elders, High Street artisans</span>
+              </div>
+            </div>
+            <div className="hero-feature-item">
+              <div className="hero-feature-icon"><Smartphone size={15} aria-hidden="true" /></div>
+              <div>
+                <strong>Direct Mobile Money</strong>
+                <span>90% goes straight to your host's MTN or Telecel wallet</span>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section className="booking-layout" aria-label="Conversation and guide match">
+        <section className={`booking-layout${guide ? ' has-match' : ''}`} aria-label="Conversation and guide match">
           <div className="conversation-panel">
             <div className="panel-heading">
               <div>
@@ -729,6 +754,7 @@ export default function App() {
                 isRecalculating={loadingAction === 'recalculating'}
                 onToggleAddon={handleToggleAddon}
                 onRequestPayment={openCheckout}
+                onReset={resetMatch}
               />
             ) : (
               <div className="empty-match">
@@ -745,11 +771,6 @@ export default function App() {
                 </div>
                 <div className="preview-stat"><ShieldCheck size={15} aria-hidden="true" /> Identity and Mobile Money wallet reviewed</div>
               </div>
-            )}
-            {guide && (
-              <button type="button" className="reset-match" onClick={resetMatch}>
-                <RefreshCw size={13} aria-hidden="true" /> Start a new request
-              </button>
             )}
           </aside>
         </section>
@@ -815,220 +836,196 @@ export default function App() {
 
 // ── GuideMatch ─────────────────────────────────────────────────────────────────
 
-function GuideMatch({ guide, matchedTheme, serverPricing, addonIncluded, isRecalculating, onToggleAddon, onRequestPayment }) {
+function GuideMatch({ guide, matchedTheme, serverPricing, addonIncluded, isRecalculating, onToggleAddon, onRequestPayment, onReset }) {
   const details = EXPERIENCE_DETAILS[matchedTheme] || EXPERIENCE_DETAILS.heritage_spiritual;
 
   const stopIcon = (type) => {
-    if (type === 'meetup')   return '📍';
+    if (type === 'meetup') return '📍';
     if (type === 'optional') return '○';
     return '•';
   };
 
   return (
     <div className="guide-match">
-
-      {/* Guide header: avatar + name + rating + languages */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1rem' }}>
-        {guide.image ? (
-          <img
-            src={guide.image}
-            alt={guide.name}
-            style={{ width: '68px', height: '68px', borderRadius: '16px', objectFit: 'cover', border: '2px solid #214734', flexShrink: 0 }}
-            onError={(e) => { e.target.style.display = 'none'; }}
-          />
-        ) : (
-          <div className={`guide-avatar ${guide.color}`} aria-hidden="true">{guide.initials}</div>
-        )}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p className="section-kicker" style={{ marginBottom: '0.15rem' }}>Your guide match · {details.label}</p>
-          <h2 style={{ marginBottom: '0.15rem' }}>{guide.name}</h2>
+      {/* Guide Header Banner */}
+      <div className="guide-match-header">
+        <div className="guide-avatar-wrap">
+          {guide.image ? (
+            <img
+              src={guide.image}
+              alt={guide.name}
+              className="guide-avatar-img"
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+          ) : (
+            <div className={`guide-avatar ${guide.color}`} aria-hidden="true">{guide.initials}</div>
+          )}
+          <span className="guide-verified-badge" title="Identity & Mobile Money Reviewed">
+            <CheckCircle2 size={13} aria-hidden="true" /> Verified
+          </span>
+        </div>
+        <div className="guide-header-info">
+          <div className="guide-header-top">
+            <span className="section-kicker">Your guide match · {details.label}</span>
+            {guide.anchorSite && (
+              <span className="guide-anchor-chip">
+                <MapPin size={12} aria-hidden="true" /> {guide.anchorSite}
+              </span>
+            )}
+          </div>
+          <h2>{guide.name}</h2>
           <p className="guide-role">{guide.role}</p>
 
-          {/* Star rating */}
-          {guide.rating && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.25rem' }}>
-              <span style={{ color: '#F5A623', fontSize: '0.9rem', letterSpacing: '1px' }}>
-                {'★'.repeat(Math.floor(guide.rating))}{'☆'.repeat(5 - Math.floor(guide.rating))}
+          <div className="guide-meta-row">
+            {guide.rating && (
+              <div className="guide-rating-pill">
+                <span className="stars">★</span>
+                <strong>{guide.rating.toFixed(2)}</strong>
+                <span>({guide.reviewsCount} reviews)</span>
+              </div>
+            )}
+            {guide.languages?.length > 0 && (
+              <span className="guide-lang-pill">
+                🗣 {guide.languages.join(' · ')}
               </span>
-              <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>{guide.rating.toFixed(2)}</span>
-              <span style={{ fontSize: '0.75rem', color: '#647067' }}>({guide.reviewsCount} reviews)</span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 2-Column Responsive Body */}
+      <div className="guide-match-body">
+        {/* Left Sub-Column: Experience Details */}
+        <div className="guide-content-col">
+          {guide.bio && (
+            <div className="guide-bio-card">
+              <p>{guide.bio}</p>
             </div>
           )}
 
-          {/* Languages */}
-          {guide.languages?.length > 0 && (
-            <p style={{ fontSize: '0.72rem', color: '#647067', marginTop: '0.15rem' }}>
-              🗣 {guide.languages.join(' · ')}
+          <div className="guide-detail-card">
+            <MapPin size={17} aria-hidden="true" />
+            <div>
+              <strong>Where to meet</strong>
+              <span>{details.meetingNote || `Your host meets you at ${guide.anchorSite || guide.area}.`}</span>
+            </div>
+          </div>
+
+          {/* Living Corridor Layer B — About This Place */}
+          <AboutThisPlace corridorId={guide.corridorId} />
+
+          {/* Experience schedule */}
+          <div className="guide-schedule-section">
+            <p className="schedule-heading">Experience schedule</p>
+            <div className="schedule-timeline">
+              {(details.stops || []).map((stop, i) => (
+                <div key={i} className={`schedule-item ${stop.type === 'meetup' ? 'meetup' : ''}`}>
+                  <span className="schedule-time">{stop.time}</span>
+                  <span className="schedule-activity">
+                    <span className="schedule-icon">{stopIcon(stop.type)}</span> {stop.activity}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* What to bring */}
+          {details.whatToBring?.length > 0 && (
+            <div className="what-to-bring-box">
+              <p className="box-heading">What to bring</p>
+              <ul>
+                {details.whatToBring.map((item, i) => <li key={i}>{item}</li>)}
+              </ul>
+            </div>
+          )}
+
+          {/* Cultural etiquette tip */}
+          {details.etiquette && (
+            <div className="cultural-tip-box">
+              💬 <strong>Cultural tip:</strong> {details.etiquette}
+            </div>
+          )}
+        </div>
+
+        {/* Right Sub-Column: Trust, Escrow & Checkout */}
+        <div className="guide-booking-col">
+          <div className="guide-detail-card trust-card">
+            <ShieldCheck size={17} aria-hidden="true" />
+            <div>
+              <strong>Why trust this match</strong>
+              <span>
+                Identity and Mobile Money wallet reviewed for the Kwan pilot.
+                {guide.ghanaCard ? ` Ghana Card on file: ${guide.ghanaCard.slice(0, 7)}•••` : ''}
+              </span>
+            </div>
+          </div>
+
+          <div className="guide-detail-card money-card">
+            <WalletCards size={17} aria-hidden="true" />
+            <div>
+              <strong>Where your money goes</strong>
+              <span>
+                {formatUsd(serverPricing.host_payout_usd)} is reserved for the host via {guide.momoNetwork || 'Mobile Money'};
+                Kwan's {formatUsd(serverPricing.platform_fee_usd)} fee and the {formatUsd(serverPricing.tourism_levy_usd)} levy are shown upfront.
+              </span>
+            </div>
+          </div>
+
+          {/* Optional ceremony add-on */}
+          <div className="addon-card">
+            <div className="addon-header">
+              <span className="addon-title">Optional Cultural Ceremony</span>
+              <button
+                type="button"
+                className={`addon-toggle-btn ${addonIncluded ? 'active' : ''}`}
+                onClick={onToggleAddon}
+                disabled={isRecalculating}
+              >
+                {isRecalculating && <Loader2 size={11} className="spin-icon" />}
+                {addonIncluded ? 'Remove Stop (-$15)' : 'Add Ceremony (+$15)'}
+              </button>
+            </div>
+            <p className="addon-desc">
+              {addonIncluded
+                ? 'Customised with ancestral ceremony; price recalculated.'
+                : 'Add an optional ceremony and Kwan will recalculate the total before checkout.'}
             </p>
-          )}
-        </div>
-      </div>
+          </div>
 
-      {/* Bio */}
-      {guide.bio && (
-        <p style={{
-          fontSize: '0.83rem',
-          color: '#374151',
-          lineHeight: 1.55,
-          margin: '0 0 1rem',
-          padding: '0.6rem 0.9rem',
-          background: 'rgba(33,71,52,0.05)',
-          borderRadius: '6px',
-          borderLeft: '3px solid #214734',
-        }}>
-          {guide.bio}
-        </p>
-      )}
-
-      {/* Meeting point */}
-      <div className="guide-detail-card" style={{ marginBottom: '0.5rem' }}>
-        <MapPin size={17} aria-hidden="true" />
-        <div>
-          <strong>Where to meet</strong>
-          <span>{details.meetingNote || `Your host meets you at ${guide.anchorSite || guide.area}.`}</span>
-        </div>
-      </div>
-
-      {/* Living Corridor Layer B — About This Place */}
-      <AboutThisPlace corridorId={guide.corridorId} />
-
-      {/* Experience schedule */}
-      <div style={{ margin: '0.9rem 0' }}>
-        <p style={{ fontSize: '0.72rem', textTransform: 'uppercase', fontFamily: 'monospace', color: '#647067', marginBottom: '0.45rem' }}>
-          Experience schedule
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-          {(details.stops || []).map((stop, i) => (
-            <div key={i} style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start', fontSize: '0.8rem' }}>
-              <span style={{ fontFamily: 'monospace', color: '#F5A623', fontWeight: 600, flexShrink: 0, minWidth: '74px' }}>
-                {stop.time}
-              </span>
-              <span style={{ color: stop.type === 'meetup' ? '#214734' : '#374151', fontWeight: stop.type === 'meetup' ? 600 : 400 }}>
-                {stopIcon(stop.type)} {stop.activity}
-              </span>
+          {/* Price summary & CTA */}
+          <div className="booking-cta-card">
+            <div className="price-row">
+              <div className="price-label">
+                <span>Total amount</span>
+                <span className="price-subtext">{addonIncluded ? 'Includes ceremony' : 'Standard experience'}</span>
+              </div>
+              <strong className="price-amount">{formatUsd(serverPricing.total_usd)}</strong>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* What to bring */}
-      {details.whatToBring?.length > 0 && (
-        <div style={{
-          margin: '0.8rem 0',
-          padding: '0.65rem 0.9rem',
-          background: 'rgba(245, 166, 35, 0.06)',
-          border: '1px solid rgba(245, 166, 35, 0.2)',
-          borderRadius: '6px',
-        }}>
-          <p style={{ fontSize: '0.72rem', textTransform: 'uppercase', fontFamily: 'monospace', color: '#8e5c19', marginBottom: '0.3rem' }}>
-            What to bring
-          </p>
-          <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.78rem', color: '#374151', lineHeight: 1.6 }}>
-            {details.whatToBring.map((item, i) => <li key={i}>{item}</li>)}
-          </ul>
-        </div>
-      )}
+            <p className="price-help">
+              90% ({formatUsd(serverPricing.host_payout_usd)}) disbursed directly to {guide.momoNetwork || 'Mobile Money'} upon 4-digit PIN verification.
+              Includes statutory 1% Ghana Tourism Levy ({formatUsd(serverPricing.tourism_levy_usd)}).
+            </p>
 
-      {/* Cultural etiquette tip */}
-      {details.etiquette && (
-        <div style={{
-          margin: '0.7rem 0',
-          padding: '0.5rem 0.8rem',
-          background: 'rgba(33,71,52,0.04)',
-          borderRadius: '6px',
-          fontSize: '0.78rem',
-          color: '#4B5563',
-          fontStyle: 'italic',
-        }}>
-          💬 <strong>Cultural tip:</strong> {details.etiquette}
-        </div>
-      )}
+            <div className="policy-box">
+              <p><strong>Availability:</strong> Pilot team confirms host schedule within hours.</p>
+              {details.cancellation && (
+                <p><strong>Cancellation:</strong> {details.cancellation}</p>
+              )}
+            </div>
 
-      {/* Trust + payment breakdown */}
-      <div className="guide-details" aria-label="Trust and payment details">
-        <div className="guide-detail-card">
-          <ShieldCheck size={17} aria-hidden="true" />
-          <div>
-            <strong>Why trust this match</strong>
-            <span>
-              Identity and Mobile Money wallet reviewed for the Kwan pilot.
-              {guide.ghanaCard ? ` Ghana Card on file: ${guide.ghanaCard.slice(0, 7)}•••` : ''}
-            </span>
-          </div>
-        </div>
-        <div className="guide-detail-card">
-          <WalletCards size={17} aria-hidden="true" />
-          <div>
-            <strong>Where your money goes</strong>
-            <span>
-              {formatUsd(serverPricing.host_payout_usd)} is reserved for the host via {guide.momoNetwork || 'Mobile Money'};
-              Kwan's {formatUsd(serverPricing.platform_fee_usd)} fee and the {formatUsd(serverPricing.tourism_levy_usd)} levy are shown upfront.
-            </span>
+            <button className="button button-primary button-full" type="button" onClick={onRequestPayment}>
+              Request payment link <ArrowUpRight size={17} aria-hidden="true" />
+            </button>
+
+            {onReset && (
+              <button type="button" className="reset-match" onClick={onReset}>
+                <RefreshCw size={13} aria-hidden="true" /> Start a new request
+              </button>
+            )}
           </div>
         </div>
       </div>
-
-      {guide.anchorSite && (
-        <div className="reviewed-note" style={{ color: '#F5A623', background: 'rgba(245, 166, 35, 0.08)' }}>
-          <CheckCircle2 size={17} aria-hidden="true" />
-          <span>Anchor site: {guide.anchorSite}</span>
-        </div>
-      )}
-
-      {/* Optional ceremony add-on */}
-      <div style={{ margin: '0.8rem 0', padding: '0.6rem 0.8rem', background: 'rgba(33,71,52,0.05)', borderRadius: '6px', border: '1px solid rgba(33,71,52,0.12)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.82rem' }}>Optional Cultural Stop / Ceremony</span>
-          <button
-            type="button"
-            onClick={onToggleAddon}
-            disabled={isRecalculating}
-            style={{
-              padding: '0.2rem 0.55rem',
-              fontSize: '0.72rem',
-              borderRadius: '4px',
-              cursor: isRecalculating ? 'not-allowed' : 'pointer',
-              background: addonIncluded ? 'rgba(239, 68, 68, 0.1)' : 'rgba(33, 71, 52, 0.1)',
-              color: addonIncluded ? '#EF4444' : '#214734',
-              border: `1px solid ${addonIncluded ? '#EF4444' : '#214734'}`,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-            }}
-          >
-            {isRecalculating && <Loader2 size={11} className="spin-icon" />}
-            {addonIncluded ? 'Remove Stop (-$15)' : 'Add Ceremony (+$15)'}
-          </button>
-        </div>
-        <span style={{ fontSize: '0.72rem', color: '#647067', display: 'block', marginTop: '0.2rem' }}>
-          {addonIncluded
-            ? 'Customised with ancestral ceremony; price has been recalculated.'
-            : 'Add an optional ceremony and Kwan will recalculate the total before checkout.'}
-        </span>
-      </div>
-
-      {/* Price summary */}
-      <div className="price-row">
-        <span>Test booking {addonIncluded && '(edited)'}</span>
-        <strong>{formatUsd(serverPricing.total_usd)}</strong>
-      </div>
-      <p className="price-help">
-        One guide, one local experience. 90% ({formatUsd(serverPricing.host_payout_usd)}) disbursed directly to {guide.momoNetwork || 'Mobile Money'} upon PIN verification.
-        Includes statutory 1% Ghana Tourism Levy ({formatUsd(serverPricing.tourism_levy_usd)}).
-      </p>
-      <p className="booking-policy">
-        <strong>Booking note:</strong> The pilot team will confirm your guide's availability within a few hours of booking.
-        If plans change, contact us before the experience so we can review a refund or reschedule.
-      </p>
-      {details.cancellation && (
-        <p className="booking-policy" style={{ color: '#647067' }}>
-          <strong>Cancellation:</strong> {details.cancellation}
-        </p>
-      )}
-
-      <button className="button button-primary button-full" type="button" onClick={onRequestPayment}>
-        Request payment link <ArrowUpRight size={17} aria-hidden="true" />
-      </button>
     </div>
   );
 }
